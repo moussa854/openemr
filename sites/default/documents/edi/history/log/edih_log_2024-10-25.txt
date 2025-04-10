@@ -1,0 +1,22 @@
+20241025:141023 _GET request 
+ srvinfo => yes  csrf_token_form => c00203c74366e986f8d06dd62bc067012969be4c 
+20241025:141023 _GET request 
+ loglist => yes  csrf_token_form => c00203c74366e986f8d06dd62bc067012969be4c 
+20241025:141023 _GET request 
+ csvtbllist => yes  csrf_token_form => c00203c74366e986f8d06dd62bc067012969be4c 
+20241025:141023 _GET request 
+ archlist => yes  csrf_token_form => c00203c74366e986f8d06dd62bc067012969be4c 
+20241025:141023 csv_archive_select_list: using /var/www/emr.carepointinfusion.com/sites/default/documents/edi/history/archive
+20241025:141039 _GET request 
+ csrf_token_form => c00203c74366e986f8d06dd62bc067012969be4c  csv_period => 1m  csv_date_start => 2024-10-01  csv_date_end => 2024-10-25  csvShowTable => gettable 
+20241025:141039 User: 98.103.97.42 - October 25, 2024, 2:16 pm
+20241025:141039 edih_disp_csvtable:  period 1m datestart 2024-10-01 dateend 2024-10-25
+20241025:141054 _GET request 
+ srvinfo => yes  csrf_token_form => c00203c74366e986f8d06dd62bc067012969be4c 
+20241025:141054 _GET request 
+ csvtbllist => yes  csrf_token_form => c00203c74366e986f8d06dd62bc067012969be4c 
+20241025:141054 _GET request 
+ archlist => yes  csrf_token_form => c00203c74366e986f8d06dd62bc067012969be4c 
+20241025:141054 csv_archive_select_list: using /var/www/emr.carepointinfusion.com/sites/default/documents/edi/history/archive
+20241025:141054 _GET request 
+ loglist => yes  csrf_token_form => c00203c74366e986f8d06dd62bc067012969be4c 
