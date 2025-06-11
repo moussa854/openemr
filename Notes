@@ -1,1 +1,2 @@
 edit `/interface/new/new_comprehensive.php` to avoide not found / access error when adding new pateint
+This Ensures that `?close` is appended if no other query parameters exist, and `&close` is appended otherwise. This resolves a 404 error when `new_search_popup.php` is called without other parameters.
