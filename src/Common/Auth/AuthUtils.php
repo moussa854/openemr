@@ -464,15 +464,79 @@ class AuthUtils
             return false;
         }
 
-        // PASSED
+        // MFA and Trusted Device Logic
+        if ($this->loginAuth) {
+            $userMfaSettings = sqlQuery("SELECT mfa_required, mfa_grace_period FROM users WHERE id = ?", [$userInfo['id']]);
+            $mfaRequired = $userMfaSettings['mfa_required'] ?? 'disabled';
+            // $mfaGracePeriod = $userMfaSettings['mfa_grace_period'] ?? 172800; // Default to 2 days if not set
+
+            if ($mfaRequired !== 'disabled') {
+                $deviceIdentifierCookie = $_COOKIE['openemr_device_identifier'] ?? null;
+                if ($deviceIdentifierCookie) {
+                    $trustedDevice = sqlQuery(
+                        "SELECT expires_at FROM login_mfa_trusted_devices WHERE user_id = ? AND device_identifier = ?",
+                        [$userInfo['id'], $deviceIdentifierCookie]
+                    );
+
+                    if ($trustedDevice && !empty($trustedDevice['expires_at']) && strtotime($trustedDevice['expires_at']) > time()) {
+                        if ($mfaRequired === 'trusted_device_optional') {
+                            // Bypass MFA
+                            $_SESSION['mfa_device_trusted_optional_bypass'] = true;
+                        } elseif ($mfaRequired === 'always') {
+                            // Device is trusted, but MFA is always required.
+                            // This state might be useful for UI hints if any.
+                            $_SESSION['mfa_device_trusted_always_active'] = true;
+                            // Proceed to MFA by not setting full session variables yet
+                            $_SESSION['mfarequired'] = true; // Signal that MFA is next
+                            $_SESSION['tempAuthUser'] = $username; // Store username temporarily
+                            $_SESSION['tempAuthUserID'] = $userInfo['id'];
+                            $_SESSION['tempAuthProvider'] = $authGroup;
+                            $_SESSION['tempAuthPass'] = $userSecure['password']; // Store original hash temporarily
+                            if (!empty($newHash)) {
+                                $_SESSION['tempAuthPass'] = $newHash; // Or new hash if rehashed
+                            }
+                            $this->clearFromMemory($password);
+                            return true; // Indicate primary auth success, MFA step will follow
+                        }
+                    } else {
+                        // No valid trusted device record, proceed to MFA
+                        $_SESSION['mfarequired'] = true;
+                        $_SESSION['tempAuthUser'] = $username;
+                        $_SESSION['tempAuthUserID'] = $userInfo['id'];
+                        $_SESSION['tempAuthProvider'] = $authGroup;
+                        $_SESSION['tempAuthPass'] = $userSecure['password'];
+                        if (!empty($newHash)) {
+                            $_SESSION['tempAuthPass'] = $newHash;
+                        }
+                        $this->clearFromMemory($password);
+                        return true;
+                    }
+                } else {
+                    // No device cookie, proceed to MFA
+                    $_SESSION['mfarequired'] = true;
+                    $_SESSION['tempAuthUser'] = $username;
+                    $_SESSION['tempAuthUserID'] = $userInfo['id'];
+                    $_SESSION['tempAuthProvider'] = $authGroup;
+                    $_SESSION['tempAuthPass'] = $userSecure['password'];
+                    if (!empty($newHash)) {
+                        $_SESSION['tempAuthPass'] = $newHash;
+                    }
+                    $this->clearFromMemory($password);
+                    return true;
+                }
+            }
+        }
+
+        // PASSED primary authentication (and potentially MFA trusted device check)
         $this->clearFromMemory($password);
         if ($this->loginAuth || $this->apiAuth) {
             // Utilize this during logins (and not during standard password checks within openemr such as esign)
             self::resetLoginFailedCounter($username);
             $this->resetIpLoginFailedCounter($ip['ip_string']);
         }
-        if ($this->loginAuth) {
-            // Specialized code for login auth (not api auth)
+
+        if ($this->loginAuth && !($_SESSION['mfarequired'] ?? false)) {
+            // Specialized code for login auth (not api auth) AND MFA is not required next
             if (!empty($newHash)) {
                 $hash = $newHash;
             } else {
@@ -490,7 +554,7 @@ class AuthUtils
             // Set up class variables that the api will need to collect (log for API is done outside)
             $this->userId = $userInfo['id'];
             $this->userGroup = $authGroup;
-        } else {
+        } elseif ($this->otherAuth) {
             // Log for authentication that are done, which are not api auth or login auth
             EventAuditLogger::instance()->newEvent('auth', $username, $authGroup, 1, "Auth success: " . $ip['ip_string']);
         }

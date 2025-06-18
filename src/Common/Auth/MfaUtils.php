@@ -90,16 +90,48 @@ class MfaUtils
      */
     public function check($token, $type)
     {
+        $mfaSuccess = false;
         switch ($type) {
             case 'TOTP':
-                return $this->checkTOTP($token);
+                $mfaSuccess = $this->checkTOTP($token);
                 break;
             case 'U2F':
-                return $this->checkU2F($token);
+                $mfaSuccess = $this->checkU2F($token);
                 break;
             default:
                 throw new \Exception('MFA type do not supported');
         }
+
+        if ($mfaSuccess && isset($_POST['trust_mfa_device']) && $_POST['trust_mfa_device'] == '1') {
+            $userMfaSettings = sqlQuery("SELECT mfa_grace_period FROM users WHERE id = ?", [$this->uid]);
+            $mfaGracePeriod = $userMfaSettings['mfa_grace_period'] ?? (30 * 24 * 60 * 60); // Default 30 days
+
+            // Delete any existing trusted device for this user
+            // This simplifies logic to one trusted device per user.
+            // For multiple devices, a different strategy for managing device_identifier would be needed.
+            sqlStatement("DELETE FROM login_mfa_trusted_devices WHERE user_id = ?", [$this->uid]);
+
+            $deviceIdentifier = RandomGenUtils::produceRandomString(64);
+            $expiresAtTimestamp = time() + $mfaGracePeriod;
+            $expiresAtFormatted = date('Y-m-d H:i:s', $expiresAtTimestamp);
+
+            sqlStatement(
+                "INSERT INTO login_mfa_trusted_devices (user_id, device_identifier, expires_at) VALUES (?, ?, ?)",
+                [$this->uid, $deviceIdentifier, $expiresAtFormatted]
+            );
+
+            // Set the cookie
+            $cookieParams = [
+                'expires' => $expiresAtTimestamp,
+                'path' => $GLOBALS['webroot'] . '/',
+                'secure' => isset($_SERVER['HTTPS']), // True if HTTPS
+                'httponly' => true,
+                'samesite' => 'Lax' // Or 'Strict'
+            ];
+            setcookie('openemr_device_identifier', $deviceIdentifier, $cookieParams);
+        }
+
+        return $mfaSuccess;
     }
 
     /**
@@ -172,6 +204,8 @@ class MfaUtils
         if (!empty($secret)) {
             $googleAuth = new \Totp($secret);
             $response = $googleAuth->validateCode($token);
+        } else {
+            $response = false; // Ensure response is false if secret is not available
         }
 
         if ($response) {
@@ -207,16 +241,22 @@ class MfaUtils
                     "`user_id` = ? AND `method` = 'U2F' AND `name` = ?",
                     array(json_encode($registration), $this->uid, $this->regs[$strhandle])
                 );
-                return true;
+                // return true; // Moved to the main check() method
             } else {
                 error_log("Unexpected keyHandle returned from doAuthenticate(): '" . errorLogEscape($strhandle) . "'");
+                $this->errorMsg = xl('U2F Key Authentication error') . ": Unexpected keyHandle";
+                return false; // Explicitly return false here
             }
         } catch (u2flib_server\Error $e) {
             // Authentication failed so we will build the U2F form again.
-            $form_response = '';
+            // $form_response = ''; // This variable is not used here
             $this->errorMsg = xl('U2F Key Authentication error') . ": " . $e->getMessage();
             return false;
         }
+        // If we reached here for U2F, it means success if $registration was set.
+        // The actual return true/false is handled by the caller based on $mfaSuccess.
+        // However, if $registration was not set (e.g. error before exception), it's a fail.
+        return isset($registration);
     }
 
     /**

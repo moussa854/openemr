@@ -78,6 +78,63 @@ if (
     $_SESSION['loginfailure'] = null;
     unset($_SESSION['loginfailure']);
 
+    if (isset($_SESSION['mfarequired']) && $_SESSION['mfarequired'] === true) {
+        if (isset($_POST['mfa_token'])) {
+            // This is an MFA submission
+            $mfaUtils = new \OpenEMR\Common\Auth\MfaUtils($_SESSION['tempAuthUserID']);
+            // Assuming TOTP for now. A more robust solution would store/determine the user's actual MFA method.
+            $mfa_type = \OpenEMR\Common\Auth\MfaUtils::TOTP;
+            // Check if other MFA types were registered and prefer U2F if available and submitted
+            if (in_array(\OpenEMR\Common\Auth\MfaUtils::U2F, $mfaUtils->getType()) && isset($_POST['u2f_response'])) {
+                // Assuming u2f_response is where U2F data would be if it were implemented beyond token.
+                // For now, this part is conceptual for U2F.
+                // $mfa_type = \OpenEMR\Common\Auth\MfaUtils::U2F;
+                // $mfa_token_data = $_POST['u2f_response']; // U2F sends a JSON response
+            } else {
+                 $mfa_token_data = $_POST['mfa_token'];
+            }
+
+            if ($mfaUtils->check($mfa_token_data, $mfa_type)) {
+                // MFA Successful
+                // Need to re-fetch minimal user info as it's not fully stored in temp session
+                $userInfoMFA = sqlQuery("SELECT id, authorized, see_auth FROM users WHERE id = ?", [$_SESSION['tempAuthUserID']]);
+                AuthUtils::setUserSessionVariables($_SESSION['tempAuthUser'], $_SESSION['tempAuthPass'], $userInfoMFA, $_SESSION['tempAuthProvider']);
+
+                // Clear temporary MFA session variables
+                unset($_SESSION['mfarequired']);
+                unset($_SESSION['tempAuthUser']);
+                unset($_SESSION['tempAuthUserID']);
+                unset($_SESSION['tempAuthProvider']);
+                unset($_SESSION['tempAuthPass']);
+                unset($_SESSION['mfa_device_trusted_always_active']);
+                if (function_exists('sodium_memzero')) {
+                    sodium_memzero($_POST["clearPass"]); // clear password from initial login
+                    if (isset($_POST["mfa_token"])) sodium_memzero($_POST["mfa_token"]);
+                } else {
+                    $_POST["clearPass"] = '';
+                    if (isset($_POST["mfa_token"])) $_POST["mfa_token"] = '';
+                }
+                EventAuditLogger::instance()->newEvent('login-mfa', $_SESSION['authUser'], $_SESSION['authProvider'], 1, "MFA success: " . ($ip['ip_string'] ?? ''));
+            } else {
+                // MFA Failed
+                $_SESSION['loginfailure'] = 1; // Or a specific MFA error message
+                // Ensure mfarequired stays true so MFA form is reshown
+                // tempAuthUser etc should still be in session for the form
+                if (function_exists('sodium_memzero')) {
+                    sodium_memzero($_POST["clearPass"]);
+                    if (isset($_POST["mfa_token"])) sodium_memzero($_POST["mfa_token"]);
+                } else {
+                    $_POST["clearPass"] = '';
+                    if (isset($_POST["mfa_token"])) $_POST["mfa_token"] = '';
+                }
+                EventAuditLogger::instance()->newEvent('login-mfa', ($_SESSION['tempAuthUser'] ?? $_POST['authUser'] ?? ''), '', 0, "MFA " . $beginLog . ": " . ($ip['ip_string'] ?? '') . ". " . $mfaUtils->errorMessage());
+                authLoginScreen(); // This will exit
+            }
+        }
+        // If $_SESSION['mfarequired'] is true but no mfa_token, it means primary auth succeeded,
+        // and login.php should render the MFA form. Do nothing more here.
+    }
+
     // skip the session expiration check below since the entry in session_tracker is not ready yet
     $skipSessionExpirationCheck = true;
 } elseif ((isset($_GET['auth'])) && ($_GET['auth'] == "logout")) {

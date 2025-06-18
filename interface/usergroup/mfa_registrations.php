@@ -163,6 +163,11 @@ $oemr_ui = new OemrUI($arrOeUiSettings);
                             </table>
                         </fieldset>
                     </div>
+
+                    <div style="margin-top: 10px; margin-bottom: 20px;">
+                        <a href="mfa_settings.php" class="btn btn-info" role="button"><?php echo xlt('Configure MFA Options and Trusted Devices'); ?></a>
+                    </div>
+
                     <div>
                         <fieldset>
                             <legend><?php echo xlt('Select/Add New Authentication Method for') . " " . text($user_full_name); ?></legend>
