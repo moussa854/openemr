@@ -1,0 +1,114 @@
+{# Infusion and Injection Form Template #}
+<form method="post" action="{{ FORM_ACTION }}/interface/forms/infusion_injection/save.php?id={{ has_id }}" name="infusion_injection_form" id="infusion_injection_form" class="form-horizontal" role="form">
+    <input type="hidden" name="process" value="true" />
+    <input type="hidden" name="csrf_token_form" value="{{ CSRF_TOKEN_FORM }}" />
+    <input type="hidden" name="id" value="{{ has_id }}" />
+    <input type="hidden" name="pid" value="{{ patient_id }}" /> {# Assuming patient_id is passed from controller #}
+
+    {% for sectionTitle, fields in formSections %}
+        <div class="panel panel-default">
+            <div class="panel-heading">
+                <h3 class="panel-title">{{ sectionTitle|xl }}</h3>
+            </div>
+            <div class="panel-body">
+                {% for field in fields %}
+                    {% if field.type == 'textarea' %}
+                        <div class="form-group">
+                            <label for="{{ field.name }}" class="col-sm-3 control-label">{{ field.label }}</label>
+                            <div class="col-sm-9">
+                                <textarea name="{{ field.name }}" id="{{ field.name }}" class="form-control" rows="3">{{ field.value }}</textarea>
+                            </div>
+                        </div>
+                    {% elseif field.type == 'text' %}
+                        <div class="form-group">
+                            <label for="{{ field.name }}" class="col-sm-3 control-label">{{ field.label }}</label>
+                            <div class="col-sm-9">
+                                <div class="input-group">
+                                    <input type="text" name="{{ field.name }}" id="{{ field.name }}" value="{{ field.value }}" class="form-control" />
+                                    {% if field.units %}
+                                        <span class="input-group-addon">{{ field.units }}</span>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                    {% elseif field.type == 'select' %}
+                        <div class="form-group">
+                            <label for="{{ field.name }}" class="col-sm-3 control-label">{{ field.label }}</label>
+                            <div class="col-sm-9">
+                                <select name="{{ field.name }}" id="{{ field.name }}" class="form-control">
+                                    {% for option in field.options %}
+                                        <option value="{{ option.value }}" {% if option.value == field.value %}selected{% endif %}>{{ option.label }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                        </div>
+                    {% elseif field.type == 'date' %}
+                        <div class="form-group">
+                            <label for="{{ field.name }}" class="col-sm-3 control-label">{{ field.label }}</label>
+                            <div class="col-sm-9">
+                                <input type="text" name="{{ field.name }}" id="{{ field.name }}" value="{{ field.value }}" class="form-control datepicker" /> {# Add datepicker class for JS initialization #}
+                            </div>
+                        </div>
+                    {% elseif field.type == 'datetime' %}
+                        <div class="form-group">
+                            <label for="{{ field.name }}" class="col-sm-3 control-label">{{ field.label }}</label>
+                            <div class="col-sm-9">
+                                <input type="text" name="{{ field.name }}" id="{{ field.name }}" value="{{ field.value }}" class="form-control datetimepicker" /> {# Add datetimepicker class for JS initialization #}
+                            </div>
+                        </div>
+                    {% elseif field.type == 'number_unit_select' %}
+                        <div class="form-group">
+                            <label for="{{ field.name_num }}" class="col-sm-3 control-label">{{ field.label }}</label>
+                            <div class="col-sm-4">
+                                <select name="{{ field.name_num }}" id="{{ field.name_num }}" class="form-control">
+                                    {% for option in field.num_options %}
+                                        <option value="{{ option.value }}" {% if option.value == field.value_num %}selected{% endif %}>{{ option.label }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <div class="col-sm-5">
+                                <select name="{{ field.name_unit }}" id="{{ field.name_unit }}" class="form-control">
+                                    {% for option in field.unit_options %}
+                                        <option value="{{ option.value }}" {% if option.value == field.value_unit %}selected{% endif %}>{{ option.label }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                        </div>
+                    {% elseif field.type == 'html' %}
+                        <div class="form-group">
+                            <div class="col-sm-offset-3 col-sm-9">
+                                {{ field.html|raw }}
+                            </div>
+                        </div>
+                    {% endif %}
+                {% endfor %}
+            </div>
+        </div>
+    {% endfor %}
+
+    <div class="row">
+        <div class="col-sm-12 text-right">
+            <button type="submit" class="btn btn-primary">{{ 'Save'|xl }}</button>
+            <a href="{{ DONT_SAVE_LINK }}" class="btn btn-default" onclick="top.restoreSession()">{{ 'Cancel'|xl }}</a>
+        </div>
+    </div>
+</form>
+
+<script type="text/javascript">
+    $(document).ready(function(){
+        // Initialize datepickers
+        $('.datepicker').datepicker({
+            dateFormat: 'yy-mm-dd' // Adjust format as needed by OpenEMR
+        });
+
+        // Initialize datetimepickers
+        $('.datetimepicker').datetimepicker({
+            dateFormat: 'yy-mm-dd', // Adjust format as needed
+            timeFormat: 'HH:mm:ss' // Adjust format as needed
+            // You might need to include jQuery UI Timepicker addon if not already present
+        });
+
+        // TODO: Add any other specific JavaScript needed for the form,
+        // e.g., for dynamic population of medication details based on selection.
+    });
+</script>
