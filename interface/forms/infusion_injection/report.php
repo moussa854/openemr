@@ -15,6 +15,108 @@ require_once(__DIR__ . "/../../globals.php");
 use OpenEMR\Common\Csrf\CsrfUtils; // For any potential links or actions, though not strictly needed for read-only display
 use OpenEMR\Common\Logging\SystemLogger;
 
+function infusion_injection_report($pid, $encounter, $cols, $id, $print = true)
+{
+    // Validate form ID
+    if (!$id || !is_numeric($id)) {
+        $output = "<div>" . xlt('Error: Form ID not provided or invalid.') . "</div>";
+        if ($print) {
+            echo $output;
+        } else {
+            return $output;
+        }
+        return;
+    }
+
+    // Fetch the form data from the database
+    $sql = "SELECT *, DATE_FORMAT(date, '%Y-%m-%d %H:%i') AS formatted_date, " .
+           "DATE_FORMAT(order_expiration_date, '%Y-%m-%d') AS formatted_order_expiration_date, " .
+           "DATE_FORMAT(administration_start, '%Y-%m-%d %H:%i') AS formatted_administration_start, " .
+           "DATE_FORMAT(administration_end, '%Y-%m-%d %H:%i') AS formatted_administration_end " .
+           "FROM form_infusion_injection WHERE id = ?";
+    $formData = sqlQuery($sql, [$id]);
+
+    if (!$formData) {
+        $output = "<div>" . xlt('Error: Form data not found for ID') . " " . htmlspecialchars($id, ENT_QUOTES, 'UTF-8') . "</div>";
+        if ($print) {
+            echo $output;
+        } else {
+            return $output;
+        }
+        return;
+    }
+
+    // Build the HTML output
+    $output = '';
+    $output .= "<table><tr>";
+    
+    $count = 0;
+    
+    // Add key fields in a structured format similar to vitals
+    $fields_to_display = array(
+        'Assessment' => $formData['assessment'] ?? '',
+        'IV Access Type' => $formData['iv_access_type'] ?? '',
+        'IV Access Location' => $formData['iv_access_location'] ?? '',
+        'IV Access Blood Return' => $formData['iv_access_blood_return'] ?? '',
+        'Order Medication' => $formData['order_medication'] ?? '',
+        'Order Dose' => $formData['order_dose'] ?? '',
+        'Order Servicing Provider' => $formData['order_servicing_provider'] ?? '',
+    );
+    
+    // Add optional fields if they have values
+    if (!empty($formData['iv_access_needle_gauge'])) {
+        $fields_to_display['IV Needle Gauge'] = $formData['iv_access_needle_gauge'];
+    }
+    if (!empty($formData['iv_access_attempts'])) {
+        $fields_to_display['IV Access Attempts'] = $formData['iv_access_attempts'];
+    }
+    if (!empty($formData['order_lot_number'])) {
+        $fields_to_display['Order Lot Number'] = $formData['order_lot_number'];
+    }
+    if (!empty($formData['order_ndc'])) {
+        $fields_to_display['Order NDC'] = $formData['order_ndc'];
+    }
+    if (!empty($formData['formatted_order_expiration_date'])) {
+        $fields_to_display['Order Expiration Date'] = $formData['formatted_order_expiration_date'];
+    }
+    if (!empty($formData['order_every_value']) && !empty($formData['order_every_unit'])) {
+        $fields_to_display['Order Every'] = $formData['order_every_value'] . ' ' . $formData['order_every_unit'];
+    }
+    if (!empty($formData['order_npi'])) {
+        $fields_to_display['Order NPI'] = $formData['order_npi'];
+    }
+    if (!empty($formData['formatted_administration_start'])) {
+        $fields_to_display['Administration Start'] = $formData['formatted_administration_start'];
+    }
+    if (!empty($formData['formatted_administration_end'])) {
+        $fields_to_display['Administration End'] = $formData['formatted_administration_end'];
+    }
+
+    foreach ($fields_to_display as $key => $value) {
+        if (empty($value)) {
+            continue;
+        }
+        
+        $output .= "<td><div class='font-weight-bold d-inline-block'>" . xlt($key) . ": </div></td>";
+        $output .= "<td><div class='text' style='display:inline-block'>" . text($value) . "</div></td>";
+        
+        $count++;
+        if ($count == $cols) {
+            $count = 0;
+            $output .= "</tr><tr>\n";
+        }
+    }
+    
+    $output .= "</tr></table>";
+
+    if ($print) {
+        echo $output;
+    } else {
+        return $output;
+    }
+}
+
+// Legacy code for backward compatibility - this was the original attempt but won't be called by OpenEMR
 // Get the form ID from the request. This is typically passed when LBF renders the form report.
 // The parameter name might vary depending on how LBF calls it, common ones are 'id', 'form_id', 'formid'.
 // Let's assume 'id' for now, which is common.
