@@ -36,6 +36,11 @@ function infusion_injection_report($pid, $encounter, $cols, $id, $print = true)
         // Define the fields we want to display and their display names
         $display_fields = array(
             'assessment' => 'Assessment',
+            // Vital Signs
+            'bp' => 'Blood Pressure', // custom key for composite
+            'pulse' => 'Pulse',
+            'temperature_f' => 'Temperature',
+            'oxygen_saturation' => 'Oxygen Saturation %',
             'iv_access_type' => 'IV Access Type',
             'iv_access_location' => 'IV Access Location', 
             'iv_access_blood_return' => 'Blood Return',
@@ -53,7 +58,17 @@ function infusion_injection_report($pid, $encounter, $cols, $id, $print = true)
         );
 
         foreach ($display_fields as $field => $label) {
-            $value = $data[$field] ?? '';
+            // Handle composite Blood Pressure field
+            if ($field === 'bp') {
+                $systolic = $data['bp_systolic'] ?? '';
+                $diastolic = $data['bp_diastolic'] ?? '';
+                $value = '';
+                if ($systolic !== '' || $diastolic !== '') {
+                    $value = trim($systolic) . '/' . trim($diastolic);
+                }
+            } else {
+                $value = $data[$field] ?? '';
+            }
             
             // Skip empty values
             if (empty($value) || $value == '0000-00-00' || $value == '0000-00-00 00:00:00') {
@@ -67,8 +82,18 @@ function infusion_injection_report($pid, $encounter, $cols, $id, $print = true)
                 }
             }
             
+            // Add units for certain vitals
+            $displayValue = $value;
+            if ($field === 'pulse') {
+                $displayValue .= ' ' . xlt('per min');
+            } elseif ($field === 'temperature_f') {
+                $displayValue .= ' F';
+            } elseif ($field === 'oxygen_saturation') {
+                $displayValue .= ' %';
+            }
+
             $output .= "<td><div class='font-weight-bold d-inline-block'>" . xlt($label) . ": </div></td>";
-            $output .= "<td><div class='text' style='display:inline-block'>" . text($value) . "</div></td>";
+            $output .= "<td><div class='text' style='display:inline-block'>" . text($displayValue) . "</div></td>";
             
             $count++;
             if ($count == $cols) {
