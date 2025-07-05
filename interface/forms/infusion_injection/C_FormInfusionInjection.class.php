@@ -113,7 +113,11 @@ class C_FormInfusionInjection
             }
 
             // Ensure custom saved values appear in dropdowns
-            $ivTypeOptions = ['' => xl('- Unassigned -'), 'peripheral_iv' => xl('Peripheral IV'), 'picc' => xl('PICC'), 'port' => xl('Port')];
+            $ivTypeRecords = $listService->getOptionsByListName('iv_access_type');
+            $ivTypeOptions = ['' => xl('- Unassigned -')];
+            foreach ($ivTypeRecords as $rec) {
+                $ivTypeOptions[$rec['option_id']] = text($rec['title']);
+            }
             $currentType = $this->infusion_injection_data->iv_access_type ?? '';
             if ($currentType !== '' && !isset($ivTypeOptions[$currentType])) {
                 $ivTypeOptions[$currentType] = $currentType;
@@ -224,16 +228,30 @@ class C_FormInfusionInjection
 
     private function getProcedureBodySiteOptions(ListService $listService)
     {
-        // Corresponds to the list 'procedure_body_site' in OpenEMR list editor
-        $options = $listService->getOptionsByListName('procedure_body_site');
+        // Use list_options list for iv_access_location instead of procedure body site? keep old function for other use
+        $options = $listService->getOptionsByListName('iv_access_location');
         $active = [];
         foreach ($options as $option) {
             if (!$option['inactive']) {
-                $active[$option['option_id']] = xl($option['title']);
+                $active[$option['option_id']] = text($option['title']);
             }
         }
-        // Use helper to sort and format (will place Unassigned first)
         return $this->getDropdownOptions(['' => xl('- Unassigned -')] + $active);
+    }
+
+    /**
+     * Ensure a list option exists (creates list row if needed).
+     */
+    private function ensureListOptionExists(string $list_id, string $value): void
+    {
+        if ($value === '') {return;}
+        $row = sqlQuery("SELECT 1 FROM list_options WHERE list_id = ? AND option_id = ?", [$list_id, $value]);
+        if ($row) {return;}
+        // determine next seq
+        $seqRow = sqlQuery("SELECT MAX(seq) AS maxseq FROM list_options WHERE list_id = ?", [$list_id]);
+        $nextSeq = ($seqRow && $seqRow['maxseq'] !== null) ? ((int)$seqRow['maxseq'] + 1) : 10;
+        // insert
+        sqlStatement("INSERT INTO list_options (list_id, option_id, title, seq, is_default, option_value, activity) VALUES (?,?,?,?,0,?,1)", [$list_id, $value, $value, $nextSeq, $value]);
     }
 
     private function getMedicationOptions(ListService $listService)
@@ -305,7 +323,7 @@ class C_FormInfusionInjection
             'date' => date('Y-m-d H:i:s'), // Current datetime for new/updated form
             'assessment' => $_POST['assessment'] ?? null,
             'iv_access_type' => (!empty($_POST['iv_access_type_new']) ? $_POST['iv_access_type_new'] : ($_POST['iv_access_type'] ?? null)),
-            'iv_access_location' => (!empty($_POST['iv_access_location_new']) ? $_POST['iv_access_location_new'] : ($_POST['iv_access_location'] ?? null)),
+            'iv_access_location' => (!empty($_POST['iv_access_location_new']) ? $_POST['iv_access_location_new'] : ($_POST['iv_access_location'] ?? $this->infusion_injection_data->iv_access_location ?? null)),
             'iv_access_blood_return' => $_POST['iv_access_blood_return'] ?? null,
             'iv_access_needle_gauge' => $_POST['iv_access_needle_gauge'] ?? null,
             'iv_access_attempts' => $_POST['iv_access_attempts'] ?? null,
@@ -486,6 +504,14 @@ class C_FormInfusionInjection
         // ... set other vital fields from $_POST['bp_systolic'], etc.
         // $vitalsService = new VitalsService(); // Or however vitals are saved
         // $vitalsService->saveVitalsForm($vitalsData);
+
+        // After determining new values, ensure they exist in list_options
+        if (!empty($_POST['iv_access_type_new'])) {
+            $this->ensureListOptionExists('iv_access_type', $_POST['iv_access_type_new']);
+        }
+        if (!empty($_POST['iv_access_location_new'])) {
+            $this->ensureListOptionExists('iv_access_location', $_POST['iv_access_location_new']);
+        }
 
         // The formJump() function (called in save.php) will handle redirecting.
         return;
