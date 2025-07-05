@@ -268,7 +268,6 @@ class C_FormInfusionInjection
                 'user' => $this->infusion_injection_data->user,
                 'groupname' => $this->infusion_injection_data->groupname,
                 'authorized' => $this->infusion_injection_data->authorized,
-                'activity' => 1,
                 'formdir' => 'infusion_injection',
                 'form_id' => $this->form_id,
                 'form_name' => 'Infusion and Injection Treatment Form'

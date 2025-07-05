@@ -8,6 +8,8 @@
 require_once(__DIR__ . "/../../globals.php");
 require_once($GLOBALS["srcdir"] . "/api.inc.php");
 
+use OpenEMR\Common\Acl\AclMain;
+
 // Check if user is authorized
 if (!AclMain::aclCheckCore('admin', 'super')) {
     die("Access denied. Admin privileges required.");
@@ -36,7 +38,6 @@ if (isset($_POST['run_migration'])) {
             'user' => $row['user'],
             'groupname' => $row['groupname'],
             'authorized' => $row['authorized'],
-            'activity' => $row['activity'] ?? 1,
             'formdir' => 'infusion_injection',
             'form_id' => $row['id'],
             'form_name' => 'Infusion and Injection Treatment Form'
