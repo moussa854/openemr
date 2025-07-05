@@ -128,7 +128,7 @@ class C_FormInfusionInjection
                     ['type' => 'text', 'label' => xl('Oxygen Saturation %'), 'name' => 'oxygen_saturation', 'value' => $this->infusion_injection_data->oxygen_saturation ?? $latestVitals['oxygen_saturation'] ?? '', 'units' => '%'],
                 ],
                 'IV Access' => [
-                    ['type' => 'select', 'label' => xl('Type of IV access'), 'name' => 'iv_access_type', 'options' => $this->getDropdownOptions(['' => xl('- Unassigned -'), 'peripheral_iv' => xl('Peripheral IV'), 'picc' => xl('PICC'), 'port' => xl('Port')]), 'value' => $this->infusion_injection_data->iv_access_type ?? ''],
+                    ['type' => 'select_add_guard', 'label' => xl('Type of IV access'), 'name' => 'iv_access_type', 'options' => $this->getDropdownOptions(['' => xl('- Unassigned -'), 'peripheral_iv' => xl('Peripheral IV'), 'picc' => xl('PICC'), 'port' => xl('Port')]), 'value' => (!empty($_POST['iv_access_type_new']) ? $_POST['iv_access_type_new'] : ($this->infusion_injection_data->iv_access_type ?? ''))],
                     ['type' => 'select_add', 'label' => xl('Location'), 'name' => 'iv_access_location', 'options' => $this->getProcedureBodySiteOptions($listService), 'value' => (!empty($_POST['iv_access_location_new']) ? $_POST['iv_access_location_new'] : ($_POST['iv_access_location'] ?? null))],
                     ['type' => 'select', 'label' => xl('Blood Return'), 'name' => 'iv_access_blood_return', 'options' => $this->getDropdownOptions(['' => xl('- Unassigned -'), 'Yes' => xl('Yes'), 'No' => xl('No')]), 'value' => $this->infusion_injection_data->iv_access_blood_return ?? ''],
                     ['type' => 'text', 'label' => xl('Needle Gauge'), 'name' => 'iv_access_needle_gauge', 'value' => $this->infusion_injection_data->iv_access_needle_gauge ?? ''],
@@ -182,7 +182,16 @@ class C_FormInfusionInjection
 
     private function getDropdownOptions(array $options)
     {
-        // Simple helper to format options for the template
+        // Ensure options are sorted alphabetically by label (A -> Z) except that blank/Unassigned stays first
+        $unassigned = [];
+        if (isset($options[''])) {
+            $unassigned[''] = $options[''];
+            unset($options['']);
+        }
+        // Sort remaining options by label
+        asort($options, SORT_NATURAL | SORT_FLAG_CASE);
+        $options = $unassigned + $options; // merge keeping Unassigned first if exists
+
         $formattedOptions = [];
         foreach ($options as $value => $label) {
             $formattedOptions[] = ['value' => $value, 'label' => $label];
@@ -203,13 +212,14 @@ class C_FormInfusionInjection
     {
         // Corresponds to the list 'procedure_body_site' in OpenEMR list editor
         $options = $listService->getOptionsByListName('procedure_body_site');
-        $formattedOptions = [['value' => '', 'label' => xl('- Unassigned -')]];
+        $active = [];
         foreach ($options as $option) {
-            if (!$option['inactive']) { // Only include active options
-                $formattedOptions[] = ['value' => $option['option_id'], 'label' => xl($option['title'])];
+            if (!$option['inactive']) {
+                $active[$option['option_id']] = xl($option['title']);
             }
         }
-        return $formattedOptions;
+        // Use helper to sort and format (will place Unassigned first)
+        return $this->getDropdownOptions(['' => xl('- Unassigned -')] + $active);
     }
 
     private function getMedicationOptions(ListService $listService)
@@ -280,7 +290,7 @@ class C_FormInfusionInjection
             'activity' => 1, // Typically 1 for active form
             'date' => date('Y-m-d H:i:s'), // Current datetime for new/updated form
             'assessment' => $_POST['assessment'] ?? null,
-            'iv_access_type' => $_POST['iv_access_type'] ?? null,
+            'iv_access_type' => (!empty($_POST['iv_access_type_new']) ? $_POST['iv_access_type_new'] : ($_POST['iv_access_type'] ?? null)),
             'iv_access_location' => (!empty($_POST['iv_access_location_new']) ? $_POST['iv_access_location_new'] : ($_POST['iv_access_location'] ?? null)),
             'iv_access_blood_return' => $_POST['iv_access_blood_return'] ?? null,
             'iv_access_needle_gauge' => $_POST['iv_access_needle_gauge'] ?? null,
