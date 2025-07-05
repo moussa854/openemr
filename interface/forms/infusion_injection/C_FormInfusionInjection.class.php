@@ -141,7 +141,8 @@ class C_FormInfusionInjection
                 'patient_id' => $GLOBALS['pid'] ?? null,
             ];
 
-            Header::setupHeader(['jquery', 'jquery-ui-dist', 'jquery-datetimepicker']);
+            // Include OpenEMR datetime picker assets (plugin + translated helper)
+            Header::setupHeader(['datetime-picker', 'datetime-picker-translated']);
 
             $twig = (new TwigContainer($this->template_dir, $GLOBALS['kernel']))->getTwig();
             return $twig->render("infusion_injection_form.html.twig", $data);
