@@ -260,6 +260,31 @@ class C_FormInfusionInjection
             $this->form_id = sqlInsert($sql, array_values($formData));
             $_POST['id'] = $this->form_id; // Set it for formJump or other post-save actions
 
+            // Create entry in the forms table for encounter display
+            $formsData = [
+                'date' => date('Y-m-d H:i:s'),
+                'encounter' => $this->infusion_injection_data->encounter,
+                'pid' => $this->infusion_injection_data->pid,
+                'user' => $this->infusion_injection_data->user,
+                'groupname' => $this->infusion_injection_data->groupname,
+                'authorized' => $this->infusion_injection_data->authorized,
+                'activity' => 1,
+                'formdir' => 'infusion_injection',
+                'form_id' => $this->form_id,
+                'form_name' => 'Infusion and Injection Treatment Form'
+            ];
+            
+            $formsSql = "INSERT INTO forms SET ";
+            $first = true;
+            foreach ($formsData as $key => $value) {
+                if (!$first) {
+                    $formsSql .= ", ";
+                }
+                $formsSql .= "`$key` = ?";
+                $first = false;
+            }
+            sqlInsert($formsSql, array_values($formsData));
+
         } else { // Existing form
             $this->form_id = $_POST['id'];
             // Ensure date is updated on edit if that's the desired behavior
@@ -286,6 +311,10 @@ class C_FormInfusionInjection
             $updateValues[] = $this->form_id;
             $updateValues[] = $GLOBALS['pid']; // Ensure user is updating their own patient's form
             $result = sqlStatement($sql, $updateValues);
+            
+            // Update the forms table entry
+            $formsUpdateSql = "UPDATE forms SET date = ? WHERE formdir = 'infusion_injection' AND form_id = ? AND pid = ?";
+            sqlStatement($formsUpdateSql, [date('Y-m-d H:i:s'), $this->form_id, $GLOBALS['pid']]);
         }
 
         if ($result === false) {
