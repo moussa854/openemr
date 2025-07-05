@@ -24,7 +24,7 @@
                             <label for="{{ field.name }}" class="col-sm-3 control-label">{{ field.label }}</label>
                             <div class="col-sm-9">
                                 <div class="input-group">
-                                    <input type="text" name="{{ field.name }}" id="{{ field.name }}" value="{{ field.value }}" class="form-control" />
+                                    <input type="{{ field.input_type|default('text') }}" {% if field.step is defined %}step="{{ field.step }}"{% endif %} name="{{ field.name }}" id="{{ field.name }}" value="{{ field.value }}" class="form-control" />
                                     {% if field.units %}
                                         <span class="input-group-addon">{{ field.units }}</span>
                                     {% endif %}
