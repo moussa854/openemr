@@ -22,6 +22,7 @@ use OpenEMR\Services\PatientService; // Added for fetching patient data if neede
 use OpenEMR\Services\FormService; // Added for interacting with other forms if needed
 use OpenEMR\Core\Header; // Added for Header::setupHeader()
 use OpenEMR\Services\VitalsService; // For fetching latest vitals
+use OpenEMR\Services\AllergyIntoleranceService;
 
 // TODO: Create a FormInfusionInjection class for data handling (e.g., using ORM or a simple data object)
 // For now, we'll use an associative array or a stdClass object to hold form data.
@@ -117,7 +118,7 @@ class C_FormInfusionInjection
                     ['type' => 'textarea', 'label' => xl('Assessment'), 'name' => 'assessment', 'value' => $this->infusion_injection_data->assessment ?? '']
                 ],
                 'Allergies' => [
-                    ['type' => 'html', 'html' => '<p>' . xl('Allergies are managed in the patient\'s medical record.') . '</p>']
+                    ['type' => 'html', 'html' => $this->buildAllergyHtml($GLOBALS['pid'] ?? null)]
                 ],
                 'Vital Signs' => [
                     ['type' => 'text', 'label' => xl('BP Systolic'), 'name' => 'bp_systolic', 'value' => $this->infusion_injection_data->bp_systolic ?? $latestVitals['bp_systolic'] ?? '', 'units' => 'mmHg'],
@@ -225,6 +226,37 @@ class C_FormInfusionInjection
         return $this->getDropdownOptions($options);
     }
 
+    /**
+     * Build HTML listing of active allergies for the patient (uses lists table).
+     */
+    private function buildAllergyHtml(?int $pid): string
+    {
+        if (empty($pid)) {
+            return '<p>' . xl('No patient selected.') . '</p>';
+        }
+
+        $rows = sqlStatement("SELECT title,reaction FROM lists WHERE pid = ? AND type = 'allergy' AND (enddate IS NULL OR enddate = '' OR enddate = '0000-00-00') AND activity = 1", [$pid]);
+        $items = [];
+        while ($row = sqlFetchArray($rows)) {
+            $label = text($row['title']);
+            $reaction = trim($row['reaction']);
+            if ($reaction !== '') {
+                $label .= ' (' . text($reaction) . ')';
+            }
+            $items[] = $label;
+        }
+
+        if (empty($items)) {
+            return '<p>' . xl('No known allergies recorded.') . '</p>';
+        }
+
+        $html = '<ul class="list-unstyled mb-0">';
+        foreach ($items as $item) {
+            $html .= '<li>&#8226; ' . $item . '</li>';
+        }
+        $html .= '</ul>';
+        return $html;
+    }
 
     public function default_action_process()
     {
