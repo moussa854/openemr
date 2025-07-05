@@ -240,11 +240,25 @@ class C_FormInfusionInjection
     }
 
     /**
+     * Ensure a list id is registered in list_options master list (list_id='lists').
+     */
+    private function ensureListExists(string $list_id): void
+    {
+        $row = sqlQuery("SELECT 1 FROM list_options WHERE list_id = 'lists' AND option_id = ?", [$list_id]);
+        if ($row) {return;}
+        $seqRow = sqlQuery("SELECT MAX(seq) AS maxseq FROM list_options WHERE list_id = 'lists'", []);
+        $nextSeq = ($seqRow && $seqRow['maxseq'] !== null) ? ((int)$seqRow['maxseq'] + 1) : 10;
+        sqlStatement("INSERT INTO list_options (list_id, option_id, title, seq, is_default, option_value, activity) VALUES ('lists', ?, ?, ?, 0, ?, 1)", [$list_id, $list_id, $nextSeq, $list_id]);
+    }
+
+    /**
      * Ensure a list option exists (creates list row if needed).
      */
     private function ensureListOptionExists(string $list_id, string $value): void
     {
         if ($value === '') {return;}
+        // Ensure parent list exists first
+        $this->ensureListExists($list_id);
         $row = sqlQuery("SELECT 1 FROM list_options WHERE list_id = ? AND option_id = ?", [$list_id, $value]);
         if ($row) {return;}
         // determine next seq
