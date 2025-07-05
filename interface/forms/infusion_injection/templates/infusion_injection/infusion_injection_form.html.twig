@@ -80,6 +80,19 @@
                                 {{ field.html|raw }}
                             </div>
                         </div>
+                    {% elseif field.type == 'select_add' %}
+                        <div class="form-group">
+                            <label for="{{ field.name }}" class="col-sm-3 control-label">{{ field.label }}</label>
+                            <div class="col-sm-9 d-flex align-items-center">
+                                <select name="{{ field.name }}" id="{{ field.name }}" class="form-control" style="max-width:200px;">
+                                    {% for option in field.options %}
+                                        <option value="{{ option.value }}" {% if option.value == field.value %}selected{% endif %}>{{ option.label }}</option>
+                                    {% endfor %}
+                                </select>
+                                <input type="text" id="{{ field.name }}_new" class="form-control ml-2" placeholder="{{ 'Add'|xl }}" style="max-width:180px;" />
+                                <button type="button" class="btn btn-secondary ml-1" onclick="addSelectOption('{{ field.name }}')">{{ 'Add'|xl }}</button>
+                            </div>
+                        </div>
                     {% endif %}
                 {% endfor %}
             </div>
@@ -102,4 +115,18 @@ $(function() {
       datetimepickerTranslated('#order_expiration_date', { timepicker: false, showSeconds: false, formatInput: false });
   }
 });
+
+function addSelectOption(selectId){
+  var sel = document.getElementById(selectId);
+  var txtInput = document.getElementById(selectId + '_new');
+  if(!sel || !txtInput){return;}
+  var newVal = txtInput.value.trim();
+  if(newVal === ''){ return; }
+  var opt = document.createElement('option');
+  opt.value = newVal;
+  opt.text = newVal;
+  opt.selected = true;
+  sel.appendChild(opt);
+  txtInput.value='';
+}
 </script>

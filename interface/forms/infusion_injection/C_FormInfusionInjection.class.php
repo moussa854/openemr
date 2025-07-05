@@ -129,7 +129,7 @@ class C_FormInfusionInjection
                 ],
                 'IV Access' => [
                     ['type' => 'select', 'label' => xl('Type of IV access'), 'name' => 'iv_access_type', 'options' => $this->getDropdownOptions(['' => xl('- Unassigned -'), 'peripheral_iv' => xl('Peripheral IV'), 'picc' => xl('PICC'), 'port' => xl('Port')]), 'value' => $this->infusion_injection_data->iv_access_type ?? ''],
-                    ['type' => 'select', 'label' => xl('Location'), 'name' => 'iv_access_location', 'options' => $this->getProcedureBodySiteOptions($listService), 'value' => $this->infusion_injection_data->iv_access_location ?? ''],
+                    ['type' => 'select_add', 'label' => xl('Location'), 'name' => 'iv_access_location', 'options' => $this->getProcedureBodySiteOptions($listService), 'value' => (!empty($_POST['iv_access_location_new']) ? $_POST['iv_access_location_new'] : ($_POST['iv_access_location'] ?? null))],
                     ['type' => 'select', 'label' => xl('Blood Return'), 'name' => 'iv_access_blood_return', 'options' => $this->getDropdownOptions(['' => xl('- Unassigned -'), 'Yes' => xl('Yes'), 'No' => xl('No')]), 'value' => $this->infusion_injection_data->iv_access_blood_return ?? ''],
                     ['type' => 'text', 'label' => xl('Needle Gauge'), 'name' => 'iv_access_needle_gauge', 'value' => $this->infusion_injection_data->iv_access_needle_gauge ?? ''],
                     ['type' => 'text', 'label' => xl('# of attempts'), 'name' => 'iv_access_attempts', 'value' => $this->infusion_injection_data->iv_access_attempts ?? ''],
@@ -281,7 +281,7 @@ class C_FormInfusionInjection
             'date' => date('Y-m-d H:i:s'), // Current datetime for new/updated form
             'assessment' => $_POST['assessment'] ?? null,
             'iv_access_type' => $_POST['iv_access_type'] ?? null,
-            'iv_access_location' => $_POST['iv_access_location'] ?? null,
+            'iv_access_location' => (!empty($_POST['iv_access_location_new']) ? $_POST['iv_access_location_new'] : ($_POST['iv_access_location'] ?? null)),
             'iv_access_blood_return' => $_POST['iv_access_blood_return'] ?? null,
             'iv_access_needle_gauge' => $_POST['iv_access_needle_gauge'] ?? null,
             'iv_access_attempts' => $_POST['iv_access_attempts'] ?? null,
