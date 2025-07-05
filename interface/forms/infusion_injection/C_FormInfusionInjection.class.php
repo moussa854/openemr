@@ -21,6 +21,7 @@ use OpenEMR\Common\Twig\TwigContainer;
 use OpenEMR\Services\PatientService; // Added for fetching patient data if needed for allergies
 use OpenEMR\Services\FormService; // Added for interacting with other forms if needed
 use OpenEMR\Core\Header; // Added for Header::setupHeader()
+use OpenEMR\Services\VitalsService; // For fetching latest vitals
 
 // TODO: Create a FormInfusionInjection class for data handling (e.g., using ORM or a simple data object)
 // For now, we'll use an associative array or a stdClass object to hold form data.
@@ -86,6 +87,30 @@ class C_FormInfusionInjection
                 $this->infusion_injection_data = new stdClass();
             }
 
+            /*
+             * Prefill vital signs from latest Vitals form (if any) when creating a NEW infusion/injection form.
+             */
+            $latestVitals = [];
+            if (empty($this->form_id) && !empty($GLOBALS['pid'])) {
+                try {
+                    $vitalsService = new VitalsService();
+                    $vitalsHistory = $vitalsService->getVitalsHistoryForPatient($GLOBALS['pid'], null);
+                    if (!empty($vitalsHistory)) {
+                        // first record is most recent because service orders DESC by date
+                        $latest = $vitalsHistory[0] ?? [];
+                        $latestVitals = [
+                            'bp_systolic' => $latest['bps'] ?? '',
+                            'bp_diastolic' => $latest['bpd'] ?? '',
+                            'pulse' => $latest['pulse'] ?? '',
+                            'temperature_f' => $latest['temperature'] ?? '',
+                            'oxygen_saturation' => $latest['oxygen_saturation'] ?? '',
+                        ];
+                    }
+                } catch (\Exception $ex) {
+                    error_log("Infusion/Injection form: Failed fetching latest vitals - " . $ex->getMessage());
+                }
+            }
+
             // Define form fields
             $formFields = [
                 'Assessment' => [
@@ -95,11 +120,11 @@ class C_FormInfusionInjection
                     ['type' => 'html', 'html' => '<p>' . xl('Allergies are managed in the patient\'s medical record.') . '</p>']
                 ],
                 'Vital Signs' => [
-                    ['type' => 'text', 'label' => xl('BP Systolic'), 'name' => 'bp_systolic', 'value' => $this->infusion_injection_data->bp_systolic ?? '', 'units' => 'mmHg'],
-                    ['type' => 'text', 'label' => xl('BP Diastolic'), 'name' => 'bp_diastolic', 'value' => $this->infusion_injection_data->bp_diastolic ?? '', 'units' => 'mmHg'],
-                    ['type' => 'text', 'label' => xl('Pulse'), 'name' => 'pulse', 'value' => $this->infusion_injection_data->pulse ?? '', 'units' => 'per min'],
-                    ['type' => 'text', 'label' => xl('Temperature F'), 'name' => 'temperature_f', 'value' => $this->infusion_injection_data->temperature_f ?? '', 'units' => '°F'],
-                    ['type' => 'text', 'label' => xl('Oxygen Saturation %'), 'name' => 'oxygen_saturation', 'value' => $this->infusion_injection_data->oxygen_saturation ?? '', 'units' => '%'],
+                    ['type' => 'text', 'label' => xl('BP Systolic'), 'name' => 'bp_systolic', 'value' => $this->infusion_injection_data->bp_systolic ?? $latestVitals['bp_systolic'] ?? '', 'units' => 'mmHg'],
+                    ['type' => 'text', 'label' => xl('BP Diastolic'), 'name' => 'bp_diastolic', 'value' => $this->infusion_injection_data->bp_diastolic ?? $latestVitals['bp_diastolic'] ?? '', 'units' => 'mmHg'],
+                    ['type' => 'text', 'label' => xl('Pulse'), 'name' => 'pulse', 'value' => $this->infusion_injection_data->pulse ?? $latestVitals['pulse'] ?? '', 'units' => 'per min'],
+                    ['type' => 'text', 'label' => xl('Temperature F'), 'name' => 'temperature_f', 'value' => $this->infusion_injection_data->temperature_f ?? $latestVitals['temperature_f'] ?? '', 'units' => '°F'],
+                    ['type' => 'text', 'label' => xl('Oxygen Saturation %'), 'name' => 'oxygen_saturation', 'value' => $this->infusion_injection_data->oxygen_saturation ?? $latestVitals['oxygen_saturation'] ?? '', 'units' => '%'],
                 ],
                 'IV Access' => [
                     ['type' => 'select', 'label' => xl('Type of IV access'), 'name' => 'iv_access_type', 'options' => $this->getDropdownOptions(['' => xl('- Unassigned -'), 'peripheral_iv' => xl('Peripheral IV'), 'picc' => xl('PICC'), 'port' => xl('Port')]), 'value' => $this->infusion_injection_data->iv_access_type ?? ''],
