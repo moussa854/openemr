@@ -29,6 +29,21 @@ function infusion_injection_report($pid, $encounter, $cols, $id, $print = true)
     $count = 0;
     $data = formFetch("form_infusion_injection", $id);
     
+    // Pull patient active allergies
+    if ($pid) {
+        $allergyRows = sqlStatement("SELECT title, reaction FROM lists WHERE pid = ? AND type='allergy' AND (enddate IS NULL OR enddate = '' OR enddate = '0000-00-00') AND activity = 1", [$pid]);
+        $allergies = [];
+        while ($row = sqlFetchArray($allergyRows)) {
+            $label = $row['title'];
+            $reaction = trim($row['reaction']);
+            if ($reaction !== '') {
+                $label .= " (" . $reaction . ")";
+            }
+            $allergies[] = $label;
+        }
+        $data['allergies'] = implode(', ', $allergies);
+    }
+    
     $output = "";
     if ($data) {
         $output .= "<table><tr>";
@@ -54,7 +69,8 @@ function infusion_injection_report($pid, $encounter, $cols, $id, $print = true)
             'order_servicing_provider' => 'Provider',
             'order_npi' => 'NPI',
             'administration_start' => 'Start Time',
-            'administration_end' => 'End Time'
+            'administration_end' => 'End Time',
+            'allergies' => 'Allergies',
         );
 
         foreach ($display_fields as $field => $label) {
@@ -90,6 +106,12 @@ function infusion_injection_report($pid, $encounter, $cols, $id, $print = true)
                 $displayValue .= ' F';
             } elseif ($field === 'oxygen_saturation') {
                 $displayValue .= ' %';
+            } elseif ($field === 'allergies') {
+                // already built as string
+                $displayValue = $value;
+                if ($displayValue === '') {
+                    continue; // skip if no allergies
+                }
             }
 
             $output .= "<td><div class='font-weight-bold d-inline-block'>" . xlt($label) . ": </div></td>";
