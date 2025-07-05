@@ -112,6 +112,20 @@ class C_FormInfusionInjection
                 }
             }
 
+            // Ensure custom saved values appear in dropdowns
+            $ivTypeOptions = ['' => xl('- Unassigned -'), 'peripheral_iv' => xl('Peripheral IV'), 'picc' => xl('PICC'), 'port' => xl('Port')];
+            $currentType = $this->infusion_injection_data->iv_access_type ?? '';
+            if ($currentType !== '' && !isset($ivTypeOptions[$currentType])) {
+                $ivTypeOptions[$currentType] = $currentType;
+            }
+
+            $locationOptionsArr = $this->getProcedureBodySiteOptions($listService);
+            $currentLoc = $this->infusion_injection_data->iv_access_location ?? '';
+            $locKeys = array_column($locationOptionsArr, 'value');
+            if ($currentLoc !== '' && !in_array($currentLoc, $locKeys)) {
+                $locationOptionsArr[] = ['value' => $currentLoc, 'label' => $currentLoc];
+            }
+
             // Define form fields
             $formFields = [
                 'Assessment' => [
@@ -128,8 +142,8 @@ class C_FormInfusionInjection
                     ['type' => 'text', 'label' => xl('Oxygen Saturation %'), 'name' => 'oxygen_saturation', 'value' => $this->infusion_injection_data->oxygen_saturation ?? $latestVitals['oxygen_saturation'] ?? '', 'units' => '%'],
                 ],
                 'IV Access' => [
-                    ['type' => 'select_add_guard', 'label' => xl('Type of IV access'), 'name' => 'iv_access_type', 'options' => $this->getDropdownOptions(['' => xl('- Unassigned -'), 'peripheral_iv' => xl('Peripheral IV'), 'picc' => xl('PICC'), 'port' => xl('Port')]), 'value' => (!empty($_POST['iv_access_type_new']) ? $_POST['iv_access_type_new'] : ($this->infusion_injection_data->iv_access_type ?? ''))],
-                    ['type' => 'select_add', 'label' => xl('Location'), 'name' => 'iv_access_location', 'options' => $this->getProcedureBodySiteOptions($listService), 'value' => (!empty($_POST['iv_access_location_new']) ? $_POST['iv_access_location_new'] : ($_POST['iv_access_location'] ?? null))],
+                    ['type' => 'select_add_guard', 'label' => xl('Type of IV access'), 'name' => 'iv_access_type', 'options' => $this->getDropdownOptions($ivTypeOptions), 'value' => (!empty($_POST['iv_access_type_new']) ? $_POST['iv_access_type_new'] : ($this->infusion_injection_data->iv_access_type ?? ''))],
+                    ['type' => 'select_add_guard', 'label' => xl('Location'), 'name' => 'iv_access_location', 'options' => $locationOptionsArr, 'value' => (!empty($_POST['iv_access_location_new']) ? $_POST['iv_access_location_new'] : ($_POST['iv_access_location'] ?? $this->infusion_injection_data->iv_access_location ?? null))],
                     ['type' => 'select', 'label' => xl('Blood Return'), 'name' => 'iv_access_blood_return', 'options' => $this->getDropdownOptions(['' => xl('- Unassigned -'), 'Yes' => xl('Yes'), 'No' => xl('No')]), 'value' => $this->infusion_injection_data->iv_access_blood_return ?? ''],
                     ['type' => 'text', 'label' => xl('Needle Gauge'), 'name' => 'iv_access_needle_gauge', 'value' => $this->infusion_injection_data->iv_access_needle_gauge ?? ''],
                     ['type' => 'text', 'label' => xl('# of attempts'), 'name' => 'iv_access_attempts', 'value' => $this->infusion_injection_data->iv_access_attempts ?? ''],
