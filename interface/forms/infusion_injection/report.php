@@ -11,103 +11,63 @@
  */
 
 require_once(__DIR__ . "/../../globals.php");
-
-use OpenEMR\Common\Csrf\CsrfUtils; // For any potential links or actions, though not strictly needed for read-only display
-use OpenEMR\Common\Logging\SystemLogger;
+require_once($GLOBALS["srcdir"] . "/api.inc.php");
 
 function infusion_injection_report($pid, $encounter, $cols, $id, $print = true)
 {
-    // Validate form ID
-    if (!$id || !is_numeric($id)) {
-        $output = "<div>" . xlt('Error: Form ID not provided or invalid.') . "</div>";
-        if ($print) {
-            echo $output;
-        } else {
-            return $output;
-        }
-        return;
-    }
-
-    // Fetch the form data from the database
-    $sql = "SELECT *, DATE_FORMAT(date, '%Y-%m-%d %H:%i') AS formatted_date, " .
-           "DATE_FORMAT(order_expiration_date, '%Y-%m-%d') AS formatted_order_expiration_date, " .
-           "DATE_FORMAT(administration_start, '%Y-%m-%d %H:%i') AS formatted_administration_start, " .
-           "DATE_FORMAT(administration_end, '%Y-%m-%d %H:%i') AS formatted_administration_end " .
-           "FROM form_infusion_injection WHERE id = ?";
-    $formData = sqlQuery($sql, [$id]);
-
-    if (!$formData) {
-        $output = "<div>" . xlt('Error: Form data not found for ID') . " " . htmlspecialchars($id, ENT_QUOTES, 'UTF-8') . "</div>";
-        if ($print) {
-            echo $output;
-        } else {
-            return $output;
-        }
-        return;
-    }
-
-    // Build the HTML output
-    $output = '';
-    $output .= "<table><tr>";
-    
     $count = 0;
+    $data = formFetch("form_infusion_injection", $id);
     
-    // Add key fields in a structured format similar to vitals
-    $fields_to_display = array(
-        'Assessment' => $formData['assessment'] ?? '',
-        'IV Access Type' => $formData['iv_access_type'] ?? '',
-        'IV Access Location' => $formData['iv_access_location'] ?? '',
-        'IV Access Blood Return' => $formData['iv_access_blood_return'] ?? '',
-        'Order Medication' => $formData['order_medication'] ?? '',
-        'Order Dose' => $formData['order_dose'] ?? '',
-        'Order Servicing Provider' => $formData['order_servicing_provider'] ?? '',
-    );
-    
-    // Add optional fields if they have values
-    if (!empty($formData['iv_access_needle_gauge'])) {
-        $fields_to_display['IV Needle Gauge'] = $formData['iv_access_needle_gauge'];
-    }
-    if (!empty($formData['iv_access_attempts'])) {
-        $fields_to_display['IV Access Attempts'] = $formData['iv_access_attempts'];
-    }
-    if (!empty($formData['order_lot_number'])) {
-        $fields_to_display['Order Lot Number'] = $formData['order_lot_number'];
-    }
-    if (!empty($formData['order_ndc'])) {
-        $fields_to_display['Order NDC'] = $formData['order_ndc'];
-    }
-    if (!empty($formData['formatted_order_expiration_date'])) {
-        $fields_to_display['Order Expiration Date'] = $formData['formatted_order_expiration_date'];
-    }
-    if (!empty($formData['order_every_value']) && !empty($formData['order_every_unit'])) {
-        $fields_to_display['Order Every'] = $formData['order_every_value'] . ' ' . $formData['order_every_unit'];
-    }
-    if (!empty($formData['order_npi'])) {
-        $fields_to_display['Order NPI'] = $formData['order_npi'];
-    }
-    if (!empty($formData['formatted_administration_start'])) {
-        $fields_to_display['Administration Start'] = $formData['formatted_administration_start'];
-    }
-    if (!empty($formData['formatted_administration_end'])) {
-        $fields_to_display['Administration End'] = $formData['formatted_administration_end'];
-    }
+    $output = "";
+    if ($data) {
+        $output .= "<table><tr>";
+        
+        // Define the fields we want to display and their display names
+        $display_fields = array(
+            'assessment' => 'Assessment',
+            'iv_access_type' => 'IV Access Type',
+            'iv_access_location' => 'IV Access Location', 
+            'iv_access_blood_return' => 'Blood Return',
+            'iv_access_needle_gauge' => 'Needle Gauge',
+            'iv_access_attempts' => 'Access Attempts',
+            'order_medication' => 'Medication',
+            'order_dose' => 'Dose',
+            'order_lot_number' => 'Lot Number',
+            'order_ndc' => 'NDC',
+            'order_expiration_date' => 'Expiration Date',
+            'order_servicing_provider' => 'Provider',
+            'order_npi' => 'NPI',
+            'administration_start' => 'Start Time',
+            'administration_end' => 'End Time'
+        );
 
-    foreach ($fields_to_display as $key => $value) {
-        if (empty($value)) {
-            continue;
+        foreach ($display_fields as $field => $label) {
+            $value = $data[$field] ?? '';
+            
+            // Skip empty values
+            if (empty($value) || $value == '0000-00-00' || $value == '0000-00-00 00:00:00') {
+                continue;
+            }
+            
+            // Format dates
+            if (strpos($field, 'date') !== false || strpos($field, 'start') !== false || strpos($field, 'end') !== false) {
+                if ($value != '0000-00-00 00:00:00' && $value != '0000-00-00') {
+                    $value = oeFormatSDFT(strtotime($value));
+                }
+            }
+            
+            $output .= "<td><div class='font-weight-bold d-inline-block'>" . xlt($label) . ": </div></td>";
+            $output .= "<td><div class='text' style='display:inline-block'>" . text($value) . "</div></td>";
+            
+            $count++;
+            if ($count == $cols) {
+                $count = 0;
+                $output .= "</tr><tr>\n";
+            }
         }
         
-        $output .= "<td><div class='font-weight-bold d-inline-block'>" . xlt($key) . ": </div></td>";
-        $output .= "<td><div class='text' style='display:inline-block'>" . text($value) . "</div></td>";
-        
-        $count++;
-        if ($count == $cols) {
-            $count = 0;
-            $output .= "</tr><tr>\n";
-        }
+        $output .= "</tr></table>";
     }
-    
-    $output .= "</tr></table>";
 
     if ($print) {
         echo $output;
