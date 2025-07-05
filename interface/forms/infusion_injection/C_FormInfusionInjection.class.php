@@ -349,6 +349,66 @@ class C_FormInfusionInjection
             return;
         }
 
+        /*
+         * ---------------------------------------------------------------------
+         * Save / Update VITAL SIGNS to form_vitals table for this encounter.
+         * ---------------------------------------------------------------------
+         */
+        try {
+            $vitalInputs = [
+                'bps' => $_POST['bp_systolic'] ?? null,
+                'bpd' => $_POST['bp_diastolic'] ?? null,
+                'pulse' => $_POST['pulse'] ?? null,
+                'temperature' => $_POST['temperature_f'] ?? null,
+                'oxygen_saturation' => $_POST['oxygen_saturation'] ?? null,
+            ];
+
+            // Only proceed if at least one vital sign has been entered
+            $hasVitals = false;
+            foreach ($vitalInputs as $v) {
+                if ($v !== null && $v !== '') {
+                    $hasVitals = true;
+                    break;
+                }
+            }
+
+            if ($hasVitals && !empty($this->infusion_injection_data->pid) && !empty($this->infusion_injection_data->encounter)) {
+                $vitalsService = new VitalsService();
+
+                // Check for existing vitals record for this patient + encounter
+                $existingVitals = $vitalsService->getVitalsForPatientEncounter($this->infusion_injection_data->pid, $this->infusion_injection_data->encounter);
+                $record = [];
+                if (!empty($existingVitals) && is_array($existingVitals)) {
+                    // Update first record (assumes list ordered by date desc)
+                    $record = $existingVitals[0];
+                    $record['id'] = $record['form_id'] ?? $record['id'] ?? null; // ensure id present for update
+                }
+
+                // Merge vital inputs
+                foreach ($vitalInputs as $k => $v) {
+                    if ($v !== null && $v !== '') {
+                        $record[$k] = $v;
+                    }
+                }
+
+                // Required base fields
+                $record['pid'] = $this->infusion_injection_data->pid;
+                $record['eid'] = $this->infusion_injection_data->encounter;
+                $record['authorized'] = $_SESSION['userauthorized'] ?? 0;
+                $record['user'] = $_SESSION['authUser'] ?? null;
+                $record['groupname'] = $_SESSION['authProvider'] ?? null;
+                if (empty($record['date'])) {
+                    $record['date'] = date('Y-m-d H:i:s');
+                }
+
+                // Persist via service
+                $vitalsService->saveVitalsArray($record);
+            }
+        } catch (\Exception $ex) {
+            // Log but do not block infusion form save
+            (new SystemLogger())->error("Infusion/Injection form: Failed to save vitals data - " . $ex->getMessage());
+        }
+
         // TODO: Save allergy data (this will likely involve OpenEMR's allergy service/functions)
         // Example:
         // $patientService = new PatientService();
