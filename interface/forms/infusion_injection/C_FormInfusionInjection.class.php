@@ -264,6 +264,12 @@ class C_FormInfusionInjection
             'order_servicing_provider' => $_POST['order_servicing_provider'] ?? 'Moussa El-hallak, M.D.',
             'order_npi' => $_POST['order_npi'] ?? '1831381524',
             'order_note' => $_POST['order_note'] ?? null,
+            // Vital sign fields also stored in infusion table for quick reference
+            'bp_systolic' => $_POST['bp_systolic'] ?? null,
+            'bp_diastolic' => $_POST['bp_diastolic'] ?? null,
+            'pulse' => $_POST['pulse'] ?? null,
+            'temperature_f' => $_POST['temperature_f'] ?? null,
+            'oxygen_saturation' => $_POST['oxygen_saturation'] ?? null,
             'administration_start' => empty($_POST['administration_start']) ? null : $_POST['administration_start'],
             'administration_end' => empty($_POST['administration_end']) ? null : $_POST['administration_end'],
             'administration_note' => $_POST['administration_note'] ?? null,
