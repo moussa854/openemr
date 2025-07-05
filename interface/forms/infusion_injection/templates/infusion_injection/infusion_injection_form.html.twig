@@ -46,14 +46,14 @@
                         <div class="form-group">
                             <label for="{{ field.name }}" class="col-sm-3 control-label">{{ field.label }}</label>
                             <div class="col-sm-9">
-                                <input type="text" name="{{ field.name }}" id="{{ field.name }}" value="{{ field.value }}" class="form-control datepicker" /> {# Add datepicker class for JS initialization #}
+                                <input type="text" name="{{ field.name }}" id="{{ field.name }}" value="{{ field.value }}" class="form-control datetimepicker" />
                             </div>
                         </div>
                     {% elseif field.type == 'datetime' %}
                         <div class="form-group">
                             <label for="{{ field.name }}" class="col-sm-3 control-label">{{ field.label }}</label>
                             <div class="col-sm-9">
-                                <input type="text" name="{{ field.name }}" id="{{ field.name }}" value="{{ field.value }}" class="form-control datetimepicker" /> {# Add datetimepicker class for JS initialization #}
+                                <input type="text" name="{{ field.name }}" id="{{ field.name }}" value="{{ field.value }}" class="form-control datetimepicker" />
                             </div>
                         </div>
                     {% elseif field.type == 'number_unit_select' %}
@@ -95,20 +95,10 @@
 </form>
 
 <script type="text/javascript">
-    $(document).ready(function(){
-        // Initialize datepickers
-        $('.datepicker').datepicker({
-            dateFormat: 'yy-mm-dd' // Adjust format as needed by OpenEMR
-        });
-
-        // Initialize datetimepickers
-        $('.datetimepicker').datetimepicker({
-            dateFormat: 'yy-mm-dd', // Adjust format as needed
-            timeFormat: 'HH:mm:ss' // Adjust format as needed
-            // You might need to include jQuery UI Timepicker addon if not already present
-        });
-
-        // TODO: Add any other specific JavaScript needed for the form,
-        // e.g., for dynamic population of medication details based on selection.
-    });
+$(function() {
+  if (typeof datetimepickerTranslated === 'function') {
+      datetimepickerTranslated('#date', { timepicker: true, showSeconds: false, formatInput: false });
+      datetimepickerTranslated('#administration_end', { timepicker: true, showSeconds: false, formatInput: false });
+  }
+});
 </script>
