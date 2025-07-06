@@ -141,9 +141,9 @@ class C_FormInfusionInjection
                 'Vital Signs' => [
                     ['type' => 'text', 'label' => xl('BP Systolic'), 'name' => 'bp_systolic', 'value' => $this->infusion_injection_data->bp_systolic ?? $latestVitals['bp_systolic'] ?? '', 'units' => 'mmHg'],
                     ['type' => 'text', 'label' => xl('BP Diastolic'), 'name' => 'bp_diastolic', 'value' => $this->infusion_injection_data->bp_diastolic ?? $latestVitals['bp_diastolic'] ?? '', 'units' => 'mmHg'],
-                    ['type' => 'text', 'label' => xl('Pulse'), 'name' => 'pulse', 'value' => $this->infusion_injection_data->pulse ?? $latestVitals['pulse'] ?? '', 'units' => 'per min'],
-                    ['type' => 'text', 'label' => xl('Temperature F'), 'name' => 'temperature_f', 'value' => $this->infusion_injection_data->temperature_f ?? $latestVitals['temperature_f'] ?? '', 'units' => '°F'],
-                    ['type' => 'text', 'label' => xl('Oxygen Saturation %'), 'name' => 'oxygen_saturation', 'value' => $this->infusion_injection_data->oxygen_saturation ?? $latestVitals['oxygen_saturation'] ?? '', 'units' => '%'],
+                    ['type' => 'text', 'input_type'=>'number','step'=>'1','label' => xl('Pulse'), 'name' => 'pulse', 'value' => isset($this->infusion_injection_data->pulse) ? intval($this->infusion_injection_data->pulse) : intval($latestVitals['pulse'] ?? 0), 'units' => 'per min'],
+                    ['type' => 'text', 'input_type'=>'number','step'=>'0.1','label' => xl('Temperature F'), 'name' => 'temperature_f', 'value' => isset($this->infusion_injection_data->temperature_f) ? number_format((float)$this->infusion_injection_data->temperature_f,1) : number_format((float)($latestVitals['temperature_f'] ?? 0),1), 'units' => '°F'],
+                    ['type' => 'text', 'input_type'=>'number','step'=>'1','label' => xl('Oxygen Saturation %'), 'name' => 'oxygen_saturation', 'value' => isset($this->infusion_injection_data->oxygen_saturation) ? intval($this->infusion_injection_data->oxygen_saturation) : intval($latestVitals['oxygen_saturation'] ?? 0), 'units' => '%'],
                 ],
                 'IV Access' => [
                     ['type' => 'select_add_guard', 'label' => xl('Type of IV access'), 'name' => 'iv_access_type', 'options' => $this->getDropdownOptions($ivTypeOptions), 'value' => (!empty($_POST['iv_access_type_new']) ? $_POST['iv_access_type_new'] : ($this->infusion_injection_data->iv_access_type ?? ''))],
