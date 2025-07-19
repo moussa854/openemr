@@ -184,6 +184,22 @@ $oemr_ui = new OemrUI($arrOeUiSettings);
                 </form>
             </div>
         </div>
+        
+        <div class="row mt-4">
+            <div class="col-sm-12">
+                <div class="card">
+                    <div class="card-header">
+                        <h4><?php echo xlt('Remembered Devices'); ?></h4>
+                    </div>
+                    <div class="card-body">
+                        <p><?php echo xlt('Manage devices that have been set to remember MFA authentication.'); ?></p>
+                        <a href="mfa_remembered_devices.php" class="btn btn-primary">
+                            <?php echo xlt('Manage Remembered Devices'); ?>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
 
     </div><!--end of container div -->
     <?php $oemr_ui->oeBelowContainerDiv();?>

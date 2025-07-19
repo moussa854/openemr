@@ -2288,6 +2288,38 @@ $GLOBALS_METADATA = array(
             xl('This Client ID Is Provided By Google For Your App (Required For Google Sign-in)')
         ),
 
+        'mfa_remember_enable' => array(
+            xl('Enable MFA Remember Device'),
+            'bool',
+            '1',
+            xl('Enable "Remember this device" option for MFA authentication')
+        ),
+
+        'mfa_remember_duration' => array(
+            xl('MFA Remember Duration (Days)'),
+            'num',
+            '30',
+            xl('Number of days to remember trusted devices for MFA')
+        ),
+
+        'mfa_remember_policy' => array(
+            xl('MFA Remember Policy'),
+            array(
+                '0' => xl('Optional - User Choice'),
+                '1' => xl('Mandatory for All Users'),
+                '2' => xl('Mandatory for Clinical Staff Only')
+            ),
+            '0',
+            xl('Policy for MFA remember device functionality')
+        ),
+
+        'mfa_max_devices_per_user' => array(
+            xl('Maximum Remembered Devices Per User'),
+            'num',
+            '5',
+            xl('Maximum number of remembered devices per user (0 = unlimited)')
+        ),
+
         'gbl_ldap_enabled' => array(
             xl('Use LDAP for Authentication'),
             'bool',
