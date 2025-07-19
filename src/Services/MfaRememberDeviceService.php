@@ -107,7 +107,7 @@ class MfaRememberDeviceService
                 (user_id, selector, validator_hash, device_info, ip_address, expires_at) 
                 VALUES (?, ?, ?, ?, ?, ?)";
         
-        sqlStatement($sql, [
+        \sqlStatement($sql, [
             $userId,
             $selector,
             $validatorHash,
@@ -148,7 +148,7 @@ class MfaRememberDeviceService
         // Look up the token in the database
         $sql = "SELECT * FROM mfa_remembered_devices 
                 WHERE selector = ? AND user_id = ? AND expires_at > NOW()";
-        $result = sqlQuery($sql, [$selector, $userId]);
+        $result = \sqlQuery($sql, [$selector, $userId]);
 
         if (!$result) {
             return false;
@@ -163,7 +163,7 @@ class MfaRememberDeviceService
         }
 
         // Update last used timestamp
-        sqlStatement(
+        \sqlStatement(
             "UPDATE mfa_remembered_devices SET last_used = NOW() WHERE id = ?",
             [$result['id']]
         );
@@ -227,7 +227,7 @@ class MfaRememberDeviceService
      */
     public function invalidateAllUserTokens($userId)
     {
-        sqlStatement(
+        \sqlStatement(
             "DELETE FROM mfa_remembered_devices WHERE user_id = ?",
             [$userId]
         );
@@ -240,10 +240,10 @@ class MfaRememberDeviceService
      */
     public function cleanupExpiredTokens()
     {
-        $result = sqlStatement(
+        $result = \sqlStatement(
             "DELETE FROM mfa_remembered_devices WHERE expires_at < NOW()"
         );
-        return sqlAffectedRows();
+        return \sqlAffectedRows();
     }
 
     /**
@@ -259,10 +259,10 @@ class MfaRememberDeviceService
                 WHERE user_id = ? AND expires_at > NOW() 
                 ORDER BY created_at DESC";
         
-        $result = sqlStatement($sql, [$userId]);
+        $result = \sqlStatement($sql, [$userId]);
         $devices = [];
         
-        while ($row = sqlFetchArray($result)) {
+        while ($row = \sqlFetchArray($result)) {
             $devices[] = $row;
         }
         
@@ -277,7 +277,7 @@ class MfaRememberDeviceService
      */
     public function getUserRememberedDevicesCount($userId)
     {
-        $result = sqlQuery(
+        $result = \sqlQuery(
             "SELECT COUNT(*) as count FROM mfa_remembered_devices WHERE user_id = ? AND expires_at > NOW()",
             [$userId]
         );
@@ -292,8 +292,8 @@ class MfaRememberDeviceService
      */
     public function removeOldestDevice($userId)
     {
-        $result = sqlStatement(
-            "DELETE FROM mfa_remembered_devices WHERE user_id = ? AND id = (
+        $result = \sqlStatement(
+            "DELETE FROM mfa_remembered_devices WHERE id = ? AND user_id = ? AND id = (
                 SELECT id FROM (
                     SELECT id FROM mfa_remembered_devices 
                     WHERE user_id = ? 
@@ -301,9 +301,9 @@ class MfaRememberDeviceService
                     LIMIT 1
                 ) as oldest
             )",
-            [$userId, $userId]
+            [$userId, $userId, $userId]
         );
-        return sqlAffectedRows() > 0;
+        return \sqlAffectedRows() > 0;
     }
 
     /**
@@ -315,11 +315,11 @@ class MfaRememberDeviceService
      */
     public function revokeDevice($deviceId, $userId)
     {
-        $result = sqlStatement(
+        $result = \sqlStatement(
             "DELETE FROM mfa_remembered_devices WHERE id = ? AND user_id = ?",
             [$deviceId, $userId]
         );
-        return sqlAffectedRows() > 0;
+        return \sqlAffectedRows() > 0;
     }
 
     /**
@@ -341,12 +341,12 @@ class MfaRememberDeviceService
         }
         
         if ($policy == 2) {
-            // Required for clinical staff only
-            $userInfo = sqlQuery(
-                "SELECT authorized FROM users WHERE id = ?",
-                [$userId]
-            );
-            return !empty($userInfo['authorized']);
+                    // Required for clinical staff only
+        $userInfo = \sqlQuery(
+            "SELECT authorized FROM users WHERE id = ?",
+            [$userId]
+        );
+        return !empty($userInfo['authorized']);
         }
         
         return false;
