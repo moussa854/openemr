@@ -243,7 +243,7 @@ class MfaRememberDeviceService
         $result = \sqlStatement(
             "DELETE FROM mfa_remembered_devices WHERE expires_at < NOW()"
         );
-        return \sqlAffectedRows();
+        return \generic_sql_affected_rows();
     }
 
     /**
@@ -303,7 +303,7 @@ class MfaRememberDeviceService
             )",
             [$userId, $userId, $userId]
         );
-        return \sqlAffectedRows() > 0;
+        return \generic_sql_affected_rows() > 0;
     }
 
     /**
@@ -319,7 +319,7 @@ class MfaRememberDeviceService
             "DELETE FROM mfa_remembered_devices WHERE id = ? AND user_id = ?",
             [$deviceId, $userId]
         );
-        return \sqlAffectedRows() > 0;
+        return \generic_sql_affected_rows() > 0;
     }
 
     /**
