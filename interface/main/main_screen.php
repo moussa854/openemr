@@ -139,6 +139,7 @@ if (isset($_POST['new_login_session_management'])) {
     $regs = array();          // for mapping device handles to their names
     $registrations = array(); // the array of stored registration objects
     
+    // AI GENERATED CODE START
     // Check for remembered device before MFA
     $isMfaBypassed = false;
     if (isset($_COOKIE['mfa_remember'])) {
@@ -248,6 +249,7 @@ if (isset($_POST['new_login_session_management'])) {
                             array($_SESSION['authUserID'])
                         );
                         
+                        // AI GENERATED CODE START
                         // Handle remember device functionality
                         if (isset($_POST['remember_device']) && $_POST['remember_device'] == '1') {
                             require_once($GLOBALS['webserver_root'] . '/src/Services/MfaRememberDeviceService.php');
@@ -262,6 +264,7 @@ if (isset($_POST['new_login_session_management'])) {
                                 $mfaRememberService->setRememberCookie($tokenData['cookie_value'], $tokenData['expiry']);
                             }
                         }
+                        // AI GENERATED CODE END
                     } else {
                         $errormsg = xl("The code you entered was not valid");
                         $errortype = "TOTP";
@@ -334,6 +337,7 @@ if (isset($_POST['new_login_session_management'])) {
                     echo '                          <input type="text" name="totp" class="form-control input-lg" id="totp" maxlength="12" required>';
                     echo '                          <input type="hidden" name="form_response" value="true" />';
                     
+                    // AI GENERATED CODE START
                     // Check if remember device is enabled globally
                     require_once($GLOBALS['webserver_root'] . '/src/Services/MfaRememberDeviceService.php');
                     $mfaRememberService = new \OpenEMR\Services\MfaRememberDeviceService();
@@ -345,6 +349,7 @@ if (isset($_POST['new_login_session_management'])) {
                         echo '                              <label for="remember_device" class="form-check-label">' . xlt('Remember this device for') . ' ' . $duration . ' ' . xlt('days') . '</label>';
                         echo '                          </div>';
                     }
+                    // AI GENERATED CODE END
                     generate_html_middle();
                     echo '                  </div>';
                     echo '              </fieldset>';
@@ -412,6 +417,7 @@ if (isset($_POST['new_login_session_management'])) {
     ///////////////////////////////////////////////////////////////////////
     // End of U2F and APP Based TOTP logic.
     ///////////////////////////////////////////////////////////////////////
+    // AI GENERATED CODE END
 
 
     // Creates a new session id when load this outer frame

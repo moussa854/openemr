@@ -2288,6 +2288,8 @@ $GLOBALS_METADATA = array(
             xl('This Client ID Is Provided By Google For Your App (Required For Google Sign-in)')
         ),
 
+        // AI GENERATED CODE START
+
         'mfa_remember_enable' => array(
             xl('Enable MFA Remember Device'),
             'bool',
@@ -2319,6 +2321,8 @@ $GLOBALS_METADATA = array(
             '5',
             xl('Maximum number of remembered devices per user (0 = unlimited)')
         ),
+
+        // AI GENERATED CODE END
 
         'gbl_ldap_enabled' => array(
             xl('Use LDAP for Authentication'),

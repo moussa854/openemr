@@ -9,6 +9,8 @@
  * @license   https://github.com/openemr/openemr/blob/master/LICENSE GNU General Public License 3
  */
 
+// AI GENERATED CODE START
+
 require_once("../../interface/globals.php");
 require_once("$srcdir/options.inc.php");
 ?>
@@ -54,4 +56,6 @@ require_once("$srcdir/options.inc.php");
             </ol>
         </div>
     </div>
-</div> 
+</div>
+
+// AI GENERATED CODE END 

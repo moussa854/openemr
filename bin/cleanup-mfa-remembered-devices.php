@@ -14,6 +14,8 @@
  * @license   https://github.com/openemr/openemr/blob/master/LICENSE GNU General Public License 3
  */
 
+// AI GENERATED CODE START
+
 // Include OpenEMR globals
 require_once(dirname(__FILE__) . '/../interface/globals.php');
 require_once($GLOBALS['srcdir'] . '/src/Services/MfaRememberDeviceService.php');
@@ -33,4 +35,6 @@ if ($deletedCount > 0) {
     error_log("OpenEMR MFA Cleanup: No expired tokens found");
 }
 
-echo "Cleanup completed. Deleted {$deletedCount} expired tokens.\n"; 
+echo "Cleanup completed. Deleted {$deletedCount} expired tokens.\n";
+
+// AI GENERATED CODE END 

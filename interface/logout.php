@@ -22,6 +22,7 @@ $_GET['auth'] = "logout";
 $sessionAllowWrite = true;
 require_once("globals.php");
 
+// AI GENERATED CODE START
 // Clear remembered device if user is logged in
 if (isset($_SESSION['authUserID'])) {
     require_once($GLOBALS['srcdir'] . '/src/Services/MfaRememberDeviceService.php');
@@ -34,3 +35,4 @@ if (isset($_SESSION['authUserID'])) {
     // Uncomment the line below if you want to revoke all remembered devices on logout
     // $mfaRememberService->invalidateAllUserTokens($_SESSION['authUserID']);
 }
+// AI GENERATED CODE END

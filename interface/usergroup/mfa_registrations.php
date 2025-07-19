@@ -185,6 +185,7 @@ $oemr_ui = new OemrUI($arrOeUiSettings);
             </div>
         </div>
         
+        <!-- AI GENERATED CODE START -->
         <div class="row mt-4">
             <div class="col-sm-12">
                 <div class="card">
@@ -200,6 +201,7 @@ $oemr_ui = new OemrUI($arrOeUiSettings);
                 </div>
             </div>
         </div>
+        <!-- AI GENERATED CODE END -->
 
     </div><!--end of container div -->
     <?php $oemr_ui->oeBelowContainerDiv();?>

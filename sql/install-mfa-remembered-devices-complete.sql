@@ -1,6 +1,8 @@
 -- Complete Installation Script for MFA Remembered Devices Feature
 -- This script creates all necessary database tables and indexes
 
+-- AI GENERATED CODE START
+
 -- 1. Create the main remembered devices table
 DROP TABLE IF EXISTS `mfa_remembered_devices`;
 CREATE TABLE `mfa_remembered_devices` (
@@ -60,4 +62,6 @@ CREATE INDEX IF NOT EXISTS idx_mfa_emergency_codes_user_expiry ON mfa_emergency_
 -- Next steps:
 -- 1. Configure the settings in Administration > Globals > Security
 -- 2. Test the feature with a user account
--- 3. Set up the cleanup cron job: 0 2 * * * /path/to/openemr/bin/cleanup-mfa-remembered-devices.php 
+-- 3. Set up the cleanup cron job: 0 2 * * * /path/to/openemr/bin/cleanup-mfa-remembered-devices.php
+
+-- AI GENERATED CODE END 

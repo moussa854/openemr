@@ -447,6 +447,7 @@ $apiUrl = $serverConfig->getInternalBaseApiUrl();
                                     echo "<div class='col-sm-12 oe-global-tab-heading'><div class='oe-pull-toward' style='font-size: 1.4rem'>" . xlt($grpname) . " &nbsp;</div><div style='margin-top: 5px'>" . text($addendum) . "</div></div>";
                                     echo "<div class='clearfix'></div>";
                                     
+                                    // AI GENERATED CODE START
                                     // Add MFA Device Management link for Security tab
                                     if ($grpname == 'Security' && !$userMode) {
                                         echo "<div class='row mb-3'>";
@@ -461,6 +462,7 @@ $apiUrl = $serverConfig->getInternalBaseApiUrl();
                                         echo "</div>";
                                         echo "</div>";
                                     }
+                                    // AI GENERATED CODE END
                                     
                                     if ($userMode) {
                                         echo "<div class='row'>";

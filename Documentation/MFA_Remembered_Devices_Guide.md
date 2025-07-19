@@ -1,5 +1,7 @@
 # MFA Remembered Devices Feature Guide
 
+<!-- AI GENERATED CODE START -->
+
 ## Overview
 
 The MFA Remembered Devices feature allows OpenEMR users to remember their device for a specified period (default 30 days) after successful MFA authentication. This reduces the friction of repeated MFA prompts while maintaining security through secure token-based authentication.
@@ -216,4 +218,6 @@ Potential future improvements:
 - Geographic restrictions for remembered devices
 - Integration with mobile device management
 - Advanced analytics and reporting
-- Integration with SSO systems 
+- Integration with SSO systems
+
+<!-- AI GENERATED CODE END --> 
