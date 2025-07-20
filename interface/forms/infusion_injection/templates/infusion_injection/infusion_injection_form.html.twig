@@ -1,0 +1,158 @@
+{# Infusion and Injection Form Template #}
+<form method="post" action="{{ FORM_ACTION }}/interface/forms/infusion_injection/save.php?id={{ has_id }}" name="infusion_injection_form" id="infusion_injection_form" class="form-horizontal" role="form">
+    <input type="hidden" name="process" value="true" />
+    <input type="hidden" name="csrf_token_form" value="{{ CSRF_TOKEN_FORM }}" />
+    <input type="hidden" name="id" value="{{ has_id }}" />
+    <input type="hidden" name="pid" value="{{ patient_id }}" /> {# Assuming patient_id is passed from controller #}
+
+    {% for sectionTitle, fields in formSections %}
+        <div class="panel panel-default">
+            <div class="panel-heading">
+                <h3 class="panel-title">{{ sectionTitle|xl }}</h3>
+            </div>
+            <div class="panel-body">
+                {% for field in fields %}
+                    {% if field.type == 'textarea' %}
+                        <div class="form-group">
+                            <label for="{{ field.name }}" class="col-sm-3 control-label">{{ field.label }}</label>
+                            <div class="col-sm-9">
+                                <textarea name="{{ field.name }}" id="{{ field.name }}" class="form-control" rows="3">{{ field.value }}</textarea>
+                            </div>
+                        </div>
+                    {% elseif field.type == 'text' %}
+                        <div class="form-group">
+                            <label for="{{ field.name }}" class="col-sm-3 control-label">{{ field.label }}</label>
+                            <div class="col-sm-9">
+                                <div class="input-group">
+                                    <input type="{{ field.input_type|default('text') }}" {% if field.step is defined %}step="{{ field.step }}"{% endif %} name="{{ field.name }}" id="{{ field.name }}" value="{{ field.value }}" class="form-control" />
+                                    {% if field.units %}
+                                        <span class="input-group-addon">{{ field.units }}</span>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                    {% elseif field.type == 'select' %}
+                        <div class="form-group">
+                            <label for="{{ field.name }}" class="col-sm-3 control-label">{{ field.label }}</label>
+                            <div class="col-sm-9">
+                                <select name="{{ field.name }}" id="{{ field.name }}" class="form-control">
+                                    {% for option in field.options %}
+                                        <option value="{{ option.value }}" {% if option.value == field.value %}selected{% endif %}>{{ option.label }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                        </div>
+                    {% elseif field.type == 'date' %}
+                        <div class="form-group">
+                            <label for="{{ field.name }}" class="col-sm-3 control-label">{{ field.label }}</label>
+                            <div class="col-sm-9">
+                                <input type="text" name="{{ field.name }}" id="{{ field.name }}" value="{{ field.value }}" class="form-control datetimepicker" />
+                            </div>
+                        </div>
+                    {% elseif field.type == 'datetime' %}
+                        <div class="form-group">
+                            <label for="{{ field.name }}" class="col-sm-3 control-label">{{ field.label }}</label>
+                            <div class="col-sm-9">
+                                <input type="text" name="{{ field.name }}" id="{{ field.name }}" value="{{ field.value }}" class="form-control datetimepicker" />
+                            </div>
+                        </div>
+                    {% elseif field.type == 'number_unit_select' %}
+                        <div class="form-group">
+                            <label for="{{ field.name_num }}" class="col-sm-3 control-label">{{ field.label }}</label>
+                            <div class="col-sm-4">
+                                <select name="{{ field.name_num }}" id="{{ field.name_num }}" class="form-control">
+                                    {% for option in field.num_options %}
+                                        <option value="{{ option.value }}" {% if option.value == field.value_num %}selected{% endif %}>{{ option.label }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <div class="col-sm-5">
+                                <select name="{{ field.name_unit }}" id="{{ field.name_unit }}" class="form-control">
+                                    {% for option in field.unit_options %}
+                                        <option value="{{ option.value }}" {% if option.value == field.value_unit %}selected{% endif %}>{{ option.label }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                        </div>
+                    {% elseif field.type == 'html' %}
+                        <div class="form-group">
+                            <div class="col-sm-offset-3 col-sm-9">
+                                {{ field.html|raw }}
+                            </div>
+                        </div>
+                    {% elseif field.type == 'select_add' %}
+                        <div class="form-group">
+                            <label for="{{ field.name }}" class="col-sm-3 control-label">{{ field.label }}</label>
+                            <div class="col-sm-9 d-flex align-items-center">
+                                <select name="{{ field.name }}" id="{{ field.name }}" class="form-control" style="max-width:200px;">
+                                    {% for option in field.options %}
+                                        <option value="{{ option.value }}" {% if option.value == field.value %}selected{% endif %}>{{ option.label }}</option>
+                                    {% endfor %}
+                                </select>
+                                <input type="text" id="{{ field.name }}_new" class="form-control ml-2" placeholder="{{ 'Add'|xl }}" style="max-width:180px;" />
+                                <button type="button" class="btn btn-secondary ml-1" onclick="addSelectOption('{{ field.name }}')">{{ 'Add'|xl }}</button>
+                            </div>
+                        </div>
+                    {% elseif field.type == 'select_add_guard' %}
+                        <div class="form-group">
+                            <label for="{{ field.name }}" class="col-sm-3 control-label">{{ field.label }}</label>
+                            <div class="col-sm-9 d-flex align-items-center flex-wrap">
+                                <select name="{{ field.name }}" id="{{ field.name }}" class="form-control" style="max-width:200px;">
+                                    {% for option in field.options %}
+                                        <option value="{{ option.value }}" {% if option.value == field.value %}selected{% endif %}>{{ option.label }}</option>
+                                    {% endfor %}
+                                </select>
+                                <input type="text" id="{{ field.name }}_new" name="{{ field.name }}_new" class="form-control ml-2" placeholder="{{ 'Add'|xl }}" style="max-width:180px;" disabled />
+                                <button type="button" id="{{ field.name }}_addbtn" class="btn btn-secondary ml-1" onclick="addSelectOption('{{ field.name }}')" disabled>{{ 'Add'|xl }}</button>
+                                <div class="form-check ml-3 mt-2">
+                                    <input type="checkbox" class="form-check-input" id="{{ field.name }}_guard" onchange="toggleAddGuard('{{ field.name }}')">
+                                    <label class="form-check-label" for="{{ field.name }}_guard">{{ 'Enable add'|xl }}</label>
+                                </div>
+                            </div>
+                        </div>
+                    {% endif %}
+                {% endfor %}
+            </div>
+        </div>
+    {% endfor %}
+
+    <div class="row">
+        <div class="col-sm-12 text-right">
+            <button type="submit" class="btn btn-primary">{{ 'Save'|xl }}</button>
+            <a href="{{ DONT_SAVE_LINK }}" class="btn btn-default" onclick="top.restoreSession()">{{ 'Cancel'|xl }}</a>
+        </div>
+    </div>
+</form>
+
+<script type="text/javascript">
+$(function() {
+  if (typeof datetimepickerTranslated === 'function') {
+      datetimepickerTranslated('#administration_start', { timepicker: true, showSeconds: false, formatInput: false });
+      datetimepickerTranslated('#administration_end', { timepicker: true, showSeconds: false, formatInput: false });
+      datetimepickerTranslated('#order_expiration_date', { timepicker: false, showSeconds: false, formatInput: false });
+  }
+});
+
+function addSelectOption(selectId){
+  var sel = document.getElementById(selectId);
+  var txtInput = document.getElementById(selectId + '_new');
+  if(!sel || !txtInput){return;}
+  var newVal = txtInput.value.trim();
+  if(newVal === ''){ return; }
+  var opt = document.createElement('option');
+  opt.value = newVal;
+  opt.text = newVal;
+  opt.selected = true;
+  sel.appendChild(opt);
+}
+
+function toggleAddGuard(selectId){
+  var chk=document.getElementById(selectId+'_guard');
+  var txt=document.getElementById(selectId+'_new');
+  var btn=document.getElementById(selectId+'_addbtn');
+  if(!chk||!txt||!btn){return;}
+  var en=chk.checked;
+  txt.disabled=!en;
+  btn.disabled=!en;
+}
+</script>
