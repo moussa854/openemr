@@ -43,7 +43,6 @@ function infusion_injection_report($pid, $encounter, $cols, $id, $print = true)
         }
         $data['allergies'] = implode(', ', $allergies);
     }
-    
     $output = "";
     if ($data) {
         $output .= "<table><tr>";
