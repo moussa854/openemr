@@ -30,9 +30,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $timeout = 60;
     }
 
-    sqlStatement('REPLACE INTO globals (gl_name, gl_value, gl_category) VALUES (?,?,"Security")', ['stepup_mfa_enabled', $enabled]);
-    sqlStatement('REPLACE INTO globals (gl_name, gl_value, gl_category) VALUES (?,?,"Security")', ['stepup_mfa_categories', $cats]);
-    sqlStatement('REPLACE INTO globals (gl_name, gl_value, gl_category) VALUES (?,?,"Security")', ['stepup_mfa_timeout', $timeout]);
+    sqlStatement('REPLACE INTO globals (gl_name, gl_value) VALUES (?,?)', ['stepup_mfa_enabled', $enabled]);
+    sqlStatement('REPLACE INTO globals (gl_name, gl_value) VALUES (?,?)', ['stepup_mfa_categories', $cats]);
+    sqlStatement('REPLACE INTO globals (gl_name, gl_value) VALUES (?,?)', ['stepup_mfa_timeout', $timeout]);
 
     // reload in-memory globals
     $GLOBALS['stepup_mfa_enabled']   = $enabled;

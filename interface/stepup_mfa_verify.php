@@ -14,11 +14,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $code = $_POST['mfa_code'] ?? '';
     if (MfaUtils::verifyTotpCode($_SESSION['authUserID'], $code)) {
         $svc->setVerified($pid);
+        $svc->logEvent($_SESSION['authUserID'] ?? 0, $pid, 'MFA_SUCCESS', 'Step-up MFA success');
         $redirect = $_SESSION[SensitiveEncounterMfaService::SESSION_MFA_REDIRECT_URL] ?? $GLOBALS['webroot'] . '/interface/patient_file/summary/demographics.php?pid=' . $pid;
         unset($_SESSION[SensitiveEncounterMfaService::SESSION_MFA_REDIRECT_URL]);
         header('Location: ' . $redirect);
         exit;
     } else {
+        $svc->logEvent($_SESSION['authUserID'] ?? 0, $pid, 'MFA_FAILURE', 'Step-up MFA invalid code');
         $error = xlt('Invalid code, please try again.');
     }
 }
