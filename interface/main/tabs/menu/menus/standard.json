@@ -736,6 +736,18 @@
         ]
       },
       {
+        "label": "Step-Up MFA Settings",
+        "menu_id": "adm0",
+        "target": "adm",
+        "url": "/interface/admin/stepup_mfa_settings.php",
+        "children": [],
+        "requirement": 0,
+        "acl_req": [
+          "admin",
+          "super"
+        ]
+      },
+      {
         "label": "Clinic",
         "icon": "fa-caret-right",
         "children": [
