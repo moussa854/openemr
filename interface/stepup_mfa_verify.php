@@ -6,13 +6,14 @@ use OpenEMR\Common\Csrf\CsrfUtils;
 use OpenEMR\Core\Header;
 use OpenEMR\Common\Auth\MfaUtils;
 
-CsrfUtils::verifyCsrf();
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && !CsrfUtils::verifyCsrfToken($_POST['csrf_token_form'] ?? '')) { CsrfUtils::csrfNotVerified(); }
 $svc = new SensitiveEncounterMfaService();
 $pid = (int)($_GET['pid'] ?? 0);
 $error = '';
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $code = $_POST['mfa_code'] ?? '';
-    if (MfaUtils::verifyTotpCode($_SESSION['authUserID'], $code)) {
+    $mfaUtil = new MfaUtils($_SESSION['authUserID']);
+    if ($mfaUtil->check($code, 'TOTP')) {
         $svc->setVerified($pid);
         $svc->logEvent($_SESSION['authUserID'] ?? 0, $pid, 'MFA_SUCCESS', 'Step-up MFA success');
         $redirect = $_SESSION[SensitiveEncounterMfaService::SESSION_MFA_REDIRECT_URL] ?? $GLOBALS['webroot'] . '/interface/patient_file/summary/demographics.php?pid=' . $pid;
@@ -39,7 +40,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         <div class="alert alert-danger"><?php echo text($error); ?></div>
     <?php endif; ?>
     <form method="POST">
-        <?php CsrfUtils::generateFormToken(); ?>
+        <input type="hidden" name="csrf_token_form" value="<?php echo attr(CsrfUtils::collectCsrfToken()); ?>">
         <input type="text" name="mfa_code" class="form-control" maxlength="6" autofocus required />
         <br />
         <button type="submit" class="btn btn-primary"><?php echo xlt('Verify'); ?></button>

@@ -1,7 +1,7 @@
 <?php
 namespace OpenEMR\Services;
 
-use OpenEMR\Common\Database\QueryUtils;
+
 use OpenEMR\Common\Session\SessionUtil;
 use OpenEMR\Common\Logging\EventAuditLogger;
 use OpenEMR\Common\Utils\RandomGenUtils;
@@ -20,6 +20,9 @@ class SensitiveEncounterMfaService
 
     /** default grace period (seconds) after successful step-up verification */
     private const DEFAULT_MFA_TIMEOUT = 900; // 15 minutes
+
+    /** cache for category names by id */
+    private ?array $cachedCatNames = null;
 
     /**
      * Returns TRUE when this OpenEMR instance has step-up enabled globally.
@@ -44,14 +47,80 @@ class SensitiveEncounterMfaService
     /**
      * Does the given appointment require step-up MFA?
      */
+    /**
+     * Collect id=>name map for sensitive categories.
+     */
+    private function collectSensitiveCategoryNames(): array
+    {
+        if ($this->cachedCatNames !== null) {
+            return $this->cachedCatNames;
+        }
+        $ids = $this->getSensitiveCategoryIds();
+        if (empty($ids)) {
+            $this->cachedCatNames = [];
+            return [];
+        }
+        $placeholders = implode(',', array_fill(0, count($ids), '?'));
+        $map = [];
+        $res = sqlStatement("SELECT pc_catid, pc_catname FROM openemr_postcalendar_categories WHERE pc_catid IN ($placeholders)", $ids);
+        while ($r = sqlFetchArray($res)) {
+            $map[(int)$r['pc_catid']] = $r['pc_catname'];
+        }
+        $this->cachedCatNames = $map;
+        return $map;
+    }
+
     public function isSensitiveAppointment(int $appointmentId): bool
     {
         $catIds = $this->getSensitiveCategoryIds();
         if (empty($catIds)) {
             return false;
         }
-        $row = QueryUtils::sqlQuery('SELECT pc_catid FROM openemr_postcalendar_events WHERE pc_eid = ?', [$appointmentId]);
+        $row = sqlQuery('SELECT pc_catid FROM openemr_postcalendar_events WHERE pc_eid = ?', [$appointmentId]);
         return $row && in_array((int)$row['pc_catid'], $catIds, true);
+    }
+
+    /**
+     * Does the encounter (form_encounter) appear to be sensitive based on its reason field.
+     */
+    public function isSensitiveEncounter(int $encounterId, ?int $patientId = null): bool
+    {
+        $names = array_map('strtolower', $this->collectSensitiveCategoryNames());
+        if (empty($names)) {
+            return false;
+        }
+        $row = sqlQuery('SELECT reason, date, pid FROM form_encounter WHERE encounter = ?', [$encounterId]);
+        if (!$row) {
+            return false;
+        }
+        $reason = strtolower($row['reason'] ?? '');
+        
+        foreach ($names as $name) {
+            if ($name !== '' && str_contains($reason, $name)) {
+                return true; // matched in reason text
+            }
+        }
+        // No match in reason; fall back to linked appointment category (encounter id often == pc_eid)
+        $fallback = $this->isSensitiveAppointment($encounterId);
+        
+        if ($fallback) {
+            return true;
+        }
+        // As final fallback search for any appointment on same date for this patient with sensitive category
+        $encDate = substr($row['date'],0,10);
+        $pidLocal = $patientId ?? ($row['pid'] ?? null);
+        if ($pidLocal && $encDate) {
+            $catIds = $this->getSensitiveCategoryIds();
+            if (!empty($catIds)) {
+                $placeholders = implode(',', array_fill(0, count($catIds), '?'));
+                $params = array_merge([$pidLocal, $encDate], $catIds);
+                $check = sqlQuery("SELECT pc_eid FROM openemr_postcalendar_events WHERE pc_pid = ? AND DATE(pc_eventDate) = ? AND pc_catid IN ($placeholders) LIMIT 1", $params);
+                $hit = !empty($check);
+                
+                return $hit;
+            }
+        }
+        return false;
     }
 
     /**
@@ -60,7 +129,7 @@ class SensitiveEncounterMfaService
     public function hasRecentVerification(int $patientId): bool
     {
         $key = self::SESSION_MFA_VERIFIED_PREFIX . $patientId;
-        if (!SessionUtil::sessionExists($key)) {
+        if (!isset($_SESSION[$key])) {
             return false;
         }
         return (time() - (int)$_SESSION[$key]) < $this->getTimeout();
@@ -87,6 +156,6 @@ class SensitiveEncounterMfaService
      */
     public function logEvent(int $userId, int $patientId, string $event, string $comment = ''): void
     {
-        (new EventAuditLogger())->auditEvent('security', $event, $userId, $patientId, null, $comment);
+        EventAuditLogger::instance()->newEvent('security', $event, $userId, $patientId, null, $comment);
     }
 }

@@ -25,8 +25,9 @@ $dispatcher->addListener(ViewEvent::EVENT_HANDLE, function (ViewEvent $event) {
     }
 
     // Check if request includes an appointment (eid) and if it is sensitive.
-    $eid = $_GET['eid'] ?? null;
-    if ($eid && $svc->isSensitiveAppointment((int)$eid)) {
+        $eventId = $_GET['eid'] ?? null;
+    $encId   = $_GET['set_encounterid'] ?? null;
+    if ( ($eventId && $svc->isSensitiveAppointment((int)$eventId)) || ($encId && $svc->isSensitiveEncounter((int)$encId, (int)$patientId)) ) {
         // Save redirect URL and send to verification page.
         $_SESSION[SensitiveEncounterMfaService::SESSION_MFA_REDIRECT_URL] = $_SERVER['REQUEST_URI'];
         $svc->logEvent($_SESSION['authUserID'] ?? 0, $patientId, 'MFA_REQUIRED', 'Step-up MFA required for sensitive encounter');
