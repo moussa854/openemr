@@ -21,3 +21,18 @@ $_GET['auth'] = "logout";
 // Set $sessionAllowWrite to true to prevent session concurrency issues during authorization/logout related code
 $sessionAllowWrite = true;
 require_once("globals.php");
+
+// AI GENERATED CODE START
+// Clear remembered device if user is logged in
+if (isset($_SESSION['authUserID'])) {
+    require_once($GLOBALS['srcdir'] . '/src/Services/MfaRememberDeviceService.php');
+    $mfaRememberService = new \OpenEMR\Services\MfaRememberDeviceService();
+    
+    // Clear the remember cookie
+    $mfaRememberService->clearRememberCookie();
+    
+    // Optionally invalidate all remembered devices for this user
+    // Uncomment the line below if you want to revoke all remembered devices on logout
+    // $mfaRememberService->invalidateAllUserTokens($_SESSION['authUserID']);
+}
+// AI GENERATED CODE END

@@ -39,7 +39,7 @@ class Totp
         if (!empty($secret)) {
             $this->_secret = $secret;
         } else {
-            $tfa = new TwoFactorAuth($this->getQrProvider());
+            $tfa = new TwoFactorAuth($this->getQrProvider(), $this->_issuer, 6, 30, Algorithm::Sha1);
             // Shared key (per rfc6238 and rfc4226) should be 20 bytes (160 bits) and encoded in base32, which should
             //   be 32 characters in base32 (below line does all this)
             $this->_secret = $tfa->createSecret(160);
@@ -78,7 +78,7 @@ class Totp
         if (empty($totp) || empty($this->_secret)) {
             return false;
         }
-        $tfa = new TwoFactorAuth($this->getQrProvider());
+        $tfa = new TwoFactorAuth($this->getQrProvider(), $this->_issuer, 6, 30, Algorithm::Sha1);
         return $tfa->verifyCode($this->_secret, $totp);
     }
 

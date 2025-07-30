@@ -446,6 +446,24 @@ $apiUrl = $serverConfig->getInternalBaseApiUrl();
                                     $addendum = $grpname == 'Appearance' ? ' (*' . xl("need to logout/login after changing these settings") . ')' : '';
                                     echo "<div class='col-sm-12 oe-global-tab-heading'><div class='oe-pull-toward' style='font-size: 1.4rem'>" . xlt($grpname) . " &nbsp;</div><div style='margin-top: 5px'>" . text($addendum) . "</div></div>";
                                     echo "<div class='clearfix'></div>";
+                                    
+                                    // AI GENERATED CODE START
+                                    // Add MFA Device Management link for Security tab
+                                    if ($grpname == 'Security' && !$userMode) {
+                                        echo "<div class='row mb-3'>";
+                                        echo "<div class='col-sm-12'>";
+                                        echo "<a href='manage_mfa_devices.php' class='btn btn-info'>";
+                                        echo "<i class='fa fa-shield'></i> " . xlt('Manage MFA Remembered Devices');
+                                        echo "</a>";
+                                        echo "&nbsp;&nbsp;";
+                                        echo "<a href='emergency_mfa_bypass.php' class='btn btn-warning'>";
+                                        echo "<i class='fa fa-exclamation-triangle'></i> " . xlt('Emergency MFA Bypass');
+                                        echo "</a>";
+                                        echo "</div>";
+                                        echo "</div>";
+                                    }
+                                    // AI GENERATED CODE END
+                                    
                                     if ($userMode) {
                                         echo "<div class='row'>";
                                         echo "<div class='col-sm-4'>&nbsp</div>";

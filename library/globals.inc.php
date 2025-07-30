@@ -2288,6 +2288,42 @@ $GLOBALS_METADATA = array(
             xl('This Client ID Is Provided By Google For Your App (Required For Google Sign-in)')
         ),
 
+        // AI GENERATED CODE START
+
+        'mfa_remember_enable' => array(
+            xl('Enable MFA Remember Device'),
+            'bool',
+            '1',
+            xl('Enable "Remember this device" option for MFA authentication')
+        ),
+
+        'mfa_remember_duration' => array(
+            xl('MFA Remember Duration (Days)'),
+            'num',
+            '30',
+            xl('Number of days to remember trusted devices for MFA')
+        ),
+
+        'mfa_remember_policy' => array(
+            xl('MFA Remember Policy'),
+            array(
+                '0' => xl('Optional - User Choice'),
+                '1' => xl('Mandatory for All Users'),
+                '2' => xl('Mandatory for Clinical Staff Only')
+            ),
+            '0',
+            xl('Policy for MFA remember device functionality')
+        ),
+
+        'mfa_max_devices_per_user' => array(
+            xl('Maximum Remembered Devices Per User'),
+            'num',
+            '5',
+            xl('Maximum number of remembered devices per user (0 = unlimited)')
+        ),
+
+        // AI GENERATED CODE END
+
         'gbl_ldap_enabled' => array(
             xl('Use LDAP for Authentication'),
             'bool',
@@ -2468,6 +2504,13 @@ $GLOBALS_METADATA = array(
             ),
             '100000',                // default
             xl('Authentication SHA512 hash rounds number.')
+        ),
+
+        'mfa_require_all_users' => array(
+            xl('Require MFA For All Users'),
+            'bool',
+            '0',
+            xl('If enabled, users who have not registered an MFA factor will be forced to enroll before accessing OpenEMR')
         ),
 
     ),
@@ -3922,7 +3965,7 @@ $GLOBALS_METADATA = array(
                 'br' => xl('Breton'),
                 'bg' => xl('Bulgarian'),
                 'my' => xl('Burmese'),
-                'ca' => xl('Catalan- Valencian'),
+                'ca' => xl('Catalan- Valencian'),
                 'ch' => xl('Chamorro'),
                 'ce' => xl('Chechen'),
                 'ny' => xl('Chichewa- Chewa- Nyanja'),
@@ -3954,7 +3997,7 @@ $GLOBALS_METADATA = array(
                 'gu' => xl('Gujarati'),
                 'ht' => xl('Haitian- Haitian Creole'),
                 'ha' => xl('Hausa'),
-                'he' => xl('Hebrew (modern)'),
+                'he' => xl('Hebrew (modern)'),
                 'hz' => xl('Herero'),
                 'hi' => xl('Hindi'),
                 'ho' => xl('Hiri Motu'),
@@ -4016,13 +4059,13 @@ $GLOBALS_METADATA = array(
                 'nr' => xl('South Ndebele'),
                 'oc' => xl('Occitan'),
                 'oj' => xl('Ojibwe, Ojibwa'),
-                'cu' => xl('Old Church Slavonic, Church Slavonic, Old Bulgarian'),
+                'cu' => xl('Old Church Slavonic, Church Slavonic, Old Bulgarian'),
                 'om' => xl('Oromo'),
                 'or' => xl('Oriya'),
                 'os' => xl('Ossetian, Ossetic'),
                 'pa' => xl('Panjabi, Punjabi'),
                 'pi' => xl('Pali'),
-                'fa' => xl('Persian (Farsi)'),
+                'fa' => xl('Persian (Farsi)'),
                 'pl' => xl('Polish'),
                 'ps' => xl('Pashto, Pushto'),
                 'pt' => xl('Portuguese'),
@@ -4059,7 +4102,7 @@ $GLOBALS_METADATA = array(
                 'tk' => xl('Turkmen'),
                 'tl' => xl('Tagalog'),
                 'tn' => xl('Tswana'),
-                'to' => xl('Tonga (Tonga Islands)'),
+                'to' => xl('Tonga (Tonga Islands)'),
                 'tr' => xl('Turkish'),
                 'ts' => xl('Tsonga'),
                 'tt' => xl('Tatar'),

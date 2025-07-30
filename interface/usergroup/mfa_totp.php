@@ -45,7 +45,9 @@ $user_full_name = $user_name['fname'] . " " . $user_name['lname'];
                 f.error.value = error;
             }
             f.action.value = step;
-            top.restoreSession();
+            if (typeof top.restoreSession === 'function') {
+                top.restoreSession();
+            }
             f.submit();
         }
 
@@ -245,7 +247,23 @@ $user_full_name = $user_name['fname'] . " " . $user_name['lname'];
                                 echo " alert(" . xlj('TOTP Method already exists and is enabled. Try again.') . ");\n";
                             }
 
-                            echo "window.location.href = 'mfa_registrations.php';\n";
+                            // Ensure essential session values are set before leaving this page
+                            \OpenEMR\Common\Csrf\CsrfUtils::setupCsrfKey();
+                            \OpenEMR\Common\Session\SessionTracker::setupSessionDatabaseTracker();
+
+                            // Build default open tabs like main_screen.php would
+                            $listSvc = new \OpenEMR\Services\ListService();
+                            $_tabs = $listSvc->getOptionsByListName('default_open_tabs', ['activity' => 1]);
+                            $_SESSION['default_open_tabs'] = $_tabs;
+
+                            // Prepare token for tabs view
+                            if (empty($_SESSION['token_main_php'])) {
+                                $_SESSION['token_main_php'] = \OpenEMR\Common\Utils\RandomGenUtils::createUniqueToken();
+                            }
+                            $token = $_SESSION['token_main_php'];
+
+                            $redirectUrl = $GLOBALS['webroot'] . '/interface/main/tabs/main.php?token_main=' . urlencode($token);
+                            echo "window.top.location.href = '{$redirectUrl}';\n";
                             echo "</script>\n";
                         }
                         ?>

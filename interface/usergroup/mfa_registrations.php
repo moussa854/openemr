@@ -44,6 +44,9 @@ $userid = $_SESSION['authUserID'];
 $user_name = getUserIDInfo($userid);
 $user_full_name = $user_name['fname'] . " " . $user_name['lname'];
 $message = '';
+// Detect if the user was redirected here because MFA is mandatory
+$forcedMfa = isset($_GET['forced']) && $_GET['forced'] == '1';
+
 if (!empty($_POST['form_delete_method'])) {
     if (!CsrfUtils::verifyCsrfToken($_POST["csrf_token_form"])) {
         CsrfUtils::csrfNotVerified();
@@ -68,12 +71,16 @@ function delclick(mfamethod, mfaname) {
     var f = document.forms[0];
     f.form_delete_method.value = mfamethod;
     f.form_delete_name.value = mfaname;
-    top.restoreSession();
+    if (typeof top.restoreSession === 'function') {
+        top.restoreSession();
+    }
     f.submit();
 }
 
 function editclick(method) {
-    top.restoreSession();
+    if (typeof top.restoreSession === 'function') {
+        top.restoreSession();
+    }
     if (method == 'TOTP') {
         window.location.href = 'mfa_totp.php?action=reg1';
     }
@@ -83,7 +90,9 @@ function editclick(method) {
 }
 
 function addclick(sel) {
-    top.restoreSession();
+    if (typeof top.restoreSession === 'function') {
+        top.restoreSession();
+    }
     if (sel.value) {
         if (sel.value == 'U2F') {
             window.location.href = 'mfa_u2f.php?action=reg1';
@@ -122,6 +131,11 @@ $oemr_ui = new OemrUI($arrOeUiSettings);
         </div>
         <div class="row">
             <div class="col-sm-12">
+            <?php if ($forcedMfa) { ?>
+                <div class="alert alert-warning" style="font-size:100%; font-weight:700">
+                    <?php echo xlt('Administrator policy requires MFA. Please register at least one authentication method to continue.'); ?>
+                </div>
+            <?php } ?>
             <?php
             if ($message) {?>
               <div id="display_msg" class="alert alert-danger" style="font-size:100%; font-weight:700"><?php echo text($message); ?></div>
@@ -184,6 +198,24 @@ $oemr_ui = new OemrUI($arrOeUiSettings);
                 </form>
             </div>
         </div>
+        
+        <!-- AI GENERATED CODE START -->
+        <div class="row mt-4">
+            <div class="col-sm-12">
+                <div class="card">
+                    <div class="card-header">
+                        <h4><?php echo xlt('Remembered Devices'); ?></h4>
+                    </div>
+                    <div class="card-body">
+                        <p><?php echo xlt('Manage devices that have been set to remember MFA authentication.'); ?></p>
+                        <a href="mfa_remembered_devices.php" class="btn btn-primary">
+                            <?php echo xlt('Manage Remembered Devices'); ?>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- AI GENERATED CODE END -->
 
     </div><!--end of container div -->
     <?php $oemr_ui->oeBelowContainerDiv();?>
