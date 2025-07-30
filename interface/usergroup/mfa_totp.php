@@ -45,9 +45,11 @@ $user_full_name = $user_name['fname'] . " " . $user_name['lname'];
                 f.error.value = error;
             }
             f.action.value = step;
+            // AI GENERATED CODE START - Guard against JavaScript errors when not in frameset
             if (typeof top.restoreSession === 'function') {
                 top.restoreSession();
             }
+            // AI GENERATED CODE END
             f.submit();
         }
 
@@ -218,7 +220,7 @@ $user_full_name = $user_name['fname'] . " " . $user_name['lname'];
                                 </div>
                             </div>
                             <?php
-                        // step 3 is to save the qr code
+                        // AI GENERATED CODE START - step 3 is to save the qr code and redirect properly
                         } elseif ($action == 'reg3') {
                             if (!CsrfUtils::verifyCsrfToken($_POST["csrf_token_form"])) {
                                 CsrfUtils::csrfNotVerified();
@@ -266,6 +268,7 @@ $user_full_name = $user_name['fname'] . " " . $user_name['lname'];
                             echo "window.top.location.href = '{$redirectUrl}';\n";
                             echo "</script>\n";
                         }
+                        // AI GENERATED CODE END
                         ?>
 
                         <input type='hidden' name='action' value='' />

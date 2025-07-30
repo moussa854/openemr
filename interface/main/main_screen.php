@@ -185,7 +185,7 @@ if (isset($_POST['new_login_session_management'])) {
             }
         }
 
-        // Enforce mandatory MFA setup when global setting is enabled
+        // AI GENERATED CODE START - Enforce mandatory MFA setup when global setting is enabled
         if (!empty($GLOBALS['mfa_require_all_users']) && !empty($_SESSION['authUserID']) && !$registrationAttempt) {
             // Redirect user to MFA registration page and block further access
             // Ensure essential session setup before leaving, otherwise subsequent pages complain
@@ -196,6 +196,7 @@ if (isset($_POST['new_login_session_management'])) {
             header('Location: ' . $redirectUrl);
             exit;
         }
+        // AI GENERATED CODE END
 
         if ($registrationAttempt) {
             $requests = '';

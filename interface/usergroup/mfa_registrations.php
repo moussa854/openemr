@@ -44,8 +44,9 @@ $userid = $_SESSION['authUserID'];
 $user_name = getUserIDInfo($userid);
 $user_full_name = $user_name['fname'] . " " . $user_name['lname'];
 $message = '';
-// Detect if the user was redirected here because MFA is mandatory
+// AI GENERATED CODE START - Detect if the user was redirected here because MFA is mandatory
 $forcedMfa = isset($_GET['forced']) && $_GET['forced'] == '1';
+// AI GENERATED CODE END
 
 if (!empty($_POST['form_delete_method'])) {
     if (!CsrfUtils::verifyCsrfToken($_POST["csrf_token_form"])) {
@@ -132,9 +133,11 @@ $oemr_ui = new OemrUI($arrOeUiSettings);
         <div class="row">
             <div class="col-sm-12">
             <?php if ($forcedMfa) { ?>
+                <!-- AI GENERATED CODE START -->
                 <div class="alert alert-warning" style="font-size:100%; font-weight:700">
                     <?php echo xlt('Administrator policy requires MFA. Please register at least one authentication method to continue.'); ?>
                 </div>
+                <!-- AI GENERATED CODE END -->
             <?php } ?>
             <?php
             if ($message) {?>

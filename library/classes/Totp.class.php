@@ -39,6 +39,7 @@ class Totp
         if (!empty($secret)) {
             $this->_secret = $secret;
         } else {
+            // AI GENERATED CODE START - Fixed constructor argument order for production server compatibility
             $tfa = new TwoFactorAuth($this->_issuer, 6, 30, Algorithm::Sha1, $this->getQrProvider());
             // Shared key (per rfc6238 and rfc4226) should be 20 bytes (160 bits) and encoded in base32, which should
             //   be 32 characters in base32 (below line does all this)
@@ -47,6 +48,7 @@ class Totp
                 error_log('OpenEMR Error : MFA was unable to create secret - exiting');
                 die();
             }
+            // AI GENERATED CODE END
         }
     }
 
@@ -60,7 +62,9 @@ class Totp
             return false;
         }
 
+        // AI GENERATED CODE START - Fixed constructor argument order for production server compatibility
         $tfa = new TwoFactorAuth($this->_issuer, 6, 30, Algorithm::Sha1, $this->getQrProvider());
+        // AI GENERATED CODE END
         $qr = $tfa->getQRCodeImageAsDataUri($this->_username, $this->_secret);
         if (empty($qr)) {
             return false;
@@ -78,7 +82,9 @@ class Totp
         if (empty($totp) || empty($this->_secret)) {
             return false;
         }
+        // AI GENERATED CODE START - Fixed constructor argument order for production server compatibility
         $tfa = new TwoFactorAuth($this->_issuer, 6, 30, Algorithm::Sha1, $this->getQrProvider());
+        // AI GENERATED CODE END
         return $tfa->verifyCode($this->_secret, $totp);
     }
 

@@ -2088,7 +2088,7 @@ $GLOBALS_METADATA = array(
     // Security Tab
     //
     'Security' => array(
-        // MFA Settings - Moved to top for better organization
+        // AI GENERATED CODE START - MFA Settings - Moved to top for better organization
         'mfa_require_all_users' => array(
             xl('Require MFA For All Users'),
             'bool',
@@ -2127,6 +2127,7 @@ $GLOBALS_METADATA = array(
             '5',
             xl('Maximum number of remembered devices per user (0 = unlimited)')
         ),
+        // AI GENERATED CODE END
 
         // Other Security Settings
         'sql_string_no_show_screen' => array(
