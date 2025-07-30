@@ -2088,6 +2088,47 @@ $GLOBALS_METADATA = array(
     // Security Tab
     //
     'Security' => array(
+        // MFA Settings - Moved to top for better organization
+        'mfa_require_all_users' => array(
+            xl('Require MFA For All Users'),
+            'bool',
+            '0',
+            xl('If enabled, users who have not registered an MFA factor will be forced to enroll before accessing OpenEMR')
+        ),
+
+        'mfa_remember_enable' => array(
+            xl('Enable MFA Remember Device'),
+            'bool',
+            '1',
+            xl('Enable "Remember this device" option for MFA authentication')
+        ),
+
+        'mfa_remember_duration' => array(
+            xl('MFA Remember Duration (Days)'),
+            'num',
+            '30',
+            xl('Number of days to remember trusted devices for MFA')
+        ),
+
+        'mfa_remember_policy' => array(
+            xl('MFA Remember Policy'),
+            array(
+                '0' => xl('Optional - User Choice'),
+                '1' => xl('Mandatory for All Users'),
+                '2' => xl('Mandatory for Clinical Staff Only')
+            ),
+            '0',
+            xl('Policy for MFA remember device functionality')
+        ),
+
+        'mfa_max_devices_per_user' => array(
+            xl('Maximum Remembered Devices Per User'),
+            'num',
+            '5',
+            xl('Maximum number of remembered devices per user (0 = unlimited)')
+        ),
+
+        // Other Security Settings
         'sql_string_no_show_screen' => array(
             xl('Mode - Do Not Show SQL Queries'),
             'bool',                           // data type
@@ -2288,42 +2329,6 @@ $GLOBALS_METADATA = array(
             xl('This Client ID Is Provided By Google For Your App (Required For Google Sign-in)')
         ),
 
-        // AI GENERATED CODE START
-
-        'mfa_remember_enable' => array(
-            xl('Enable MFA Remember Device'),
-            'bool',
-            '1',
-            xl('Enable "Remember this device" option for MFA authentication')
-        ),
-
-        'mfa_remember_duration' => array(
-            xl('MFA Remember Duration (Days)'),
-            'num',
-            '30',
-            xl('Number of days to remember trusted devices for MFA')
-        ),
-
-        'mfa_remember_policy' => array(
-            xl('MFA Remember Policy'),
-            array(
-                '0' => xl('Optional - User Choice'),
-                '1' => xl('Mandatory for All Users'),
-                '2' => xl('Mandatory for Clinical Staff Only')
-            ),
-            '0',
-            xl('Policy for MFA remember device functionality')
-        ),
-
-        'mfa_max_devices_per_user' => array(
-            xl('Maximum Remembered Devices Per User'),
-            'num',
-            '5',
-            xl('Maximum number of remembered devices per user (0 = unlimited)')
-        ),
-
-        // AI GENERATED CODE END
-
         'gbl_ldap_enabled' => array(
             xl('Use LDAP for Authentication'),
             'bool',
@@ -2504,13 +2509,6 @@ $GLOBALS_METADATA = array(
             ),
             '100000',                // default
             xl('Authentication SHA512 hash rounds number.')
-        ),
-
-        'mfa_require_all_users' => array(
-            xl('Require MFA For All Users'),
-            'bool',
-            '0',
-            xl('If enabled, users who have not registered an MFA factor will be forced to enroll before accessing OpenEMR')
         ),
 
     ),
