@@ -48,17 +48,48 @@ class StepupMfaService
     /** Check if current user session has a recent verification for this patient */
     public function hasRecentVerification(int $pid): bool
     {
-        $key = self::SESSION_KEY_PREFIX . $pid;
-        if (!isset($_SESSION[$key])) {
-            return false;
-        }
-        return (time() - $_SESSION[$key]) < self::getTimeout();
+        // Use database table instead of session variables for better reliability
+        $userId = $_SESSION['authUserID'] ?? 1;
+        $timeout = $this->getTimeout();
+        
+        $sql = "SELECT COUNT(*) as count FROM stepup_mfa_verifications 
+                WHERE user_id = ? AND patient_id = ? AND expires_at > NOW()";
+        
+        $result = sqlQuery($sql, [$userId, $pid]);
+        $count = $result['count'] ?? 0;
+        
+        error_log("StepUpMFA: Database verification check - User: $userId, Patient: $pid, Count: $count");
+        
+        return $count > 0;
     }
 
     /** Mark a successful MFA verification for a patient */
     public function setVerified(int $pid): void
     {
-        $_SESSION[self::SESSION_KEY_PREFIX . $pid] = time();
+        $userId = $_SESSION['authUserID'] ?? 1;
+        $encounterId = $_GET['encounter'] ?? null;
+        $timeout = $this->getTimeout();
+        $expiresAt = date('Y-m-d H:i:s', time() + $timeout);
+        
+        // Insert verification record into database
+        $sql = "INSERT INTO stepup_mfa_verifications 
+                (user_id, patient_id, encounter_id, expires_at, verification_type, ip_address, user_agent, session_id, ohio_compliance_logged) 
+                VALUES (?, ?, ?, ?, 'TOTP', ?, ?, ?, 1)";
+        
+        $params = [
+            $userId,
+            $pid,
+            $encounterId,
+            $expiresAt,
+            $_SERVER['REMOTE_ADDR'] ?? null,
+            $_SERVER['HTTP_USER_AGENT'] ?? null,
+            session_id()
+        ];
+        
+        sqlStatement($sql, $params);
+        
+        error_log("StepUpMFA: Database verification set - User: $userId, Patient: $pid, Expires: $expiresAt");
+        
         $this->logEvent('MFA_SUCCESS', "Step-up MFA verification completed for patient $pid");
     }
 

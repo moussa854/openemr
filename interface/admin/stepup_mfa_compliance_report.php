@@ -3,10 +3,11 @@ require_once(__DIR__ . '/../globals.php');
 
 use OpenEMR\Common\Csrf\CsrfUtils;
 use OpenEMR\Common\Acl\AclMain;
+use OpenEMR\Core\Header;
 use OpenEMR\Services\StepupMfaService;
 
 // ACL check – require admin super privileges
-if (!AclMain::aclCheckCore('admin', 'users')) {
+if (!AclMain::aclCheckCore('admin', 'super')) {
     die(xlt('Not authorized')); // simple block
 }
 
