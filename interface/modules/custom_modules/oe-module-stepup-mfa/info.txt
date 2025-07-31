@@ -1,0 +1,4 @@
+name: Step-Up MFA
+category: security
+enabled: true
+version: 1.0.0
