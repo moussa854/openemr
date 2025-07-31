@@ -1,6 +1,9 @@
 <?php
 // Step-Up MFA Module Bootstrap – runs on every OpenEMR request when module is enabled.
 
+// TEST: This should appear in the log if bootstrap loads
+file_put_contents('/tmp/stepup_mfa_test.log', date('Y-m-d H:i:s') . ' - Bootstrap loaded' . PHP_EOL, FILE_APPEND);
+
 require_once(dirname(__FILE__, 4) . '/globals.php');
 
 use OpenEMR\Services\StepupMfaService;
