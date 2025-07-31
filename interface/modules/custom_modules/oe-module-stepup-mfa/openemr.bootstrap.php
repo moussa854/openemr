@@ -1,39 +1,47 @@
 <?php
-/**
- * Bootstrap file – automatically loaded by OpenEMR when present in a custom module.
- * Hooks into the event system to enforce step-up MFA prior to viewing sensitive encounters.
- */
+// Step-Up MFA Module Bootstrap – runs on every OpenEMR request when module is enabled.
 
-use OpenEMR\Events\PatientDemographics\ViewEvent;
-use OpenEMR\Services\SensitiveEncounterMfaService;
+require_once(dirname(__FILE__, 4) . '/globals.php');
 
-$dispatcher = $GLOBALS['kernel']->getEventDispatcher();
-$dispatcher->addListener(ViewEvent::EVENT_HANDLE, function (ViewEvent $event) {
-    $svc = new SensitiveEncounterMfaService();
-    if (!$svc->isEnabled()) {
-        return $event;
+use OpenEMR\Services\StepupMfaService;
+
+// Exit early if feature disabled or user not logged in.
+if (!StepupMfaService::isEnabled() || empty($_SESSION['authUserID'])) {
+    return;
+}
+
+$service = new StepupMfaService();
+
+// Determine current patient/context
+$pid = $_GET['pid'] ?? ($_SESSION['pid'] ?? null);
+if (!$pid) {
+    return; // nothing to protect
+}
+
+$needsMfa = false;
+
+// Check by calendar event id (eid)
+if (isset($_GET['eid']) && ctype_digit($_GET['eid'])) {
+    $needsMfa = $service->isSensitiveByEventId((int)$_GET['eid']);
+}
+
+// Check by encounter id (set_encounter or set_encounterid)
+if (!$needsMfa) {
+    $encId = null;
+    if (isset($_GET['set_encounter']) && ctype_digit($_GET['set_encounter'])) {
+        $encId = (int)$_GET['set_encounter'];
+    } elseif (isset($_GET['set_encounterid']) && ctype_digit($_GET['set_encounterid'])) {
+        $encId = (int)$_GET['set_encounterid'];
     }
-
-    $patientId = $event->getPid();
-    if (!$patientId) {
-        return $event;
+    if ($encId !== null) {
+        $needsMfa = $service->isSensitiveEncounter($encId);
     }
+}
 
-    // If already verified within grace-period, nothing to do.
-    if ($svc->hasRecentVerification($patientId)) {
-        return $event;
-    }
-
-    // Check if request includes an appointment (eid) and if it is sensitive.
-        $eventId = $_GET['eid'] ?? null;
-    $encId   = $_GET['set_encounterid'] ?? null;
-    if ( ($eventId && $svc->isSensitiveAppointment((int)$eventId)) || ($encId && $svc->isSensitiveEncounter((int)$encId, (int)$patientId)) ) {
-        // Save redirect URL and send to verification page.
-        $_SESSION[SensitiveEncounterMfaService::SESSION_MFA_REDIRECT_URL] = $_SERVER['REQUEST_URI'];
-        $svc->logEvent($_SESSION['authUserID'] ?? 0, $patientId, 'MFA_REQUIRED', 'Step-up MFA required for sensitive encounter');
-        header('Location: ' . $GLOBALS['webroot'] . '/interface/stepup_mfa_verify.php?pid=' . urlencode($patientId));
-        exit;
-    }
-
-    return $event;
-});
+// If sensitive and not recently verified – redirect to MFA page
+if ($needsMfa && !$service->hasRecentVerification((int)$pid)) {
+    $_SESSION['stepup_mfa_redirect'] = $_SERVER['REQUEST_URI'];
+    $verifyUrl = $GLOBALS['webroot'] . '/interface/stepup_mfa_verify.php?pid=' . urlencode((string)$pid);
+    header('Location: ' . $verifyUrl);
+    exit;
+}
