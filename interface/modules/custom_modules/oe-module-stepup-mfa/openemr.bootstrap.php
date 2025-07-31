@@ -19,6 +19,8 @@ if (!$pid) {
 }
 
 $needsMfa = false;
+// debug log
+error_log('StepUpMFA bootstrap start pid=' . ($pid ?? 'null') . ' URI=' . $_SERVER['REQUEST_URI']);
 
 // Check by calendar event id (eid)
 if (isset($_GET['eid']) && ctype_digit($_GET['eid'])) {
@@ -34,6 +36,7 @@ if (!$needsMfa) {
         $encId = (int)$_GET['set_encounterid'];
     }
     if ($encId !== null) {
+        error_log('StepUpMFA check encounter ' . $encId);
         $needsMfa = $service->isSensitiveEncounter($encId);
     }
 }

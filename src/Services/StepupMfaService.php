@@ -64,7 +64,9 @@ class StepupMfaService
         if (!$row) {
             return false;
         }
-        return in_array((int)$row['pc_catid'], self::getSensitiveCategoryIds(), true);
+        $sens = in_array((int)$row['pc_catid'], self::getSensitiveCategoryIds(), true);
+        error_log('StepUpMFA isSensitiveByEventId eid=' . $eid . ' cat=' . $row['pc_catid'] . ' result=' . ($sens?'yes':'no'));
+        return $sens;
     }
 
     /** Determine sensitivity by encounter (fallback using reason field text match) */
