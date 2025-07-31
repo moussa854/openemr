@@ -1,7 +1,19 @@
 <?php
 // Step-Up MFA Module Bootstrap – runs on every OpenEMR request when module is enabled.
 
-require_once(dirname(__FILE__, 4) . '/globals.php');
+// TEST: This should appear in the log if module bootstrap loads
+file_put_contents('/tmp/stepup_mfa_module_test.log', date('Y-m-d H:i:s') . ' - Module bootstrap loaded - START' . PHP_EOL, FILE_APPEND);
+
+// Check if globals.php exists
+$globalsPath = dirname(__FILE__, 4) . '/globals.php';
+file_put_contents('/tmp/stepup_mfa_module_test.log', date('Y-m-d H:i:s') . ' - Checking globals path: ' . $globalsPath . PHP_EOL, FILE_APPEND);
+
+if (!file_exists($globalsPath)) {
+    file_put_contents('/tmp/stepup_mfa_module_test.log', date('Y-m-d H:i:s') . ' - ERROR: globals.php not found at ' . $globalsPath . PHP_EOL, FILE_APPEND);
+    return;
+}
+
+require_once($globalsPath);
 
 use OpenEMR\Services\StepupMfaService;
 

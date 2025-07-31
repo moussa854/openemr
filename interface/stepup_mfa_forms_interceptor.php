@@ -1,6 +1,7 @@
 <?php
 /**
  * Step-Up MFA enforcement during encounter (forms.php) views.
+ * Enhanced for Ohio compliance requirements for controlled substances.
  * Included by forms.php right after the standard includes so $pid and $encounter are available.
  */
 
@@ -27,13 +28,13 @@ function oe_stepup_mfa_forms_check(): void
         return;
     }
 
-    // If current encounter reason/name is sensitive, enforce MFA
+    // Enhanced sensitivity check that includes controlled substance detection
     if ($encounter) {
-        $sens = $svc->isSensitiveEncounter((int)$encounter);
-        error_log('StepUpMFA forms sensitive? ' . ($sens ? 'yes' : 'no'));
-        if ($sens) {
+        $requiresMfa = $svc->requiresMfaForEncounter((int)$encounter);
+        error_log('StepUpMFA forms requires MFA? ' . ($requiresMfa ? 'yes' : 'no'));
+        if ($requiresMfa) {
             $_SESSION['stepup_mfa_redirect'] = $_SERVER['REQUEST_URI'];
-            $svc->logEvent('MFA_REQUIRED', 'Step-up MFA required during forms.php');
+            $svc->logEvent('MFA_REQUIRED', 'Step-up MFA required during forms.php for sensitive encounter');
             header('Location: ' . $GLOBALS['webroot'] . '/interface/stepup_mfa_verify.php?pid=' . urlencode((string)$pid));
             exit;
         }

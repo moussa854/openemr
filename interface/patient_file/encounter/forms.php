@@ -26,6 +26,7 @@ require_once("$srcdir/group.inc.php");
 require_once("$srcdir/patient.inc.php");
 require_once("$srcdir/amc.php");
 require_once($GLOBALS['srcdir'] . '/ESign/Api.php');
+require_once(__DIR__ . '/../../stepup_mfa_forms_interceptor.php');
 require_once("$srcdir/../controllers/C_Document.class.php");
 
 use ESign\Api;

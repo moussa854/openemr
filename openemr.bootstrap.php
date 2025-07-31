@@ -41,11 +41,14 @@ if (!$needsMfa) {
     if ($encId !== null) {
         error_log('StepUpMFA check encounter ' . $encId);
         $needsMfa = $service->isSensitiveEncounter($encId);
+        error_log('StepUpMFA needsMfa: ' . ($needsMfa ? 'true' : 'false'));
     }
 }
 
 // If sensitive and not recently verified – redirect to MFA page
 if ($needsMfa && !$service->hasRecentVerification((int)$pid)) {
+    error_log('StepUpMFA: Redirecting to MFA verification page');
+    error_log('StepUpMFA: hasRecentVerification: ' . ($service->hasRecentVerification((int)$pid) ? 'true' : 'false'));
     $_SESSION['stepup_mfa_redirect'] = $_SERVER['REQUEST_URI'];
     $verifyUrl = $GLOBALS['webroot'] . '/interface/stepup_mfa_verify.php?pid=' . urlencode((string)$pid);
     header('Location: ' . $verifyUrl);
