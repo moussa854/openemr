@@ -13,6 +13,7 @@ if (!class_exists(StepupMfaService::class)) {
 function oe_stepup_mfa_forms_check(): void
 {
     global $pid, $encounter, $GLOBALS;
+    error_log('StepUpMFA forms interceptor hit pid=' . ($pid??'') . ' enc=' . ($encounter??''));
     $svc = new StepupMfaService();
 
     
@@ -27,11 +28,15 @@ function oe_stepup_mfa_forms_check(): void
     }
 
     // If current encounter reason/name is sensitive, enforce MFA
-    if ($encounter && $svc->isSensitiveEncounter((int)$encounter)) {
-        $_SESSION['stepup_mfa_redirect'] = $_SERVER['REQUEST_URI'];
-        $svc->logEvent('MFA_REQUIRED', 'Step-up MFA required during forms.php');
-        header('Location: ' . $GLOBALS['webroot'] . '/interface/stepup_mfa_verify.php?pid=' . urlencode($pid));
-        exit;
+    if ($encounter) {
+        $sens = $svc->isSensitiveEncounter((int)$encounter);
+        error_log('StepUpMFA forms sensitive? ' . ($sens ? 'yes' : 'no'));
+        if ($sens) {
+            $_SESSION['stepup_mfa_redirect'] = $_SERVER['REQUEST_URI'];
+            $svc->logEvent('MFA_REQUIRED', 'Step-up MFA required during forms.php');
+            header('Location: ' . $GLOBALS['webroot'] . '/interface/stepup_mfa_verify.php?pid=' . urlencode((string)$pid));
+            exit;
+        }
     }
 }
 
