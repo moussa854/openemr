@@ -4,16 +4,16 @@
  * Included by forms.php right after the standard includes so $pid and $encounter are available.
  */
 
-use OpenEMR\Services\SensitiveEncounterMfaService;
+use OpenEMR\Services\StepupMfaService;
 
-if (!class_exists(SensitiveEncounterMfaService::class)) {
-    require_once dirname(__DIR__) . '/src/Services/SensitiveEncounterMfaService.php';
+if (!class_exists(StepupMfaService::class)) {
+    require_once dirname(__DIR__) . '/src/Services/StepupMfaService.php';
 }
 
 function oe_stepup_mfa_forms_check(): void
 {
     global $pid, $encounter, $GLOBALS;
-    $svc = new SensitiveEncounterMfaService();
+    $svc = new StepupMfaService();
 
     
     if (!$svc->isEnabled()) {
@@ -28,8 +28,8 @@ function oe_stepup_mfa_forms_check(): void
 
     // If current encounter reason/name is sensitive, enforce MFA
     if ($encounter && $svc->isSensitiveEncounter((int)$encounter)) {
-        $_SESSION[SensitiveEncounterMfaService::SESSION_MFA_REDIRECT_URL] = $_SERVER['REQUEST_URI'];
-        $svc->logEvent($_SESSION['authUserID'] ?? 0, (int)$pid, 'MFA_REQUIRED', 'Step-up MFA required for sensitive encounter');
+        $_SESSION['stepup_mfa_redirect'] = $_SERVER['REQUEST_URI'];
+        $svc->logEvent('MFA_REQUIRED', 'Step-up MFA required during forms.php');
         header('Location: ' . $GLOBALS['webroot'] . '/interface/stepup_mfa_verify.php?pid=' . urlencode($pid));
         exit;
     }
