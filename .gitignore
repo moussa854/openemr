@@ -1,32 +1,41 @@
-# logs
-/logs
+# OpenEMR Critical Files - DO NOT OVERWRITE
+# Following OpenEMR upgrade best practices from:
+# https://www.open-emr.org/wiki/index.php/Linux_Upgrade_7.0.2_to_7.0.3
 
-# environment vars
-.env
-
-# vendor and assets
-node_modules
-/vendor/*
-/public/assets/*
-/public/themes/*
-!/public/assets/modified
-/.docs/.out/*
-
-# ccda service build
-ccdaservice/node_modules
-
-# dev editor configs
-/.idea/*
-/.vscode/*
-/.vscode-oss/*
-/nbproject/*
-.DS_Store
-.buildpath
-.project
-.settings
-
-# testing
-.phpunit.result.cache
-coverage/js-unit
-
+# Database configuration
 sites/default/sqlconf.php
+
+# Site-specific configuration
+sites/default/config.php
+sites/default/globals.php
+
+# Custom modules (site-specific)
+interface/modules/custom_modules/
+
+# Contrib directory (site-specific customizations)
+contrib/
+
+# Documents and uploads
+sites/default/documents/
+sites/default/images/
+
+# Logs
+sites/default/logs/
+
+# Cache and temporary files
+sites/default/documents/smarty/
+tmp/
+
+# Site-specific settings
+sites/default/sqlconf.php
+sites/default/config.php
+sites/default/globals.php
+
+# Backup files
+*.backup
+*.bak
+*.old
+
+# Deployment scripts (local only)
+deploy_*.sh
+fix_*.sh
