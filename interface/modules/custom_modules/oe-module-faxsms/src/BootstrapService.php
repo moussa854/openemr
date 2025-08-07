@@ -50,8 +50,8 @@ class BootstrapService
     public function createVendorGlobals(): void
     {
         sqlInsert(
-            "INSERT INTO `globals` (`gl_name`,`gl_value`) 
-                VALUES ('oefax_enable_fax', '0'), 
+            "INSERT INTO `globals` (`gl_name`,`gl_value`)
+                VALUES ('oefax_enable_fax', '0'),
                        ('oefax_enable_sms', '0'),
                        ('oerestrict_users', '0'),
                        ('oesms_send', '0'),
@@ -125,7 +125,7 @@ class BootstrapService
         $vendor = '_persisted';
         $authId = 0;
         $content = json_encode($settings);
-        $sql = "INSERT INTO `module_faxsms_credentials` (`id`, `auth_user`, `vendor`, `credentials`) 
+        $sql = "INSERT INTO `module_faxsms_credentials` (`id`, `auth_user`, `vendor`, `credentials`)
             VALUES (?, ?, ?, ?) ON DUPLICATE KEY UPDATE `auth_user`= ?, `vendor` = ?, `credentials`= ?, `updated` = NOW()";
 
         return sqlQuery($sql, array('', $authId, $vendor, $content, $authId, $vendor, $content));
@@ -143,5 +143,34 @@ class BootstrapService
             return json_decode($globals['credentials'], true) ?? [];
         }
         return [];
+    }
+
+    public static function getUserPermission($user_id, $service)
+    {
+        if (empty($user_id)) {
+            $user_id = $_SESSION['authUserID'] ?? 0;
+        }
+        $setting_label = "module_faxsms_{$service}_permission";
+        $query = "SELECT setting_value FROM user_settings WHERE setting_user = ? AND setting_label = ?";
+        $result = sqlQuery($query, [$user_id, $setting_label]);
+        return $result ? $result['setting_value'] : '1';
+    }
+
+    public static function usePrimaryAccount($user_id)
+    {
+        if (empty($user_id)) {
+            $user_id = $_SESSION['authUserID'] ?? 0;
+        }
+        $setting_label = "module_faxsms_use_primary";
+        $query = "SELECT setting_value FROM user_settings WHERE setting_user = ? AND setting_label = ?";
+        $result = sqlQuery($query, [$user_id, $setting_label]);
+        return $result ? $result['setting_value'] : '0';
+    }
+
+    public static function getPrimaryUser()
+    {
+        $query = "SELECT setting_user FROM user_settings WHERE setting_label = 'module_faxsms_primary_user' AND setting_value = '1' LIMIT 1";
+        $result = sqlQuery($query);
+        return $result ? $result['setting_user'] : '0';
     }
 }

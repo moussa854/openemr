@@ -14,9 +14,11 @@ namespace Application\Model;
 
 use DateTime;
 use Exception;
+use Laminas\Db\Adapter\Adapter;
 use Laminas\Db\Adapter\Exception\ExceptionInterface;
 use Laminas\Db\TableGateway\AbstractTableGateway;
 use Laminas\Db\ResultSet\ResultSet;
+use Laminas\Db\TableGateway\Feature\GlobalAdapterFeature;
 use OpenEMR\Common\Logging\EventAuditLogger;
 
 class ApplicationTable extends AbstractTableGateway
@@ -26,7 +28,7 @@ class ApplicationTable extends AbstractTableGateway
 
     /**
      *
-     * @param \Laminas\Db\Adapter\Adapter $adapter
+     * @param Adapter $adapter
      */
     public function __construct()
     {

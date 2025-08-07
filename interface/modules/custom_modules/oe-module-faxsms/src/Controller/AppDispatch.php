@@ -16,6 +16,7 @@ use MyMailer;
 use OpenEMR\Common\Acl\AclMain;
 use OpenEMR\Common\Crypto\CryptoGen;
 use OpenEMR\Common\Session\SessionUtil;
+use OpenEMR\Modules\FaxSMS\BootstrapService;
 
 /**
  * Class AppDispatch
@@ -52,7 +53,6 @@ abstract class AppDispatch
             self::$_apiModule = $_REQUEST['type'] ?? $_SESSION["oefax_current_module_type"] ?? null;
         }
         $this->crypto = new CryptoGen();
-        $this->credentials = $this->getCredentials();
         $this->dispatchActions();
         $this->render();
     }
@@ -415,16 +415,24 @@ abstract class AppDispatch
         }
 
         $vendor = self::getModuleVendor();
-        $this->authUser = (int)$this->getSession('authUserID') ?? 0;
+        $this->authUser = (int)$this->getSession('authUserID');
+        $use = BootstrapService::usePrimaryAccount($this->authUser);
         if (!($GLOBALS['oerestrict_users'] ?? null)) {
-            $this->authUser = 0; // This makes it global and shared to all users.
+            $this->authUser = 0;
         }
+        if ($use) {
+            $this->authUser = BootstrapService::getPrimaryUser();
+        }
+        if ((int)$this->getSession('editingUser') > 0) {
+            $this->authUser = (int)$this->getSession('editingUser');
+        }
+
         // encrypt for safety.
         $content = $this->crypto->encryptStandard(json_encode($setup));
         if (empty($vendor) || empty($setup)) {
             return xlt('Error: Missing vendor, user or credential items');
         }
-        $sql = "INSERT INTO `module_faxsms_credentials` (`id`, `auth_user`, `vendor`, `credentials`) 
+        $sql = "INSERT INTO `module_faxsms_credentials` (`id`, `auth_user`, `vendor`, `credentials`)
             VALUES (?, ?, ?, ?) ON DUPLICATE KEY UPDATE `auth_user`= ?, `vendor` = ?, `credentials`= ?, `updated` = NOW()";
         sqlStatement($sql, array('', $this->authUser, $vendor, $content, $this->authUser, $vendor, $content));
 
@@ -515,34 +523,7 @@ abstract class AppDispatch
             array($this->authUser, $vendor, $encrypted)
         );
     }
-    public function getVoiceCredentials(): mixed
-    {
-        $vendor = '_voice';
-        $this->authUser = (int)$this->getSession('authUserID');
-        if (!($GLOBALS['oerestrict_users'] ?? null)) {
-            $this->authUser = 0;
-        }
-        $credentials = sqlQuery("SELECT * FROM `module_faxsms_credentials` WHERE `auth_user` = ? AND `vendor` = ?", array($this->authUser, $vendor));
 
-        if (empty($credentials)) {
-            return array(
-                'extension' => '',
-                'phone' => '',
-                'smsNumber' => '',
-                'appKey' => '',
-                'appSecret' => '',
-                'server' => '',
-                'portal' => '',
-                'production' => '',
-                'jwt' => ''
-            );
-        } else {
-            $credentials = $credentials['credentials'];
-        }
-
-        $decrypt = $this->crypto->decryptStandard($credentials);
-        return json_decode($decrypt, true);
-    }
     /**
      * Common credentials storage between services
      * the service class will set specific credential.
@@ -553,30 +534,37 @@ abstract class AppDispatch
     {
         $vendor = self::getModuleVendor();
         $this->authUser = (int)$this->getSession('authUserID');
+        $use = BootstrapService::usePrimaryAccount($this->authUser);
         if (!($GLOBALS['oerestrict_users'] ?? null)) {
             $this->authUser = 0;
         }
+        if ($use) {
+            $this->authUser = BootstrapService::getPrimaryUser();
+        }
+        if ((int)$this->getSession('editingUser') > 0) {
+            $this->authUser = (int)$this->getSession('editingUser');
+        }
+
         $credentials = sqlQuery("SELECT * FROM `module_faxsms_credentials` WHERE `auth_user` = ? AND `vendor` = ?", array($this->authUser, $vendor));
 
         if (empty($credentials)) {
-            $credentials = array(
+            return array(
                 'username' => '',
                 'extension' => '',
                 'password' => '',
                 'account' => '',
-                'phone' => '',
+                'phone' => '+1',
                 'appKey' => '',
                 'appSecret' => '',
                 'server' => '',
                 'portal' => '',
-                'smsNumber' => '',
+                'smsNumber' => '+1',
                 'production' => '',
                 'redirect_url' => '',
                 'smsHours' => "50",
                 'smsMessage' => "A courtesy reminder for ***NAME*** \r\nFor the appointment scheduled on: ***DATE*** At: ***STARTTIME*** Until: ***ENDTIME*** \r\nWith: ***PROVIDER*** Of: ***ORG***\r\nPlease call if unable to attend.",
                 'jwt' => '',
             );
-            return $credentials;
         } else {
             $credentials = $credentials['credentials'];
         }
@@ -667,9 +655,10 @@ abstract class AppDispatch
      * @param $u
      * @return bool
      */
-    public function verifyAcl($sect = 'patients', $v = 'docs', $u = ''): bool
+    public function verifyAcl($sect = 'patients', $v = 'demo', $u = ''): bool
     {
-        return AclMain::aclCheckCore($sect, $v, $u);
+        $ret = AclMain::aclCheckCore($sect, $v, $u);
+        return $ret;
     }
 
     public function formatPhoneForSave($number): string
@@ -735,6 +724,6 @@ abstract class AppDispatch
      */
     public function getCredentials(): mixed
     {
-        return appDispatch::getSetup();
+        return AppDispatch::getSetup();
     }
 }
