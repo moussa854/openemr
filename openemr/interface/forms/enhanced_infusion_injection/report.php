@@ -351,7 +351,7 @@ function enhanced_infusion_injection_report($pid, $encounter, $cols, $id, $print
                         <?php if (hasValue($form_data['order_strength'])): ?>
                         <div class="field">
                             <span class="field-label">Strength:</span>
-                            <span class="field-value"><?php echo htmlspecialchars($form_data['order_strength']); ?></span>
+                            <span class="field-value"><?php echo htmlspecialchars($form_data['order_strength'] . ' ' . extractUnitFromDose($form_data['order_dose'] ?? '')); ?></span>
                         </div>
                         <?php endif; ?>
                         <?php if (hasValue($form_data['administration_route'])): ?>
