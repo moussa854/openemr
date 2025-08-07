@@ -14,8 +14,8 @@ $dsn = "mysql:host={$sqlconf['host']};dbname={$sqlconf['dbase']}";
 $pdo = new PDO($dsn, $sqlconf['login'], $sqlconf['pass'], [PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION]);
 
 $report_type = $_GET['type'] ?? 'overview';
-$start_date = $_GET["start_date"] ?? YYYYMMDDToDate(date("Y-m-01")); // First day of current month
-$end_date = $_GET["end_date"] ?? YYYYMMDDToDate(date("Y-m-d")); // Today
+$start_date = $_GET["start_date"] ?? oeFormatShortDate(date("Y-m-01")); // First day of current month
+$end_date = $_GET["end_date"] ?? oeFormatShortDate(date("Y-m-d")); // Today
 
 // Add time to end_date to include the full day
 $end_date_with_time = $end_date . ' 23:59:59';

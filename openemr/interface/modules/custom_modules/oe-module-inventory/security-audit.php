@@ -246,8 +246,8 @@ $securityAudit = new SecurityAudit($pdo, $user_id);
 
 // Handle audit report requests
 $report_type = $_GET['type'] ?? 'overview';
-$start_date = $_GET["start_date"] ?? YYYYMMDDToDate(date("Y-m-01"));
-$end_date = $_GET["end_date"] ?? YYYYMMDDToDate(date("Y-m-d"));
+$start_date = $_GET["start_date"] ?? oeFormatShortDate(date("Y-m-01"));
+$end_date = $_GET["end_date"] ?? oeFormatShortDate(date("Y-m-d"));
 
 $audit_data = [];
 

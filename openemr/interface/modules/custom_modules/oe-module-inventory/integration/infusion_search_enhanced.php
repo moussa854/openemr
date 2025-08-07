@@ -436,7 +436,7 @@ $csrf_token = CsrfUtils::collectCsrfToken();
                             <div class="col-md-4">
                                 <div class="form-group">
                                     <label for="iv_access_date" class="control-label">Access Date:</label>
-                                    <input type="text" name="iv_access_date" id="iv_access_date" class="form-control" value="<?php echo htmlspecialchars(YYYYMMDDToDate(["iv_access_date"] ?? "")); ?>" placeholder="Date and time">
+                                    <input type="text" name="iv_access_date" id="iv_access_date" class="form-control" value="<?php echo htmlspecialchars(oeFormatShortDate(["iv_access_date"] ?? "")); ?>" placeholder="Date and time">
                                 </div>
                             </div>
                         </div>
@@ -592,7 +592,7 @@ $csrf_token = CsrfUtils::collectCsrfToken();
                             <div class="col-md-4">
                                 <div class="form-group">
                                     <label for="order_expiration_date" class="control-label">Expiration Date:</label>
-                                    <input type="text" name="order_expiration_date" id="order_expiration_date" class="form-control" value="<?php echo htmlspecialchars(YYYYMMDDToDate(["order_expiration_date"] ?? "")); ?>">
+                                    <input type="text" name="order_expiration_date" id="order_expiration_date" class="form-control" value="<?php echo htmlspecialchars(oeFormatShortDate(["order_expiration_date"] ?? "")); ?>">
                                 </div>
                             </div>
                             <div class="col-md-4">
@@ -627,7 +627,7 @@ $csrf_token = CsrfUtils::collectCsrfToken();
                             <div class="col-md-4">
                                 <div class="form-group">
                                     <label for="order_end_date" class="control-label">End Date:</label>
-                                    <input type="text" name="order_end_date" id="order_end_date" class="form-control" value="<?php echo htmlspecialchars(YYYYMMDDToDate(["order_end_date"] ?? "")); ?>">
+                                    <input type="text" name="order_end_date" id="order_end_date" class="form-control" value="<?php echo htmlspecialchars(oeFormatShortDate(["order_end_date"] ?? "")); ?>">
                                 </div>
                             </div>
                         </div>
@@ -665,13 +665,13 @@ $csrf_token = CsrfUtils::collectCsrfToken();
                             <div class="col-md-4">
                                 <div class="form-group">
                                     <label for="administration_start" class="control-label">Start Time:</label>
-                                    <input type="text" name="administration_start" id="administration_start" class="form-control" value="<?php echo htmlspecialchars(YYYYMMDDToDate(["administration_start"] ?? "")); ?>" onchange="calculateDuration()" placeholder="Date and time">
+                                    <input type="text" name="administration_start" id="administration_start" class="form-control" value="<?php echo htmlspecialchars(oeFormatShortDate(["administration_start"] ?? "")); ?>" onchange="calculateDuration()" placeholder="Date and time">
                                 </div>
                             </div>
                             <div class="col-md-4">
                                 <div class="form-group">
                                     <label for="administration_end" class="control-label">End Time:</label>
-                                    <input type="text" name="administration_end" id="administration_end" class="form-control" value="<?php echo htmlspecialchars(YYYYMMDDToDate(["administration_end"] ?? "")); ?>" onchange="calculateDuration()" placeholder="Date and time">
+                                    <input type="text" name="administration_end" id="administration_end" class="form-control" value="<?php echo htmlspecialchars(oeFormatShortDate(["administration_end"] ?? "")); ?>" onchange="calculateDuration()" placeholder="Date and time">
                                 </div>
                             </div>
                             <div class="col-md-4">
@@ -1028,7 +1028,7 @@ $csrf_token = CsrfUtils::collectCsrfToken();
             
             document.getElementById('order_lot_number').value = drug.lot_number || '';
             document.getElementById('order_ndc').value = drug.ndc_11 || drug.ndc_10 || '';
-            document.getElementById("order_expiration_date").value = YYYYMMDDToDate_js(drug.expiration_date || "");
+            document.getElementById("order_expiration_date").value = oeFormatShortDate_js(drug.expiration_date || "");
             
             // Set hidden fields
             document.getElementById('selected-drug-id').value = drug.drug_id;
@@ -1430,7 +1430,7 @@ if (document.getElementById("iv_access_date") && document.getElementById("iv_acc
                 document.getElementById('order_ndc').value = medication.ndc;
             }
             if (medication.expiration_date) {
-                document.getElementById("order_expiration_date").value = YYYYMMDDToDate_js(medication.expiration_date);
+                document.getElementById("order_expiration_date").value = oeFormatShortDate_js(medication.expiration_date);
             }
             if (medication.frequency_value) {
                 document.getElementById('order_every_value').value = medication.frequency_value;
@@ -1445,7 +1445,7 @@ if (document.getElementById("iv_access_date") && document.getElementById("iv_acc
                 document.getElementById('order_npi').value = medication.npi;
             }
             if (medication.end_date) {
-                document.getElementById("order_end_date").value = YYYYMMDDToDate_js(medication.end_date);
+                document.getElementById("order_end_date").value = oeFormatShortDate_js(medication.end_date);
             }
             if (medication.note) {
                 document.getElementById('order_note').value = medication.note;

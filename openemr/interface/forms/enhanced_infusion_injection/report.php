@@ -116,13 +116,13 @@ function enhanced_infusion_injection_report($pid, $encounter, $cols, $id, $print
                             </div>
                             <div class="info-item">
                                 <span class="info-label">DOB:</span>
-                                <span class="info-value"><?php echo htmlspecialchars($patient['DOB']); ?></span>
+                                <span class="info-value"><?php echo htmlspecialchars(oeFormatShortDate($patient['DOB'] ?? '')); ?></span>
                             </div>
                         </div>
                         <div class="info-pair">
                             <div class="info-item">
                                 <span class="info-label">DOS:</span>
-                                <span class="info-value"><?php echo YYYYMMDDToDate($dos_date); ?></span>
+                                <span class="info-value"><?php echo oeFormatShortDate($dos_date); ?></span>
                             </div>
                             <div class="info-item">
                                 <span class="info-label">Encounter:</span>
@@ -211,7 +211,7 @@ function enhanced_infusion_injection_report($pid, $encounter, $cols, $id, $print
                         <?php if (hasValue($form_data['order_end_date'])): ?>
                         <div class="field">
                             <span class="field-label">End Date:</span>
-                            <span class="field-value"><?php echo htmlspecialchars(YYYYMMDDToDate($form_data['order_end_date'] ?? '')); ?></span>
+                            <span class="field-value"><?php echo htmlspecialchars(oeFormatShortDate($form_data['order_end_date'] ?? '')); ?></span>
                         </div>
                         <?php endif; ?>
                         <?php if (hasValue($form_data['order_servicing_provider'])): ?>
@@ -323,7 +323,7 @@ function enhanced_infusion_injection_report($pid, $encounter, $cols, $id, $print
                         <?php if (hasValue($form_data['iv_access_date'])): ?>
                         <div class="field">
                             <span class="field-label">Date:</span>
-                            <span class="field-value"><?php echo htmlspecialchars(YYYYMMDDToDate($form_data['iv_access_date'] ?? '')); ?></span>
+                            <span class="field-value"><?php echo htmlspecialchars(oeFormatShortDate($form_data['iv_access_date'] ?? '')); ?></span>
                         </div>
                         <?php endif; ?>
                         <?php if (hasValue($form_data['iv_access_comments'])): ?>
@@ -369,7 +369,7 @@ function enhanced_infusion_injection_report($pid, $encounter, $cols, $id, $print
                         <?php if (hasValue($form_data['order_expiration_date'])): ?>
                         <div class="field">
                             <span class="field-label">Expiration Date:</span>
-                            <span class="field-value"><?php echo htmlspecialchars(YYYYMMDDToDate($form_data['order_expiration_date'] ?? '')); ?></span>
+                            <span class="field-value"><?php echo htmlspecialchars(oeFormatShortDate($form_data['order_expiration_date'] ?? '')); ?></span>
                         </div>
                         <?php endif; ?>
                         <?php if (hasValue($form_data['order_ndc'])): ?>
