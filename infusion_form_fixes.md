@@ -8,8 +8,47 @@
 - ✅ Inventory module database connections - FIXED
 - ✅ Form submission errors - FIXED
 - ✅ Strength and Route fields not saving - FIXED
+- ✅ Field mapping issues (order_route → administration_route) - FIXED
 
 **Last tested:** August 7, 2025 - All functionality working as expected
+
+---
+
+## Issue: Field Mapping Error - order_route vs administration_route
+
+**Problem:** Form submission was failing with `Unknown column 'order_route' in 'SET'` error.
+
+**Root Cause:** The form was sending `order_route` field but the database column is called `administration_route`. The SQL was being generated dynamically from array keys, so the key needed to match the database column name.
+
+**Solution:** Fixed the field mapping in the save handler to correctly map form field to database column.
+
+### Files Modified:
+- `/var/www/emr.carepointinfusion.com/interface/modules/custom_modules/oe-module-inventory/integration/save_enhanced.php`
+
+### Changes Made:
+**Fixed field mapping in form data preparation:**
+```php
+// Before (causing error):
+"administration_route" => $_POST["administration_route"] ?? null,
+
+// After (working correctly):
+"administration_route" => $_POST["order_route"] ?? null,
+```
+
+### Database Schema:
+- **Form Field:** `order_route` (sent by JavaScript)
+- **Database Column:** `administration_route` (actual column name)
+- **SQL Generation:** Dynamic SQL built from array keys using `"`$key` = ?"`
+
+### Error Resolution:
+- **Error:** `Unknown column 'order_route' in 'SET'`
+- **Cause:** Array key didn't match database column name
+- **Fix:** Map form field `order_route` to database column `administration_route`
+
+### Testing:
+1. Select a drug from inventory → Route field populates with "IV"
+2. Save the form → No database errors
+3. Reopen the form → Route value persists correctly
 
 ---
 
@@ -33,7 +72,7 @@
 
 ### Database Fields:
 - `order_strength` - varchar(255) - Stores medication strength (e.g., "1000 mg")
-- `order_route` - varchar(255) - Stores administration route (e.g., "IV")
+- `administration_route` - varchar(255) - Stores administration route (e.g., "IV")
 
 ### JavaScript Integration:
 - **Strength field** is populated from `drug.size` when a drug is selected
@@ -162,6 +201,7 @@ ndc_11
 3. **Module Files:** The hardcoded credentials are a temporary workaround - proper OpenEMR integration should be implemented in the future
 4. **Form Logic:** The conditional diagnosis loading should be applied to all new installations
 5. **Form Fields:** Ensure all form fields are properly mapped in save handlers
+6. **Field Mapping:** Verify form field names match database column names in save handlers
 
 ## Future Improvements
 
@@ -169,3 +209,4 @@ ndc_11
 2. **Form State Management:** Implement proper form state tracking to avoid duplicate loading
 3. **Database Schema:** Consider adding indexes for better performance on large datasets
 4. **Field Validation:** Add client-side and server-side validation for all form fields
+5. **Field Mapping:** Create a centralized field mapping configuration to avoid mismatches
