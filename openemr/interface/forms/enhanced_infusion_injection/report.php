@@ -408,13 +408,13 @@ function enhanced_infusion_injection_report($pid, $encounter, $cols, $id, $print
                             <span class="field-value"><?php echo htmlspecialchars($form_data['inventory_wastage_quantity']); ?> <?php echo htmlspecialchars(extractUnitFromDose($form_data['order_dose'] ?? '')); ?></span>
                         </div>
                         <?php endif; ?>
-                        <?php if (hasValue($form_data['inventory_wastage_reason'])): ?>
+                        <?php if (hasValue($form_data['inventory_wastage_reason']) && (floatval($form_data['inventory_wastage_quantity'] ?? 0) > 0)): ?>
                         <div class="field">
                             <span class="field-label">Wastage Reason:</span>
                             <span class="field-value"><?php echo htmlspecialchars($form_data['inventory_wastage_reason']); ?></span>
                         </div>
                         <?php endif; ?>
-                        <?php if (hasValue($form_data['inventory_wastage_notes'])): ?>
+                        <?php if (hasValue($form_data['inventory_wastage_notes']) && (floatval($form_data['inventory_wastage_quantity'] ?? 0) > 0)): ?>
                         <div class="field">
                             <span class="field-label">Wastage Notes:</span>
                             <span class="field-value"><?php echo htmlspecialchars($form_data['inventory_wastage_notes']); ?></span>
