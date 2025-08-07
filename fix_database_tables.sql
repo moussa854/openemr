@@ -80,6 +80,7 @@ CREATE TABLE IF NOT EXISTS form_enhanced_infusion_injection (
     inventory_quantity_used decimal(10,2) NULL,
     inventory_wastage_quantity decimal(10,2) NULL,
     inventory_wastage_reason varchar(100) NULL,
+    inventory_wastage_notes text NULL,
     inventory_reservation_id int(11) NULL,
     PRIMARY KEY (id),
     UNIQUE KEY uuid (uuid),
@@ -130,6 +131,7 @@ CREATE TABLE IF NOT EXISTS form_infusion_injection (
     inventory_quantity_used decimal(10,2) NULL,
     inventory_wastage_quantity decimal(10,2) NULL,
     inventory_wastage_reason varchar(100) NULL,
+    inventory_wastage_notes text NULL,
     inventory_reservation_id int(11) NULL,
     PRIMARY KEY (id),
     UNIQUE KEY uuid (uuid),
@@ -179,4 +181,8 @@ INSERT INTO infusion_wastage_reasons (reason_code, reason_description, is_active
 ('EQUIPMENT_FAILURE', 'Equipment failure during administration', 1),
 ('WRONG_DOSE', 'Wrong dose prepared', 1),
 ('PATIENT_REFUSED', 'Patient refused medication', 1),
-('OTHER', 'Other reason', 1); 
+('OTHER', 'Other reason', 1);
+
+-- Add missing inventory_wastage_notes column to existing tables if they don't exist
+ALTER TABLE form_enhanced_infusion_injection ADD COLUMN IF NOT EXISTS inventory_wastage_notes text NULL AFTER inventory_wastage_reason;
+ALTER TABLE form_infusion_injection ADD COLUMN IF NOT EXISTS inventory_wastage_notes text NULL AFTER inventory_wastage_reason; 
