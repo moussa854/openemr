@@ -9,8 +9,43 @@
 - ✅ Form submission errors - FIXED
 - ✅ Strength and Route fields not saving - FIXED
 - ✅ Field mapping issues (order_route → administration_route) - FIXED
+- ✅ Route field not loading from database - FIXED
 
 **Last tested:** August 7, 2025 - All functionality working as expected
+
+---
+
+## Issue: Route Field Not Loading from Database
+
+**Problem:** The Route field was saving correctly to the database but not loading back into the form when reopened. The field showed placeholder text "Route of administration" instead of the saved "IV" value.
+
+**Root Cause:** The form loading logic was trying to access `$saved_data['order_route']` but the database column is `administration_route`. The field mapping was missing in the form loading code.
+
+**Solution:** Added field mapping in the form loading logic to map the database column to the form field.
+
+### Files Modified:
+- `/var/www/emr.carepointinfusion.com/interface/modules/custom_modules/oe-module-inventory/integration/infusion_search_enhanced.php`
+
+### Changes Made:
+**Added field mapping in form loading logic:**
+```php
+// Map database columns to form fields
+$saved_data["order_route"] = $saved_data["administration_route"] ?? "";
+```
+
+### Database Schema:
+- **Database Column:** `administration_route` (where value is stored)
+- **Form Field:** `order_route` (what the form expects)
+- **Mapping:** Database column → Form field
+
+### Form Loading Logic:
+- **Before:** Form tried to load `$saved_data['order_route']` (which was empty)
+- **After:** Form loads `$saved_data['administration_route']` and maps it to `order_route`
+
+### Testing:
+1. Save form with drug selected → Route saves as "IV" to database
+2. Reopen the form → Route field should display "IV" instead of placeholder
+3. Verify route value persists correctly across form sessions
 
 ---
 
@@ -202,6 +237,7 @@ ndc_11
 4. **Form Logic:** The conditional diagnosis loading should be applied to all new installations
 5. **Form Fields:** Ensure all form fields are properly mapped in save handlers
 6. **Field Mapping:** Verify form field names match database column names in save handlers
+7. **Form Loading:** Ensure database columns are properly mapped to form fields when loading saved data
 
 ## Future Improvements
 
@@ -210,3 +246,4 @@ ndc_11
 3. **Database Schema:** Consider adding indexes for better performance on large datasets
 4. **Field Validation:** Add client-side and server-side validation for all form fields
 5. **Field Mapping:** Create a centralized field mapping configuration to avoid mismatches
+6. **Form Loading:** Implement consistent field mapping between save and load operations
