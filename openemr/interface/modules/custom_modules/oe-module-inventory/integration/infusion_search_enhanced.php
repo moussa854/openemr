@@ -1593,6 +1593,38 @@ if (document.getElementById("iv_access_date") && document.getElementById("iv_acc
             }
         }
         
+        // Date formatting function
+        function oeFormatShortDate_js(dateString) {
+            if (!dateString) return '';
+            
+            // If it's already in YYYY-MM-DD format, convert to display format
+            if (dateString.match(/^\d{4}-\d{2}-\d{2}$/)) {
+                const date = new Date(dateString + 'T00:00:00');
+                return date.toLocaleDateString('en-US', {
+                    month: '2-digit',
+                    day: '2-digit',
+                    year: 'numeric'
+                });
+            }
+            
+            // If it's already in display format, return as is
+            if (dateString.match(/^\d{2}\/\d{2}\/\d{4}$/)) {
+                return dateString;
+            }
+            
+            // Try to parse and format
+            const date = new Date(dateString);
+            if (isNaN(date.getTime())) {
+                return dateString; // Return original if can't parse
+            }
+            
+            return date.toLocaleDateString('en-US', {
+                month: '2-digit',
+                day: '2-digit',
+                year: 'numeric'
+            });
+        }
+        
         // Signature Management Functions
         let currentFormId = <?php echo $form_id ?: 'null'; ?>;
         

@@ -5,9 +5,9 @@
  */
 
 // Include OpenEMR globals
-require_once(dirname(__FILE__) . "/../../../../globals.php");
-require_once(dirname(__FILE__) . "/../../../../library/sql.inc.php");
-require_once(dirname(__FILE__) . "/../../../../library/forms.inc.php");
+require_once(dirname(__FILE__) . "/../../../../../globals.php");
+require_once(dirname(__FILE__) . "/../../../../../library/sql.inc.php");
+require_once(dirname(__FILE__) . "/../../../../../library/forms.inc.php");
 
 // Set content type to JSON
 header('Content-Type: application/json');
