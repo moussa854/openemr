@@ -1280,7 +1280,8 @@ $csrf_token = CsrfUtils::collectCsrfToken();
                 showSeconds: false,
                 formatInput: true,
                 minDate: false,
-                maxDate: false
+                maxDate: false,
+                format: 'Y-m-d g:i A'
             });
             
             // Initialize diagnoses from saved data
