@@ -206,7 +206,6 @@ function zip_content($source, $destination, $content = '', $create = true)
       }
     </style>
 
-    /** AI generated code by google-labs-jules starts */
     <style>
         /* Enhanced styling for Future Appointments section only */
         .future-appointments-section {
@@ -270,7 +269,6 @@ function zip_content($source, $destination, $content = '', $create = true)
             page-break-inside: avoid !important;
         }
     </style>
-    /** AI generated code by google-labs-jules ends */
 
     <?php if (!$PDF_OUTPUT) { ?>
         <?php // if the track_anything form exists, then include the styling
@@ -458,7 +456,6 @@ function zip_content($source, $destination, $content = '', $create = true)
                         }
 
                         echo "</div><br />";
-                                        /** AI generated code by google-labs-jules starts */
                     } elseif ($val == "future_appointments") {
                         echo "<hr style='border-top: 1px solid #e0e0e0; margin: 20px 0;' />";
                         echo "<div class='text no-break future-appointments-section' id='future_appointments'>\n";
@@ -557,7 +554,6 @@ function zip_content($source, $destination, $content = '', $create = true)
                         }
 
                         echo "</div><br />";
-                    /** AI generated code by google-labs-jules ends */
                     } elseif ($val == "demographics") {
                         echo "<hr />";
                         echo "<div class='text demographics' id='DEM'>\n";
