@@ -572,7 +572,7 @@ function enhanced_infusion_injection_report($pid, $encounter, $cols, $id, $print
                 const id = urlParams.get('id') || <?php echo json_encode($id); ?>;
                 
                 // Build PDF download URL
-                const pdfUrl = '../enhanced_infusion_injection/pdf_report.php?' + 
+                const pdfUrl = 'pdf_report.php?' + 
                     'pid=' + encodeURIComponent(pid) + 
                     '&encounter=' + encodeURIComponent(encounter) + 
                     '&id=' + encodeURIComponent(id);
