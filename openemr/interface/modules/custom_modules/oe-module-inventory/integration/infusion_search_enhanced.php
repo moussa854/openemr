@@ -218,6 +218,69 @@ $csrf_token = CsrfUtils::collectCsrfToken();
         }
         .input-group {
             display: flex;
+            align-items: center;
+        }
+        .input-group-append {
+            margin-left: -1px;
+        }
+        .input-group-text {
+            padding: 8px 12px;
+            background-color: #e9ecef;
+            border: 1px solid #ddd;
+            border-left: none;
+        }
+        
+        /* Signature Styles */
+        .signatures-container {
+            background: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 5px;
+            padding: 15px;
+            margin-bottom: 20px;
+        }
+        .signature-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+        }
+        .signature-table th,
+        .signature-table td {
+            padding: 8px;
+            border-bottom: 1px solid #dee2e6;
+            text-align: left;
+        }
+        .signature-table th {
+            background-color: #e9ecef;
+            font-weight: bold;
+        }
+        .signature-form {
+            background: #ffffff;
+            border: 1px solid #dee2e6;
+            border-radius: 5px;
+            padding: 20px;
+        }
+        .signature-actions {
+            display: flex;
+            gap: 5px;
+        }
+        .signature-actions .btn {
+            padding: 4px 8px;
+            font-size: 12px;
+        }
+        .signature-type-badge {
+            display: inline-block;
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-size: 11px;
+            font-weight: bold;
+            text-transform: uppercase;
+        }
+        .signature-type-primary { background-color: #007bff; color: white; }
+        .signature-type-witness { background-color: #28a745; color: white; }
+        .signature-type-reviewer { background-color: #ffc107; color: #212529; }
+        .signature-type-custom { background-color: #6c757d; color: white; }
+        .mt-3 { margin-top: 15px; }
+            display: flex;
             align-items: stretch;
             width: 100%;
         }
@@ -740,6 +803,58 @@ $csrf_token = CsrfUtils::collectCsrfToken();
                                     <label for="administration_note" class="control-label">Administration Notes:</label>
                                     <textarea name="administration_note" id="administration_note" class="form-control" rows="3" 
                                               placeholder="Notes about administration, patient response, complications..."><?php echo htmlspecialchars($saved_data['administration_note'] ?? ''); ?></textarea>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Electronic Signatures Section -->
+                    <div class="form-section">
+                        <h3 class="section-title"><i class="fa fa-pencil"></i> Electronic Signatures</h3>
+                        
+                        <!-- Existing Signatures Display -->
+                        <div id="existing-signatures" class="signatures-container">
+                            <div class="row">
+                                <div class="col-md-12">
+                                    <div class="alert alert-info">
+                                        <i class="fa fa-info-circle"></i> No signatures yet. Add the first signature below.
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- New Signature Form -->
+                        <div class="signature-form">
+                            <div class="row">
+                                <div class="col-md-4">
+                                    <div class="form-group">
+                                        <label for="signature_type" class="control-label">Signature Type:</label>
+                                        <select id="signature_type" class="form-control">
+                                            <option value="primary">Primary Provider</option>
+                                            <option value="witness">Witness</option>
+                                            <option value="reviewer">Reviewer</option>
+                                            <option value="custom">Custom</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="form-group">
+                                        <label for="signature_datetime" class="control-label">Date & Time:</label>
+                                        <input type="datetime-local" id="signature_datetime" class="form-control" value="<?php echo date('Y-m-d\TH:i'); ?>">
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="form-group">
+                                        <label for="signature_text" class="control-label">Signature Text:</label>
+                                        <input type="text" id="signature_text" class="form-control" placeholder="Enter signature text">
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row mt-3">
+                                <div class="col-md-12">
+                                    <button type="button" class="btn btn-primary" onclick="addSignature()">
+                                        <i class="fa fa-pencil"></i> Add Signature
+                                    </button>
                                 </div>
                             </div>
                         </div>
@@ -1461,6 +1576,225 @@ if (document.getElementById("iv_access_date") && document.getElementById("iv_acc
             notification.innerHTML = `
                 <strong>Previous Medication Loaded!</strong> 
                 Medication order for "${medicationName}" has been loaded from the previous encounter.
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            `;
+            
+            // Insert at the top of the form
+            const form = document.querySelector('form');
+            if (form) {
+                form.insertBefore(notification, form.firstChild);
+                
+                // Auto-dismiss after 5 seconds
+                setTimeout(() => {
+                    if (notification.parentNode) {
+                        notification.remove();
+                    }
+                }, 5000);
+            }
+        }
+        
+        // Signature Management Functions
+        let currentFormId = <?php echo $form_id ?: 'null'; ?>;
+        
+        // Load existing signatures when page loads
+        document.addEventListener('DOMContentLoaded', function() {
+            if (currentFormId) {
+                loadExistingSignatures();
+            }
+        });
+        
+        function loadExistingSignatures() {
+            if (!currentFormId) return;
+            
+            fetch(`get_signatures.php?form_id=${currentFormId}`)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        displaySignatures(data.signatures);
+                    } else {
+                        console.error('Error loading signatures:', data.message);
+                    }
+                })
+                .catch(error => {
+                    console.error('Error loading signatures:', error);
+                });
+        }
+        
+        function displaySignatures(signatures) {
+            const container = document.getElementById('existing-signatures');
+            
+            if (signatures.length === 0) {
+                container.innerHTML = `
+                    <div class="row">
+                        <div class="col-md-12">
+                            <div class="alert alert-info">
+                                <i class="fa fa-info-circle"></i> No signatures yet. Add the first signature below.
+                            </div>
+                        </div>
+                    </div>
+                `;
+                return;
+            }
+            
+            let tableHtml = `
+                <table class="signature-table">
+                    <thead>
+                        <tr>
+                            <th>User</th>
+                            <th>Type</th>
+                            <th>Date & Time</th>
+                            <th>Signature Text</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+            `;
+            
+            signatures.forEach(signature => {
+                const dateTime = new Date(signature.signature_date).toLocaleString();
+                const typeBadge = `<span class="signature-type-badge signature-type-${signature.signature_type}">${signature.type_display_name}</span>`;
+                
+                let actionsHtml = '';
+                if (signature.can_edit) {
+                    actionsHtml = `
+                        <div class="signature-actions">
+                            <button class="btn btn-sm btn-warning" onclick="editSignature(${signature.id})">
+                                <i class="fa fa-edit"></i> Edit
+                            </button>
+                            <button class="btn btn-sm btn-danger" onclick="deleteSignature(${signature.id})">
+                                <i class="fa fa-trash"></i> Delete
+                            </button>
+                        </div>
+                    `;
+                }
+                
+                tableHtml += `
+                    <tr>
+                        <td>${signature.user_name}</td>
+                        <td>${typeBadge}</td>
+                        <td>${dateTime}</td>
+                        <td>${signature.signature_text}</td>
+                        <td>${actionsHtml}</td>
+                    </tr>
+                `;
+            });
+            
+            tableHtml += '</tbody></table>';
+            container.innerHTML = tableHtml;
+        }
+        
+        function addSignature() {
+            const signatureType = document.getElementById('signature_type').value;
+            const signatureDateTime = document.getElementById('signature_datetime').value;
+            const signatureText = document.getElementById('signature_text').value.trim();
+            
+            if (!signatureText) {
+                alert('Please enter signature text');
+                return;
+            }
+            
+            if (!currentFormId) {
+                alert('Form must be saved before adding signatures');
+                return;
+            }
+            
+            const formData = new FormData();
+            formData.append('form_id', currentFormId);
+            formData.append('signature_type', signatureType);
+            formData.append('signature_date', signatureDateTime);
+            formData.append('signature_text', signatureText);
+            
+            fetch('save_signature.php', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    // Clear the form
+                    document.getElementById('signature_text').value = '';
+                    document.getElementById('signature_datetime').value = new Date().toISOString().slice(0, 16);
+                    
+                    // Reload signatures
+                    loadExistingSignatures();
+                    
+                    // Show success message
+                    showNotification('Signature added successfully!', 'success');
+                } else {
+                    showNotification('Error: ' + data.message, 'danger');
+                }
+            })
+            .catch(error => {
+                console.error('Error adding signature:', error);
+                showNotification('Error adding signature', 'danger');
+            });
+        }
+        
+        function deleteSignature(signatureId) {
+            if (!confirm('Are you sure you want to delete this signature?')) {
+                return;
+            }
+            
+            const formData = new FormData();
+            formData.append('signature_id', signatureId);
+            
+            fetch('delete_signature.php', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    loadExistingSignatures();
+                    showNotification('Signature deleted successfully!', 'success');
+                } else {
+                    showNotification('Error: ' + data.message, 'danger');
+                }
+            })
+            .catch(error => {
+                console.error('Error deleting signature:', error);
+                showNotification('Error deleting signature', 'danger');
+            });
+        }
+        
+        function editSignature(signatureId) {
+            // For now, we'll use a simple prompt
+            // In a full implementation, you might want a modal dialog
+            const newText = prompt('Enter new signature text:');
+            if (newText === null) return;
+            
+            const newDateTime = prompt('Enter new date and time (YYYY-MM-DD HH:MM:SS):', new Date().toISOString().slice(0, 19).replace('T', ' '));
+            if (newDateTime === null) return;
+            
+            const formData = new FormData();
+            formData.append('signature_id', signatureId);
+            formData.append('signature_text', newText);
+            formData.append('signature_date', newDateTime);
+            
+            fetch('update_signature.php', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    loadExistingSignatures();
+                    showNotification('Signature updated successfully!', 'success');
+                } else {
+                    showNotification('Error: ' + data.message, 'danger');
+                }
+            })
+            .catch(error => {
+                console.error('Error updating signature:', error);
+                showNotification('Error updating signature', 'danger');
+            });
+        }
+        
+        function showNotification(message, type = 'info') {
+            const notification = document.createElement('div');
+            notification.className = `alert alert-${type} alert-dismissible fade show`;
+            notification.innerHTML = `
+                ${message}
                 <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
             `;
             
