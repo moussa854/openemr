@@ -124,13 +124,56 @@ function enhanced_infusion_injection_report($pid, $encounter, $cols, $id, $print
                 .signature-value { color: #212529; font-style: italic; }
                 @media print {
                     .print-button, button { display: none; }
-                    body { background: white; }
-                    .container { box-shadow: none; }
+                    body { background: white; margin: 0; padding: 0; }
+                    .container { 
+                        box-shadow: none; 
+                        border-radius: 0; 
+                        margin: 0; 
+                        padding: 20px; 
+                        max-width: none; 
+                        background: white;
+                    }
+                    .header { 
+                        margin-bottom: 20px; 
+                        padding-bottom: 15px; 
+                        border-bottom: 2px solid #000; 
+                    }
+                    .section { 
+                        margin-bottom: 20px; 
+                        page-break-inside: avoid; 
+                        border: 1px solid #000; 
+                    }
+                    .section-title { 
+                        background: #000 !important; 
+                        color: white !important; 
+                        -webkit-print-color-adjust: exact; 
+                        print-color-adjust: exact; 
+                    }
+                    .signature-entry { 
+                        page-break-inside: avoid; 
+                        border: 1px solid #000; 
+                        background: #f8f9fa !important; 
+                        -webkit-print-color-adjust: exact; 
+                        print-color-adjust: exact; 
+                    }
+                    .signature-type { 
+                        background: #000 !important; 
+                        color: white !important; 
+                        -webkit-print-color-adjust: exact; 
+                        print-color-adjust: exact; 
+                    }
+                    .patient-info { 
+                        background: #f8f9fa !important; 
+                        border: 1px solid #000; 
+                        -webkit-print-color-adjust: exact; 
+                        print-color-adjust: exact; 
+                    }
                 }
             </style>
         </head>
         <body>
             <div class="container">
+                <button class="print-button" onclick="window.print();">🖨️ Print Form</button>
                 <div class="header">
                     <h1>Infusion & Injection Form</h1>
                     <div class="patient-info">
