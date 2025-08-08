@@ -1,6 +1,5 @@
 <?php
-
-/**
+/*
  * javascripts function to allow date internationalization
  * and converts date back to YYYY-MM-DD and YYYY-MM-DD HH:MM:SS (SS is optional)
  * formats
@@ -14,7 +13,13 @@
  * @copyright Copyright (c) 2016 Amiel Elboim <amielel@matrix.co.il>
  * @copyright Copyright (c) 2018 Brady Miller <brady.g.miller@gmail.com>
  * @license   https://github.com/openemr/openemr/blob/master/LICENSE GNU General Public License 3
+ *
+ * This file is intended to be included via a <script> tag.
+ * Ensure OpenEMR globals and helpers are loaded to provide js_escape() and date_display_format.
  */
+
+require_once __DIR__ . '/../interface/globals.php';
+require_once __DIR__ . '/htmlspecialchars.inc.php';
 
 ?>
 
