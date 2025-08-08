@@ -13,26 +13,6 @@ function hasValue($value) {
 }
 
 function extractUnitFromDose($dose) {
-function formatFrequencyUnit($value, $unit) {
-    if (empty($value) || empty($unit)) return $unit;
-    
-    // Convert to singular if value is 1
-    if ($value == 1) {
-        $singular_units = [
-            "days" => "day",
-            "weeks" => "week",
-            "months" => "month",
-            "years" => "year",
-            "hours" => "hour",
-            "minutes" => "minute"
-        ];
-        return $singular_units[strtolower($unit)] ?? $unit;
-    }
-    
-    return $unit;
-}
-    if (empty($dose)) return '';
-    
     // Common units to look for
     $units = ['mg', 'mL', 'gram', 'grams', 'g', 'mcg', 'units', 'IU', 'mEq', 'mmol'];
     
