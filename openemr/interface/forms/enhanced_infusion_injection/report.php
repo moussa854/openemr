@@ -111,7 +111,7 @@ function enhanced_infusion_injection_report($pid, $encounter, $cols, $id, $print
                 .section-title { background: #007bff; color: white; padding: 10px 15px; font-weight: bold; font-size: 16px; }
                 .field { padding: 10px 15px; border-bottom: 1px solid #dee2e6; display: flex; }
                 .field:last-child { border-bottom: none; }
-                .print-button { background: #28a745; color: white; padding: 10px 20px; border: none; border-radius: 5px; cursor: pointer; margin-bottom: 20px; }
+                .print-button { background: #28a745; color: white; padding: 10px 20px; border: none; border-radius: 5px; cursor: pointer; margin-bottom: 20px; margin-right: 10px; font-size: 14px; font-weight: bold; }
                 .no-data { color: #6c757d; font-style: italic; }
                 .signatures-container { margin-top: 15px; }
                 .signature-entry { border: 1px solid #dee2e6; border-radius: 5px; margin-bottom: 15px; padding: 15px; background: #f8f9fa; }
@@ -174,6 +174,7 @@ function enhanced_infusion_injection_report($pid, $encounter, $cols, $id, $print
         <body>
             <div class="container">
                 <button class="print-button" onclick="window.print();">🖨️ Print Form</button>
+                <button class="print-button" onclick="downloadPDF();">📄 Download PDF</button>
                 <div class="header">
                     <h1>Infusion & Injection Form</h1>
                     <div class="patient-info">
@@ -561,6 +562,30 @@ function enhanced_infusion_injection_report($pid, $encounter, $cols, $id, $print
                 <?php endif; ?>
                 
             </div>
+            
+            <script>
+            function downloadPDF() {
+                // Get current URL parameters
+                const urlParams = new URLSearchParams(window.location.search);
+                const pid = urlParams.get('pid') || <?php echo json_encode($pid); ?>;
+                const encounter = urlParams.get('encounter') || <?php echo json_encode($encounter); ?>;
+                const id = urlParams.get('id') || <?php echo json_encode($id); ?>;
+                
+                // Build PDF download URL
+                const pdfUrl = '../enhanced_infusion_injection/pdf_report.php?' + 
+                    'pid=' + encodeURIComponent(pid) + 
+                    '&encounter=' + encodeURIComponent(encounter) + 
+                    '&id=' + encodeURIComponent(id);
+                
+                // Create hidden link to trigger download
+                const link = document.createElement('a');
+                link.href = pdfUrl;
+                link.style.display = 'none';
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+            }
+            </script>
         </body>
         </html>
         <?php
