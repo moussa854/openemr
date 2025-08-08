@@ -227,7 +227,7 @@ $oemr_ui = new OemrUI($arrOeUiSettings);
                         <table class="includes mt-3">
                             <tr>
                                 <td class='text'>
-                                    <input type='checkbox' name='include_demographics' id='include_demographics' value="demographics" checked /><?php echo xlt('Demographics'); ?>
+                                    <input type='checkbox' name='include_demographics' id='include_demographics' value="demographics" /><?php echo xlt('Demographics'); ?>
                                     <br />
                                     <?php if (AclMain::aclCheckCore('patients', 'med')) : ?>
                                     <input type='checkbox' name='include_history' id='include_history' value="history" /><?php echo xlt('History'); ?>
@@ -238,11 +238,7 @@ $oemr_ui = new OemrUI($arrOeUiSettings);
                                     -->
                                     <input type='checkbox' name='include_insurance' id='include_insurance' value="insurance" /><?php echo xlt('Insurance'); ?>
                                     <br />
-                                    <input type='checkbox' name='include_billing' id='include_billing' value="billing"
-                                    <?php
-                                    if (!$GLOBALS['simplified_demographics']) {
-                                        echo 'checked';
-                                    } ?> /><?php echo xlt('Billing'); ?>
+                                    <input type='checkbox' name='include_billing' id='include_billing' value="billing" /><?php echo xlt('Billing'); ?>
                                     <br />
                                 </td>
                                 <td class='text'>
