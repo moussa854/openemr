@@ -223,7 +223,7 @@ function enhanced_infusion_injection_report($pid, $encounter, $cols, $id, $print
                         <?php if (hasValue($form_data['order_every_value']) || hasValue($form_data['order_every_unit'])): ?>
                         <div class="field">
                             <span class="field-label">Frequency:</span>
-                            <span class="field-value"><?php echo htmlspecialchars($form_data["order_every_value"] ?? "") . " " . htmlspecialchars(formatFrequencyUnit($form_data["order_every_value"] ?? 0, $form_data["order_every_unit"] ?? "")); ?></span>
+                            <span class="field-value"><?php echo htmlspecialchars($form_data["order_every_value"] ?? "") . " " . htmlspecialchars(($form_data["order_every_value"] == 1 ? rtrim($form_data["order_every_unit"] ?? "", "s") : $form_data["order_every_unit"] ?? "")); ?></span>
                         </div>
                         <?php endif; ?>
                         <?php if (hasValue($form_data['order_end_date'])): ?>
