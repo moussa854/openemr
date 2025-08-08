@@ -14,7 +14,6 @@ $ignoreAuth = false;
 require_once(dirname(__FILE__) . "/../../../../../interface/globals.php");
 require_once(dirname(__FILE__) . "/../../../../../library/forms.inc.php");
 require_once(dirname(__FILE__) . "/../../../../../library/patient.inc.php");
-require_once(dirname(__FILE__) . "/../../../../../library/formatting_DateToYYYYMMDD_js.js.php");
 
 use OpenEMR\Common\Csrf\CsrfUtils;
 
@@ -114,6 +113,7 @@ $csrf_token = CsrfUtils::collectCsrfToken();
 <!DOCTYPE html>
 <html>
 <head>
+    <script src="../../../../../library/formatting_DateToYYYYMMDD_js.js.php"></script>
     <title>Enhanced Infusion and Injection Form</title>
     <link rel="stylesheet" href="<?php echo $GLOBALS['webroot']; ?>/interface/themes/style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
