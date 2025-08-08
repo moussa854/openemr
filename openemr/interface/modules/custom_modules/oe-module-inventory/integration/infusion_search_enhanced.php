@@ -114,9 +114,6 @@ $csrf_token = CsrfUtils::collectCsrfToken();
 <html>
 <head>
     <script src="../../../../../library/formatting_DateToYYYYMMDD_js.js.php"></script>
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-datetimepicker/2.5.20/jquery.datetimepicker.full.min.js"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jquery-datetimepicker/2.5.20/jquery.datetimepicker.min.css">
     <title>Enhanced Infusion and Injection Form</title>
     <link rel="stylesheet" href="<?php echo $GLOBALS['webroot']; ?>/public/themes/style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
@@ -502,7 +499,7 @@ $csrf_token = CsrfUtils::collectCsrfToken();
                             <div class="col-md-4">
                                 <div class="form-group">
                                     <label for="iv_access_date" class="control-label">Access Date:</label>
-                                    <input type="text" name="iv_access_date" id="iv_access_date" class="form-control datetimepicker" value="<?php echo htmlspecialchars(oeFormatShortDate($saved_data["iv_access_date"] ?? "")); ?>" placeholder="Date and time">
+                                    <input type="datetime-local" name="iv_access_date" id="iv_access_date" class="form-control" value="<?php echo htmlspecialchars(date('Y-m-d\TH:i', strtotime($saved_data["iv_access_date"] ?? 'now'))); ?>" placeholder="Date and time">
                                 </div>
                             </div>
                         </div>
@@ -658,7 +655,7 @@ $csrf_token = CsrfUtils::collectCsrfToken();
                             <div class="col-md-4">
                                 <div class="form-group">
                                     <label for="order_expiration_date" class="control-label">Expiration Date:</label>
-                                    <input type="text" name="order_expiration_date" id="order_expiration_date" class="form-control datepicker" value="<?php echo htmlspecialchars(oeFormatShortDate($saved_data["order_expiration_date"] ?? "")); ?>">
+                                    <input type="date" name="order_expiration_date" id="order_expiration_date" class="form-control" value="<?php echo htmlspecialchars($saved_data["order_expiration_date"] ?? ""); ?>">
                                 </div>
                             </div>
                             <div class="col-md-4">
@@ -693,7 +690,7 @@ $csrf_token = CsrfUtils::collectCsrfToken();
                             <div class="col-md-4">
                                 <div class="form-group">
                                     <label for="order_end_date" class="control-label">End Date:</label>
-                                    <input type="text" name="order_end_date" id="order_end_date" class="form-control datepicker" value="<?php echo htmlspecialchars(oeFormatShortDate($saved_data["order_end_date"] ?? "")); ?>">
+                                    <input type="date" name="order_end_date" id="order_end_date" class="form-control" value="<?php echo htmlspecialchars($saved_data["order_end_date"] ?? ""); ?>">
                                 </div>
                             </div>
                         </div>
@@ -731,13 +728,13 @@ $csrf_token = CsrfUtils::collectCsrfToken();
                             <div class="col-md-4">
                                 <div class="form-group">
                                     <label for="administration_start" class="control-label">Start Time:</label>
-                                    <input type="text" name="administration_start" id="administration_start" class="form-control datetimepicker" value="<?php echo htmlspecialchars(oeFormatShortDate($saved_data["administration_start"] ?? "")); ?>" onchange="calculateDuration()" placeholder="Date and time">
+                                    <input type="datetime-local" name="administration_start" id="administration_start" class="form-control" value="<?php echo htmlspecialchars(date('Y-m-d\TH:i', strtotime($saved_data["administration_start"] ?? 'now'))); ?>" onchange="calculateDuration()" placeholder="Date and time">
                                 </div>
                             </div>
                             <div class="col-md-4">
                                 <div class="form-group">
                                     <label for="administration_end" class="control-label">End Time:</label>
-                                    <input type="text" name="administration_end" id="administration_end" class="form-control datetimepicker" value="<?php echo htmlspecialchars(oeFormatShortDate($saved_data["administration_end"] ?? "")); ?>" onchange="calculateDuration()" placeholder="Date and time">
+                                    <input type="datetime-local" name="administration_end" id="administration_end" class="form-control" value="<?php echo htmlspecialchars(date('Y-m-d\TH:i', strtotime($saved_data["administration_end"] ?? 'now'))); ?>" onchange="calculateDuration()" placeholder="Date and time">
                                 </div>
                             </div>
                             <div class="col-md-4">
@@ -1267,23 +1264,6 @@ $csrf_token = CsrfUtils::collectCsrfToken();
         
         // Initialize form when page loads
         document.addEventListener('DOMContentLoaded', function() {
-            // Initialize date pickers
-            $('.datepicker').datetimepicker({
-                timepicker: false,
-                showSeconds: false,
-                formatInput: true,
-                minDate: false,
-                maxDate: false
-            });
-            $('.datetimepicker').datetimepicker({
-                timepicker: true,
-                showSeconds: false,
-                formatInput: true,
-                minDate: false,
-                maxDate: false,
-                format: 'Y-m-d g:i A'
-            });
-            
             // Initialize diagnoses from saved data
             const savedDiagnoses = document.getElementById('diagnoses_codes').value;
             if (savedDiagnoses) {
