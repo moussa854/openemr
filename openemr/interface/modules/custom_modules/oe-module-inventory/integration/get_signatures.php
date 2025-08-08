@@ -42,6 +42,7 @@ try {
     // Get all active signatures for this form
     $signatures_sql = "SELECT 
                         s.id,
+                        s.user_id,
                         s.signature_text,
                         s.signature_date,
                         s.signature_type,
