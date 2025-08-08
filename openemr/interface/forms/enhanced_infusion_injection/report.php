@@ -1,5 +1,6 @@
 <?php
 require_once($GLOBALS["fileroot"] . "/library/formatting.inc.php");
+require_once($GLOBALS["fileroot"] . "/src/Services/Utils/DateFormatterUtils.php");
 /**
  * Enhanced Infusion and Injection Form Report
  * 
@@ -10,6 +11,23 @@ require_once($GLOBALS["fileroot"] . "/library/formatting.inc.php");
 // Function to check if a field has meaningful data
 function hasValue($value) {
     return !empty($value) && $value !== null && $value !== '';
+}
+
+// Function to format datetime with AM/PM
+function formatDateTimeAmPm($datetime) {
+    if (empty($datetime) || $datetime === '0000-00-00 00:00:00' || $datetime === '0000-00-00') {
+        return '';
+    }
+    
+    $timestamp = strtotime($datetime);
+    if ($timestamp === false) {
+        return $datetime; // Return original if can't parse
+    }
+    
+    $formatted_date = oeFormatShortDate(date('Y-m-d', $timestamp));
+    $formatted_time = date('g:i A', $timestamp);
+    
+    return $formatted_date . ' ' . $formatted_time;
 }
 
 function extractUnitFromDose($dose) {
@@ -330,7 +348,7 @@ function enhanced_infusion_injection_report($pid, $encounter, $cols, $id, $print
                         <?php if (hasValue($form_data['iv_access_date'])): ?>
                         <div class="field">
                             <span class="field-label">Date:</span>
-                            <span class="field-value"><?php echo htmlspecialchars(oeFormatShortDate($form_data['iv_access_date'] ?? '')); ?></span>
+                            <span class="field-value"><?php echo htmlspecialchars(formatDateTimeAmPm($form_data['iv_access_date'] ?? '')); ?></span>
                         </div>
                         <?php endif; ?>
                         <?php if (hasValue($form_data['iv_access_comments'])): ?>
@@ -388,13 +406,13 @@ function enhanced_infusion_injection_report($pid, $encounter, $cols, $id, $print
                         <?php if (hasValue($form_data['administration_start'])): ?>
                         <div class="field">
                             <span class="field-label">Start Time:</span>
-                            <span class="field-value"><?php echo htmlspecialchars($form_data['administration_start']); ?></span>
+                            <span class="field-value"><?php echo htmlspecialchars(formatDateTimeAmPm($form_data['administration_start'])); ?></span>
                         </div>
                         <?php endif; ?>
                         <?php if (hasValue($form_data['administration_end'])): ?>
                         <div class="field">
                             <span class="field-label">End Time:</span>
-                            <span class="field-value"><?php echo htmlspecialchars($form_data['administration_end']); ?></span>
+                            <span class="field-value"><?php echo htmlspecialchars(formatDateTimeAmPm($form_data['administration_end'])); ?></span>
                         </div>
                         <?php endif; ?>
                         <?php if (hasValue($form_data['administration_duration'])): ?>
