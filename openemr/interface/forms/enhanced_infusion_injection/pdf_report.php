@@ -7,7 +7,7 @@
  * It uses mPDF library for PDF generation.
  */
 
-require_once("../../../globals.php");
+require_once("../../globals.php");
 require_once("$srcdir/patient.inc.php");
 require_once("$srcdir/forms.inc.php");
 
