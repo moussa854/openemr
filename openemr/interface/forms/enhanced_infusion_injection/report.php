@@ -95,6 +95,15 @@ function enhanced_infusion_injection_report($pid, $encounter, $cols, $id, $print
                 .field:last-child { border-bottom: none; }
                 .print-button { background: #28a745; color: white; padding: 10px 20px; border: none; border-radius: 5px; cursor: pointer; margin-bottom: 20px; }
                 .no-data { color: #6c757d; font-style: italic; }
+                .signatures-container { margin-top: 15px; }
+                .signature-entry { border: 1px solid #dee2e6; border-radius: 5px; margin-bottom: 15px; padding: 15px; background: #f8f9fa; }
+                .signature-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; flex-wrap: wrap; }
+                .signature-user { font-weight: bold; color: #007bff; font-size: 14px; }
+                .signature-type { background: #007bff; color: white; padding: 4px 8px; border-radius: 12px; font-size: 11px; font-weight: bold; text-transform: uppercase; }
+                .signature-date { color: #6c757d; font-size: 12px; }
+                .signature-text { margin-top: 8px; padding-top: 8px; border-top: 1px solid #dee2e6; }
+                .signature-label { font-weight: bold; color: #495057; margin-right: 8px; }
+                .signature-value { color: #212529; font-style: italic; }
                 @media print {
                     .print-button, button { display: none; }
                     body { background: white; }
@@ -431,6 +440,52 @@ function enhanced_infusion_injection_report($pid, $encounter, $cols, $id, $print
                         </div>
                         <?php endif; ?>
                     </div>
+                    
+                    <!-- Electronic Signatures Section -->
+                    <?php
+                    // Get signatures for this form
+                    $signatures_sql = "SELECT 
+                                        s.signature_text,
+                                        s.signature_date,
+                                        s.signature_type,
+                                        s.signature_order,
+                                        u.fname,
+                                        u.lname,
+                                        st.display_name as type_display_name
+                                       FROM form_enhanced_infusion_signatures s
+                                       LEFT JOIN users u ON s.user_id = u.id
+                                       LEFT JOIN signature_types st ON s.signature_type = st.type_name
+                                       WHERE s.form_id = ? AND s.is_active = 1
+                                       ORDER BY s.signature_order ASC, s.created_at ASC";
+                    
+                    $signatures_result = sqlStatement($signatures_sql, [$id]);
+                    $signatures = [];
+                    while ($row = sqlFetchArray($signatures_result)) {
+                        $signatures[] = $row;
+                    }
+                    
+                    if (!empty($signatures)): ?>
+                    <div class="section">
+                        <div class="section-title">Electronic Signatures</div>
+                        <div class="signatures-container">
+                            <?php foreach ($signatures as $signature): ?>
+                            <div class="signature-entry">
+                                <div class="signature-header">
+                                    <span class="signature-user"><?php echo htmlspecialchars(trim($signature['fname'] . ' ' . $signature['lname'])); ?></span>
+                                    <span class="signature-type"><?php echo htmlspecialchars($signature['type_display_name'] ?? ucfirst($signature['signature_type'])); ?></span>
+                                    <span class="signature-date"><?php echo htmlspecialchars(oeFormatShortDate($signature['signature_date'])); ?></span>
+                                </div>
+                                <?php if (!empty(trim($signature['signature_text']))): ?>
+                                <div class="signature-text">
+                                    <span class="signature-label">Signature Text:</span>
+                                    <span class="signature-value"><?php echo htmlspecialchars($signature['signature_text']); ?></span>
+                                </div>
+                                <?php endif; ?>
+                            </div>
+                            <?php endforeach; ?>
+                        </div>
+                    </div>
+                    <?php endif; ?>
                     
                 <?php else: ?>
                     <div class="section">
