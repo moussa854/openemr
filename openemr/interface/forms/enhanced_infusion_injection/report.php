@@ -13,6 +13,24 @@ function hasValue($value) {
 }
 
 function extractUnitFromDose($dose) {
+function formatFrequencyUnit($value, $unit) {
+    if (empty($value) || empty($unit)) return $unit;
+    
+    // Convert to singular if value is 1
+    if ($value == 1) {
+        $singular_units = [
+            "days" => "day",
+            "weeks" => "week",
+            "months" => "month",
+            "years" => "year",
+            "hours" => "hour",
+            "minutes" => "minute"
+        ];
+        return $singular_units[strtolower($unit)] ?? $unit;
+    }
+    
+    return $unit;
+}
     if (empty($dose)) return '';
     
     // Common units to look for
@@ -205,7 +223,7 @@ function enhanced_infusion_injection_report($pid, $encounter, $cols, $id, $print
                         <?php if (hasValue($form_data['order_every_value']) || hasValue($form_data['order_every_unit'])): ?>
                         <div class="field">
                             <span class="field-label">Frequency:</span>
-                            <span class="field-value"><?php echo htmlspecialchars($form_data['order_every_value'] ?? '') . ' ' . htmlspecialchars($form_data['order_every_unit'] ?? ''); ?></span>
+                            <span class="field-value"><?php echo htmlspecialchars($form_data["order_every_value"] ?? "") . " " . htmlspecialchars(formatFrequencyUnit($form_data["order_every_value"] ?? 0, $form_data["order_every_unit"] ?? "")); ?></span>
                         </div>
                         <?php endif; ?>
                         <?php if (hasValue($form_data['order_end_date'])): ?>
