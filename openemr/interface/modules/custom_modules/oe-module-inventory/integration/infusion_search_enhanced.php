@@ -846,7 +846,7 @@ $csrf_token = CsrfUtils::collectCsrfToken();
                                 <div class="col-md-4">
                                     <div class="form-group">
                                         <label for="signature_text" class="control-label">Signature Text:</label>
-                                        <input type="text" id="signature_text" class="form-control" placeholder="Enter signature text">
+                                        <input type="text" id="signature_text" class="form-control" placeholder="Enter signature text (optional)">
                                     </div>
                                 </div>
                             </div>

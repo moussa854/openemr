@@ -43,14 +43,7 @@ if ($form_id <= 0) {
     exit;
 }
 
-// Signature text is now optional - if empty, use user's name
-if (empty($signature_text)) {
-    // Get user's name to use as default signature text
-    $user_sql = "SELECT fname, lname FROM users WHERE id = ?";
-    $user_result = sqlStatement($user_sql, [$user_id]);
-    $user_data = sqlFetchArray($user_result);
-    $signature_text = trim($user_data['fname'] . ' ' . $user_data['lname']);
-}
+// Signature text is optional - if empty, leave it blank
 
 // Validate signature type
 $valid_types = ['primary', 'witness', 'reviewer', 'custom'];
