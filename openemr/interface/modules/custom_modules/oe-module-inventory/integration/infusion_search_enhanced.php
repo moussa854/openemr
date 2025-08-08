@@ -1688,10 +1688,7 @@ if (document.getElementById("iv_access_date") && document.getElementById("iv_acc
             const signatureDateTime = document.getElementById('signature_datetime').value;
             const signatureText = document.getElementById('signature_text').value.trim();
             
-            if (!signatureText) {
-                alert('Please enter signature text');
-                return;
-            }
+            // Signature text is now optional - if empty, it will use the user's name
             
             if (!currentFormId) {
                 alert('Form must be saved before adding signatures');

@@ -5,9 +5,9 @@
  */
 
 // Include OpenEMR globals
-require_once(dirname(__FILE__) . "/../../../../../globals.php");
-require_once(dirname(__FILE__) . "/../../../../../library/sql.inc.php");
-require_once(dirname(__FILE__) . "/../../../../../library/forms.inc.php");
+require_once(dirname(__FILE__) . "/../../../../globals.php");
+require_once(dirname(__FILE__) . "/../../../../library/sql.inc.php");
+require_once(dirname(__FILE__) . "/../../../../library/forms.inc.php");
 
 // Set content type to JSON
 header('Content-Type: application/json');
@@ -39,10 +39,13 @@ if ($signature_id <= 0) {
     exit;
 }
 
+// Signature text is now optional - if empty, use user's name
 if (empty($signature_text)) {
-    http_response_code(400);
-    echo json_encode(['success' => false, 'message' => 'Signature text is required']);
-    exit;
+    // Get user's name to use as default signature text
+    $user_sql = "SELECT fname, lname FROM users WHERE id = ?";
+    $user_result = sqlStatement($user_sql, [$user_id]);
+    $user_data = sqlFetchArray($user_result);
+    $signature_text = trim($user_data['fname'] . ' ' . $user_data['lname']);
 }
 
 try {
