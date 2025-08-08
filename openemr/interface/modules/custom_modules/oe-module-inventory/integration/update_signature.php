@@ -4,12 +4,15 @@
  * Handles updating electronic signatures for the enhanced infusion form
  */
 
-// Include OpenEMR globals
+// Ensure auth is required and session is started through OpenEMR
+$ignoreAuth = false;
+$sessionAllowReadOnly = true;
+
 require_once(dirname(__FILE__) . "/../../../../../interface/globals.php");
 require_once(dirname(__FILE__) . "/../../../../../library/sql.inc.php");
 require_once(dirname(__FILE__) . "/../../../../../library/forms.inc.php");
 
-// Set content type to JSON
+// Always return JSON
 header('Content-Type: application/json');
 
 // Check if user is logged in

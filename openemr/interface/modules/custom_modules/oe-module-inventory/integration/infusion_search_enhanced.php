@@ -1638,7 +1638,9 @@ if (document.getElementById("iv_access_date") && document.getElementById("iv_acc
         function loadExistingSignatures() {
             if (!currentFormId) return;
             
-            fetch(`get_signatures.php?form_id=${currentFormId}`)
+            fetch(`get_signatures.php?form_id=${currentFormId}&site=default`, {
+                credentials: 'same-origin'
+            })
                 .then(response => response.json())
                 .then(data => {
                     if (data.success) {
@@ -1733,8 +1735,9 @@ if (document.getElementById("iv_access_date") && document.getElementById("iv_acc
             formData.append('signature_date', signatureDateTime);
             formData.append('signature_text', signatureText);
             
-            fetch('save_signature.php', {
+            fetch('save_signature.php?site=default', {
                 method: 'POST',
+                credentials: 'same-origin',
                 body: formData
             })
             .then(response => response.json())
@@ -1767,8 +1770,9 @@ if (document.getElementById("iv_access_date") && document.getElementById("iv_acc
             const formData = new FormData();
             formData.append('signature_id', signatureId);
             
-            fetch('delete_signature.php', {
+            fetch('delete_signature.php?site=default', {
                 method: 'POST',
+                credentials: 'same-origin',
                 body: formData
             })
             .then(response => response.json())
@@ -1800,8 +1804,9 @@ if (document.getElementById("iv_access_date") && document.getElementById("iv_acc
             formData.append('signature_text', newText);
             formData.append('signature_date', newDateTime);
             
-            fetch('update_signature.php', {
+            fetch('update_signature.php?site=default', {
                 method: 'POST',
+                credentials: 'same-origin',
                 body: formData
             })
             .then(response => response.json())
