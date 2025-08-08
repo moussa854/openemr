@@ -5,7 +5,7 @@
  */
 
 // Include OpenEMR globals
-require_once(dirname(__FILE__) . "/../../../../../globals.php");
+require_once(dirname(__FILE__) . "/../../../../../interface/globals.php");
 require_once(dirname(__FILE__) . "/../../../../../library/sql.inc.php");
 require_once(dirname(__FILE__) . "/../../../../../library/forms.inc.php");
 
