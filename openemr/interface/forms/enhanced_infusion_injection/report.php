@@ -473,7 +473,12 @@ function enhanced_infusion_injection_report($pid, $encounter, $cols, $id, $print
                                 <div class="signature-header">
                                     <span class="signature-user"><?php echo htmlspecialchars(trim($signature['fname'] . ' ' . $signature['lname'])); ?></span>
                                     <span class="signature-type"><?php echo htmlspecialchars($signature['type_display_name'] ?? ucfirst($signature['signature_type'])); ?></span>
-                                    <span class="signature-date"><?php echo htmlspecialchars(oeFormatShortDate($signature['signature_date'])); ?></span>
+                                    <span class="signature-date"><?php 
+                                        $signature_date = $signature['signature_date'] ?? '';
+                                        $formatted_date = oeFormatShortDate($signature_date);
+                                        $formatted_time = date('g:i A', strtotime($signature_date));
+                                        echo htmlspecialchars($formatted_date . ' ' . $formatted_time);
+                                    ?></span>
                                 </div>
                                 <?php if (!empty(trim($signature['signature_text']))): ?>
                                 <div class="signature-text">
