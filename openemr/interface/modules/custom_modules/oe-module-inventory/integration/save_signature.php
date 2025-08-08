@@ -73,9 +73,54 @@ try {
     $existing_result = sqlStatement($existing_sql, [$form_id, $user_id, $signature_type]);
     
     if (sqlFetchArray($existing_result)) {
-        http_response_code(409);
-        echo json_encode(['success' => false, 'message' => 'User already has a signature of this type for this form']);
-        exit;
+        // Instead of blocking, update the existing signature
+        $update_sql = "UPDATE form_enhanced_infusion_signatures 
+                       SET signature_text = ?, signature_date = ?, updated_at = CURRENT_TIMESTAMP 
+                       WHERE form_id = ? AND user_id = ? AND signature_type = ? AND is_active = 1";
+        
+        $update_result = sqlStatement($update_sql, [$signature_text, $signature_date, $form_id, $user_id, $signature_type]);
+        
+        if ($update_result) {
+            // Get the updated signature ID
+            $existing_sql = "SELECT id FROM form_enhanced_infusion_signatures 
+                           WHERE form_id = ? AND user_id = ? AND signature_type = ? AND is_active = 1";
+            $existing_result = sqlStatement($existing_sql, [$form_id, $user_id, $signature_type]);
+            $existing_data = sqlFetchArray($existing_result);
+            $signature_id = $existing_data['id'];
+            
+            // Log the update activity
+            $log_sql = "INSERT INTO form_enhanced_infusion_signature_log 
+                        (form_id, signature_id, user_id, action, details, ip_address) 
+                        VALUES (?, ?, ?, 'update', ?, ?)";
+            sqlStatement($log_sql, [
+                $form_id, 
+                $signature_id, 
+                $user_id, 
+                "Updated existing signature of type: $signature_type", 
+                $_SERVER['REMOTE_ADDR'] ?? ''
+            ]);
+
+            // Get user information for response
+            $user_sql = "SELECT fname, lname FROM users WHERE id = ?";
+            $user_result = sqlStatement($user_sql, [$user_id]);
+            $user_data = sqlFetchArray($user_result);
+            $user_name = trim($user_data['fname'] . ' ' . $user_data['lname']);
+
+            echo json_encode([
+                'success' => true,
+                'message' => 'Signature updated successfully',
+                'signature_id' => $signature_id,
+                'user_name' => $user_name,
+                'signature_type' => $signature_type,
+                'signature_date' => $signature_date,
+                'signature_text' => $signature_text
+            ]);
+            exit;
+        } else {
+            http_response_code(500);
+            echo json_encode(['success' => false, 'message' => 'Failed to update existing signature']);
+            exit;
+        }
     }
 
     // Get the next signature order
@@ -100,7 +145,7 @@ try {
     ]);
 
     if ($insert_result) {
-        $signature_id = sqlInsertID();
+        $signature_id = generic_sql_insert_id();
         
         // Log the signature activity
         $log_sql = "INSERT INTO form_enhanced_infusion_signature_log 
