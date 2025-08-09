@@ -36,13 +36,10 @@ require_once("report.php");
 
 // Function to build HTML content with exact styling matching the web interface
 function buildPDFHTML($patient, $form_data, $dos_date, $encounter, $pid, $id) {
-    // Helper function to check if a field has meaningful data
-    function hasValue($value) {
-        return !empty($value) && $value !== null && $value !== '';
-    }
-
-    // Helper function to format datetime with AM/PM
-    function formatDateTimeAmPm($datetime) {
+    // Note: hasValue() function is already declared in report.php, so we use it directly
+    
+    // Helper function to format datetime with AM/PM (local to this function)
+    $formatDateTimeAmPm = function($datetime) {
         if (empty($datetime) || $datetime === '0000-00-00 00:00:00' || $datetime === '0000-00-00') {
             return '';
         }
@@ -56,10 +53,10 @@ function buildPDFHTML($patient, $form_data, $dos_date, $encounter, $pid, $id) {
         $formatted_time = date('g:i A', $timestamp);
         
         return $formatted_date . ' ' . $formatted_time;
-    }
+    };
 
-    // Helper function to extract unit from dose
-    function extractUnitFromDose($dose) {
+    // Helper function to extract unit from dose (local to this function)
+    $extractUnitFromDose = function($dose) {
         $units = ['mg', 'mL', 'gram', 'grams', 'g', 'mcg', 'units', 'IU', 'mEq', 'mmol'];
         
         foreach ($units as $unit) {
@@ -74,10 +71,10 @@ function buildPDFHTML($patient, $form_data, $dos_date, $encounter, $pid, $id) {
         }
         
         return '';
-    }
+    };
 
-    // Build allergies HTML
-    function buildAllergyHtml($pid) {
+    // Build allergies HTML (local to this function)
+    $buildAllergyHtml = function($pid) {
         if (empty($pid)) {
             return 'No patient selected.';
         }
@@ -99,7 +96,7 @@ function buildPDFHTML($patient, $form_data, $dos_date, $encounter, $pid, $id) {
             $html .= '• ' . $item . '<br>';
         }
         return $html;
-    }
+    };
 
     $html = '<!DOCTYPE html>
     <html>
