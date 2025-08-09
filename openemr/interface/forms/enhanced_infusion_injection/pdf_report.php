@@ -377,10 +377,33 @@ function buildPDFHTML($patient, $form_data, $dos_date, $encounter, $pid, $id) {
                 <span class="field-value">' . htmlspecialchars($formatDateTimeAmPm($form_data['administration_end'])) . '</span>
             </div>';
         }
-        if (hasValue($form_data['administration_duration'])) {
+        // Always show duration if we have start and end times
+        $calculated_duration = '';
+        if (hasValue($form_data['administration_start']) && hasValue($form_data['administration_end'])) {
+            $start = strtotime($form_data['administration_start']);
+            $end = strtotime($form_data['administration_end']);
+            
+            if ($start !== false && $end !== false && $end > $start) {
+                $duration_seconds = $end - $start;
+                $duration_minutes = round($duration_seconds / 60);
+                
+                $hours = floor($duration_minutes / 60);
+                $minutes = $duration_minutes % 60;
+                
+                if ($hours == 0) {
+                    $calculated_duration = $minutes . ' minute' . ($minutes != 1 ? 's' : '');
+                } else if ($minutes == 0) {
+                    $calculated_duration = $hours . ' hour' . ($hours != 1 ? 's' : '');
+                } else {
+                    $calculated_duration = $hours . ' hour' . ($hours != 1 ? 's' : '') . ' ' . $minutes . ' minute' . ($minutes != 1 ? 's' : '');
+                }
+            }
+        }
+        
+        if (!empty($calculated_duration)) {
             $html .= '<div class="field">
                 <span class="field-label">Duration:</span>
-                <span class="field-value">' . htmlspecialchars($form_data['administration_duration']) . ' hours</span>
+                <span class="field-value">' . htmlspecialchars($calculated_duration) . '</span>
             </div>';
         }
         if (hasValue($form_data['inventory_quantity_used'])) {

@@ -49,6 +49,35 @@ function extractUnitFromDose($dose) {
     return '';
 }
 
+// Helper function to format duration from start and end times
+function formatDuration($start_time, $end_time) {
+    if (empty($start_time) || empty($end_time) || 
+        $start_time === '0000-00-00 00:00:00' || $end_time === '0000-00-00 00:00:00') {
+        return '';
+    }
+    
+    $start = strtotime($start_time);
+    $end = strtotime($end_time);
+    
+    if ($start === false || $end === false || $end <= $start) {
+        return '';
+    }
+    
+    $duration_seconds = $end - $start;
+    $duration_minutes = round($duration_seconds / 60);
+    
+    $hours = floor($duration_minutes / 60);
+    $minutes = $duration_minutes % 60;
+    
+    if ($hours == 0) {
+        return $minutes . ' minute' . ($minutes != 1 ? 's' : '');
+    } else if ($minutes == 0) {
+        return $hours . ' hour' . ($hours != 1 ? 's' : '');
+    } else {
+        return $hours . ' hour' . ($hours != 1 ? 's' : '') . ' ' . $minutes . ' minute' . ($minutes != 1 ? 's' : '');
+    }
+}
+
 // Function to build allergies HTML from system
 function buildAllergyHtml($pid) {
     if (empty($pid)) {
@@ -459,12 +488,13 @@ function enhanced_infusion_injection_report($pid, $encounter, $cols, $id, $print
                             <span class="field-value"><?php echo htmlspecialchars(formatDateTimeAmPm($form_data['administration_end'])); ?></span>
                         </div>
                         <?php endif; ?>
-                        <?php if (hasValue($form_data['administration_duration'])): ?>
                         <div class="field">
                             <span class="field-label">Duration:</span>
-                            <span class="field-value"><?php echo htmlspecialchars($form_data['administration_duration']); ?> hours</span>
+                            <span class="field-value"><?php 
+                                $calculated_duration = formatDuration($form_data['administration_start'] ?? '', $form_data['administration_end'] ?? '');
+                                echo htmlspecialchars($calculated_duration ?: 'Not calculated'); 
+                            ?></span>
                         </div>
-                        <?php endif; ?>
                         <?php if (hasValue($form_data['inventory_quantity_used'])): ?>
                         <div class="field">
                             <span class="field-label">Quantity Used:</span>
