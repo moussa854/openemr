@@ -105,15 +105,14 @@ function buildPDFHTML($patient, $form_data, $dos_date, $encounter, $pid, $id) {
         <title>Infusion & Injection Form</title>
         <style>
             body { font-family: Arial, sans-serif; font-size: 11pt; margin: 20px; }
-            .section { margin-bottom: 20px; border: 1px solid #dee2e6; border-radius: 5px; overflow: hidden; }
-            .section-title { background: #007bff; color: white; padding: 10px 15px; font-weight: bold; font-size: 12pt; margin: 0; }
-            .field { padding: 10px 15px; border-bottom: 1px solid #dee2e6; }
-            .field:last-child { border-bottom: none; }
-            .field-label { font-weight: bold; color: #495057; display: inline-block; min-width: 120px; }
-            .field-value { color: #212529; font-weight: 500; }
-            .patient-info { background: #f8f9fa; padding: 15px; border: 1px solid #e9ecef; margin-bottom: 20px; border-radius: 5px; }
-            .header { text-align: center; border-bottom: 2px solid #007bff; padding-bottom: 15px; margin-bottom: 20px; }
-            .header h1 { color: #007bff; margin: 0 0 10px 0; font-size: 18pt; font-weight: bold; }
+            .section { margin-bottom: 15px; border: 1px solid #ccc; }
+            .section-title { background: #007bff; color: white; padding: 8px 12px; font-weight: bold; font-size: 12pt; margin: 0; }
+            .field { padding: 8px 12px; border-bottom: 1px solid #eee; }
+            .field-label { font-weight: bold; color: #333; display: inline-block; width: 150px; }
+            .field-value { color: #000; }
+            .patient-info { background: #f9f9f9; padding: 12px; border: 1px solid #ddd; margin-bottom: 15px; }
+            .header { text-align: center; border-bottom: 2px solid #007bff; padding-bottom: 10px; margin-bottom: 15px; }
+            .header h1 { color: #007bff; margin: 0 0 8px 0; font-size: 16pt; font-weight: bold; }
         </style>
     </head>
     <body>
@@ -508,27 +507,26 @@ $form_data = sqlQuery($sql, [$id, $pid]);
 $htmlContent = buildPDFHTML($patient, $form_data, $dos_date, $encounter, $pid, $id);
 
 try {
-    // Configure mPDF
+    // Configure mPDF with simpler settings
     $config_mpdf = Config_Mpdf::getConfigMpdf();
     $config_mpdf['margin_left'] = 15;
     $config_mpdf['margin_right'] = 15;
     $config_mpdf['margin_top'] = 15;
-    $config_mpdf['margin_bottom'] = 30;
-    $config_mpdf['margin_footer'] = 10;
+    $config_mpdf['margin_bottom'] = 25;
     $config_mpdf['default_font_size'] = 11;
+    $config_mpdf['mode'] = 'utf-8';
+    $config_mpdf['format'] = 'A4';
     
     // Create PDF
     $pdf = new Mpdf($config_mpdf);
     
-    // Set footer with patient name and DOB on left, page numbers on right
-    $patient_dob = !empty($patient['DOB']) ? oeFormatShortDate($patient['DOB']) : '';
-    $footer_left = $patient['fname'] . ' ' . $patient['lname'];
-    if (!empty($patient_dob)) {
-        $footer_left .= ' (' . $patient_dob . ')';
-    }
-    
-    // Use custom footer with patient info and page numbers
-    $pdf->setFooter($footer_left . '|Page {PAGENO} of {nb}');
+    // Temporarily disable footer to isolate table height issue
+    // $patient_dob = !empty($patient['DOB']) ? oeFormatShortDate($patient['DOB']) : '';
+    // $footer_left = $patient['fname'] . ' ' . $patient['lname'];
+    // if (!empty($patient_dob)) {
+    //     $footer_left .= ' (' . $patient_dob . ')';
+    // }
+    // $pdf->setFooter($footer_left . '|Page {PAGENO} of {nb}');
     
     // Set document info
     $patient_name = $patient['fname'] . '_' . $patient['lname'];
