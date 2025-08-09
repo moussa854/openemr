@@ -525,7 +525,7 @@ try {
     // Set professional header for first page only
     $logo_path = '/var/www/emr.carepointinfusion.com/sites/default/images/practice_logo.png';
     $header_html = '
-        <table width="100%" style="font-size: 10pt; color: #333; border-bottom: 2px solid #007bff; padding-bottom: 5px;">
+        <table width="100%" style="font-size: 10pt; color: #333; padding-bottom: 5px;">
             <tr>
                 <td width="25%" style="vertical-align: top;">';
     
