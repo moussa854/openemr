@@ -367,8 +367,254 @@ function buildPDFHTML($patient, $form_data, $dos_date, $encounter, $pid, $id) {
         
         $html .= '</div>';
 
-        // Add more sections as needed (Allergies, Vital Signs, etc.)
-        // For now, let's focus on the main sections that show the styling
+        // Allergies section
+        $html .= '<div class="section">
+            <div class="section-title">Allergies</div>
+            <div class="field">
+                <span class="field-label">Allergies:</span>
+                <span class="field-value">' . $buildAllergyHtml($pid) . '</span>
+            </div>
+        </div>';
+
+        // Vital Signs section
+        $html .= '<div class="section">
+            <div class="section-title">Vital Signs</div>';
+        
+        if (hasValue($form_data['bp_systolic']) || hasValue($form_data['bp_diastolic'])) {
+            $html .= '<div class="field">
+                <span class="field-label">Blood Pressure:</span>
+                <span class="field-value">' . htmlspecialchars($form_data['bp_systolic'] ?? '') . '/' . htmlspecialchars($form_data['bp_diastolic'] ?? '') . ' mmHg</span>
+            </div>';
+        }
+        if (hasValue($form_data['pulse'])) {
+            $html .= '<div class="field">
+                <span class="field-label">Pulse:</span>
+                <span class="field-value">' . htmlspecialchars($form_data['pulse']) . ' bpm</span>
+            </div>';
+        }
+        if (hasValue($form_data['temperature_f'])) {
+            $html .= '<div class="field">
+                <span class="field-label">Temperature:</span>
+                <span class="field-value">' . htmlspecialchars($form_data['temperature_f']) . ' °F</span>
+            </div>';
+        }
+        if (hasValue($form_data['oxygen_saturation'])) {
+            $html .= '<div class="field">
+                <span class="field-label">Oxygen Sat:</span>
+                <span class="field-value">' . htmlspecialchars($form_data['oxygen_saturation']) . '%</span>
+            </div>';
+        }
+        if (hasValue($form_data['respiratory_rate'])) {
+            $html .= '<div class="field">
+                <span class="field-label">Respiratory Rate:</span>
+                <span class="field-value">' . htmlspecialchars($form_data['respiratory_rate']) . ' breaths/min</span>
+            </div>';
+        }
+        if (hasValue($form_data['weight'])) {
+            $html .= '<div class="field">
+                <span class="field-label">Weight:</span>
+                <span class="field-value">' . htmlspecialchars($form_data['weight']) . ' lbs</span>
+            </div>';
+        }
+        if (hasValue($form_data['height'])) {
+            $html .= '<div class="field">
+                <span class="field-label">Height:</span>
+                <span class="field-value">' . htmlspecialchars($form_data['height']) . ' in</span>
+            </div>';
+        }
+        
+        $html .= '</div>';
+
+        // IV Access section
+        $html .= '<div class="section">
+            <div class="section-title">IV Access</div>';
+            
+        if (hasValue($form_data['iv_access_type'])) {
+            $html .= '<div class="field">
+                <span class="field-label">Access Type:</span>
+                <span class="field-value">' . htmlspecialchars($form_data['iv_access_type']) . '</span>
+            </div>';
+        }
+        if (hasValue($form_data['iv_access_location'])) {
+            $html .= '<div class="field">
+                <span class="field-label">Location:</span>
+                <span class="field-value">' . htmlspecialchars($form_data['iv_access_location']) . '</span>
+            </div>';
+        }
+        if (hasValue($form_data['iv_access_needle_gauge'])) {
+            $html .= '<div class="field">
+                <span class="field-label">Needle Gauge:</span>
+                <span class="field-value">' . htmlspecialchars($form_data['iv_access_needle_gauge']) . '</span>
+            </div>';
+        }
+        if (hasValue($form_data['iv_access_blood_return'])) {
+            $html .= '<div class="field">
+                <span class="field-label">Blood Return:</span>
+                <span class="field-value">' . htmlspecialchars($form_data['iv_access_blood_return']) . '</span>
+            </div>';
+        }
+        if (hasValue($form_data['iv_access_attempts'])) {
+            $html .= '<div class="field">
+                <span class="field-label">Attempts:</span>
+                <span class="field-value">' . htmlspecialchars($form_data['iv_access_attempts']) . '</span>
+            </div>';
+        }
+        if (hasValue($form_data['iv_access_date'])) {
+            $html .= '<div class="field">
+                <span class="field-label">Date:</span>
+                <span class="field-value">' . htmlspecialchars($formatDateTimeAmPm($form_data['iv_access_date'] ?? '')) . '</span>
+            </div>';
+        }
+        if (hasValue($form_data['iv_access_comments'])) {
+            $html .= '<div class="field">
+                <span class="field-label">Comments:</span>
+                <span class="field-value">' . htmlspecialchars($form_data['iv_access_comments']) . '</span>
+            </div>';
+        }
+        
+        $html .= '</div>';
+
+        // Administration section (expanded)
+        $html .= '<div class="section">
+            <div class="section-title">Administration</div>';
+            
+        if (hasValue($form_data['order_medication'])) {
+            $html .= '<div class="field">
+                <span class="field-label">Medication:</span>
+                <span class="field-value">' . htmlspecialchars($form_data['order_medication']) . '</span>
+            </div>';
+        }
+        if (hasValue($form_data['order_dose'])) {
+            $html .= '<div class="field">
+                <span class="field-label">Dose:</span>
+                <span class="field-value">' . htmlspecialchars($form_data['order_dose']) . '</span>
+            </div>';
+        }
+        if (hasValue($form_data['order_strength'])) {
+            $html .= '<div class="field">
+                <span class="field-label">Strength:</span>
+                <span class="field-value">' . htmlspecialchars($form_data['order_strength'] . ' ' . $extractUnitFromDose($form_data['order_dose'] ?? '')) . '</span>
+            </div>';
+        }
+        if (hasValue($form_data['administration_route'])) {
+            $html .= '<div class="field">
+                <span class="field-label">Route:</span>
+                <span class="field-value">' . htmlspecialchars($form_data['administration_route']) . '</span>
+            </div>';
+        }
+        if (hasValue($form_data['order_lot_number'])) {
+            $html .= '<div class="field">
+                <span class="field-label">Lot Number:</span>
+                <span class="field-value">' . htmlspecialchars($form_data['order_lot_number']) . '</span>
+            </div>';
+        }
+        if (hasValue($form_data['order_expiration_date'])) {
+            $html .= '<div class="field">
+                <span class="field-label">Expiration Date:</span>
+                <span class="field-value">' . htmlspecialchars(oeFormatShortDate($form_data['order_expiration_date'] ?? '')) . '</span>
+            </div>';
+        }
+        if (hasValue($form_data['administration_start'])) {
+            $html .= '<div class="field">
+                <span class="field-label">Start Time:</span>
+                <span class="field-value">' . htmlspecialchars($formatDateTimeAmPm($form_data['administration_start'])) . '</span>
+            </div>';
+        }
+        if (hasValue($form_data['administration_end'])) {
+            $html .= '<div class="field">
+                <span class="field-label">End Time:</span>
+                <span class="field-value">' . htmlspecialchars($formatDateTimeAmPm($form_data['administration_end'])) . '</span>
+            </div>';
+        }
+        if (hasValue($form_data['administration_duration'])) {
+            $html .= '<div class="field">
+                <span class="field-label">Duration:</span>
+                <span class="field-value">' . htmlspecialchars($form_data['administration_duration']) . ' hours</span>
+            </div>';
+        }
+        if (hasValue($form_data['inventory_quantity_used'])) {
+            $html .= '<div class="field">
+                <span class="field-label">Quantity Used:</span>
+                <span class="field-value">' . htmlspecialchars($form_data['inventory_quantity_used']) . ' ' . htmlspecialchars($extractUnitFromDose($form_data['order_dose'] ?? '')) . '</span>
+            </div>';
+        }
+        if (hasValue($form_data['inventory_wastage_quantity']) && (floatval($form_data['inventory_wastage_quantity'] ?? 0) > 0)) {
+            $html .= '<div class="field">
+                <span class="field-label">Quantity Wasted:</span>
+                <span class="field-value">' . htmlspecialchars($form_data['inventory_wastage_quantity']) . ' ' . htmlspecialchars($extractUnitFromDose($form_data['order_dose'] ?? '')) . '</span>
+            </div>';
+            
+            if (hasValue($form_data['inventory_wastage_reason'])) {
+                $html .= '<div class="field">
+                    <span class="field-label">Wastage Reason:</span>
+                    <span class="field-value">' . htmlspecialchars($form_data['inventory_wastage_reason']) . '</span>
+                </div>';
+            }
+            if (hasValue($form_data['inventory_wastage_notes'])) {
+                $html .= '<div class="field">
+                    <span class="field-label">Wastage Notes:</span>
+                    <span class="field-value">' . htmlspecialchars($form_data['inventory_wastage_notes']) . '</span>
+                </div>';
+            }
+        }
+        if (hasValue($form_data['administration_comments'])) {
+            $html .= '<div class="field">
+                <span class="field-label">Administration Comments:</span>
+                <span class="field-value">' . htmlspecialchars($form_data['administration_comments']) . '</span>
+            </div>';
+        }
+        
+        $html .= '</div>';
+
+        // Electronic Signatures section
+        $signatures_sql = "SELECT 
+                            s.signature_text,
+                            s.signature_date,
+                            s.signature_type,
+                            s.signature_order,
+                            u.fname,
+                            u.lname,
+                            st.display_name as type_display_name
+                           FROM form_enhanced_infusion_signatures s
+                           LEFT JOIN users u ON s.user_id = u.id
+                           LEFT JOIN signature_types st ON s.signature_type = st.type_name
+                           WHERE s.form_id = ? AND s.is_active = 1
+                           ORDER BY s.signature_order ASC, s.created_at ASC";
+        
+        $signatures_result = sqlStatement($signatures_sql, [$id]);
+        $signatures = [];
+        while ($row = sqlFetchArray($signatures_result)) {
+            $signatures[] = $row;
+        }
+        
+        if (!empty($signatures)) {
+            $html .= '<div class="section">
+                <div class="section-title">Electronic Signatures</div>';
+            
+            foreach ($signatures as $signature) {
+                $signature_date = $signature['signature_date'] ?? '';
+                $formatted_date = oeFormatShortDate($signature_date);
+                $formatted_time = date('g:i A', strtotime($signature_date));
+                
+                $html .= '<div class="signature-entry">
+                    <div class="signature-header">
+                        <span class="signature-user">' . htmlspecialchars(trim($signature['fname'] . ' ' . $signature['lname'])) . '</span>
+                        <span class="signature-type">' . htmlspecialchars($signature['type_display_name'] ?? ucfirst($signature['signature_type'])) . '</span>
+                        <span class="signature-date">' . htmlspecialchars($formatted_date . ' ' . $formatted_time) . '</span>
+                    </div>';
+                
+                if (!empty(trim($signature['signature_text']))) {
+                    $html .= '<div class="signature-text">
+                        <span class="signature-label">Signature Text:</span>
+                        <span class="signature-value">' . htmlspecialchars($signature['signature_text']) . '</span>
+                    </div>';
+                }
+                
+                $html .= '</div>';
+            }
+            
+            $html .= '</div>';
+        }
     }
 
     $html .= '
