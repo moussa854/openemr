@@ -514,9 +514,9 @@ try {
         'format'         => 'A4',
         'margin_left'    => 15,    // numbers only, no "mm" strings
         'margin_right'   => 15,
-        'margin_top'     => 15,
+        'margin_top'     => 35,    // increased for header space on first page
         'margin_bottom'  => 25,
-        'margin_header'  => 0,
+        'margin_header'  => 20,    // space for header
         'margin_footer'  => 10,    // reserve space for footer
         'default_font_size' => 11,
     ]);
@@ -524,6 +524,37 @@ try {
     // Set auto margin properties to avoid calculation conflicts
     $pdf->setAutoBottomMargin = 'stretch';
     $pdf->autoMarginPadding = 0.0;
+    
+    // Set professional header for first page only
+    $logo_path = '/var/www/emr.carepointinfusion.com/sites/default/images/practice_logo.png';
+    $header_html = '
+        <table width="100%" style="font-size: 10pt; color: #333; border-bottom: 2px solid #007bff; padding-bottom: 5px;">
+            <tr>
+                <td width="25%" style="vertical-align: top;">';
+    
+    // Check if logo exists and add it
+    if (file_exists($logo_path)) {
+        $header_html .= '<img src="' . $logo_path . '" style="max-height: 50px; max-width: 100px;" alt="CarePoint Logo">';
+    } else {
+        $header_html .= '<div style="width: 100px; height: 50px; border: 1px solid #ccc; text-align: center; line-height: 50px; font-size: 8pt;">Logo</div>';
+    }
+    
+    $header_html .= '</td>
+                <td width="75%" style="text-align: right; vertical-align: top;">
+                    <div style="font-weight: bold; font-size: 12pt; color: #007bff; margin-bottom: 3px;">CarePoint Infusion Center</div>
+                    <div style="line-height: 1.3;">
+                        23215 Commerce Park Suite 318<br>
+                        Beachwood, OH 44122-5803<br>
+                        Phone: (216) 755-4044<br>
+                        Fax: (330) 967-0571
+                    </div>
+                </td>
+            </tr>
+        </table>
+    ';
+    
+    // Set header for first page only
+    $pdf->SetHTMLHeader($header_html, 'O'); // 'O' for odd pages (first page)
     
     // Now safely set footer with patient info
     $patient_dob = !empty($patient['DOB']) ? oeFormatShortDate($patient['DOB']) : '';
