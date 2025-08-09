@@ -534,9 +534,9 @@ try {
     
     // Check if logo exists and add it
     if (file_exists($logo_path)) {
-        $header_html .= '<img src="' . $logo_path . '" style="max-height: 50px; max-width: 100px;" alt="CarePoint Logo">';
+        $header_html .= '<img src="' . $logo_path . '" style="max-height: 70px; max-width: 140px;" alt="CarePoint Logo">';
     } else {
-        $header_html .= '<div style="width: 100px; height: 50px; border: 1px solid #ccc; text-align: center; line-height: 50px; font-size: 8pt;">Logo</div>';
+        $header_html .= '<div style="width: 140px; height: 70px; border: 1px solid #ccc; text-align: center; line-height: 70px; font-size: 8pt;">Logo</div>';
     }
     
     $header_html .= '</td>
