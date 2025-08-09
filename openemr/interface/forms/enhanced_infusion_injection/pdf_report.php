@@ -513,7 +513,8 @@ try {
     $config_mpdf['margin_left'] = 15;
     $config_mpdf['margin_right'] = 15;
     $config_mpdf['margin_top'] = 15;
-    $config_mpdf['margin_bottom'] = 25; // Increased bottom margin for footer
+    $config_mpdf['margin_bottom'] = 30;
+    $config_mpdf['margin_footer'] = 10;
     $config_mpdf['default_font_size'] = 11;
     
     // Create PDF
@@ -521,19 +522,13 @@ try {
     
     // Set footer with patient name and DOB on left, page numbers on right
     $patient_dob = !empty($patient['DOB']) ? oeFormatShortDate($patient['DOB']) : '';
-    $footer_left = htmlspecialchars($patient['fname'] . ' ' . $patient['lname']);
+    $footer_left = $patient['fname'] . ' ' . $patient['lname'];
     if (!empty($patient_dob)) {
-        $footer_left .= ' (' . htmlspecialchars($patient_dob) . ')';
+        $footer_left .= ' (' . $patient_dob . ')';
     }
     
-    $pdf->SetHTMLFooter('
-        <table width="100%" style="font-size: 10px; border-top: 1px solid #000; padding-top: 5px;">
-            <tr>
-                <td style="text-align: left; width: 50%;">' . $footer_left . '</td>
-                <td style="text-align: right; width: 50%;">Page {PAGENO} of {nbpg}</td>
-            </tr>
-        </table>
-    ');
+    // Use custom footer with patient info and page numbers
+    $pdf->setFooter($footer_left . '|Page {PAGENO} of {nb}');
     
     // Set document info
     $patient_name = $patient['fname'] . '_' . $patient['lname'];
