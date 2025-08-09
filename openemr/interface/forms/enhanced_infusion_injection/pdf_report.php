@@ -113,6 +113,9 @@ function buildPDFHTML($patient, $form_data, $dos_date, $encounter, $pid, $id) {
             .patient-info { background: #f9f9f9; padding: 12px; border: 1px solid #ddd; margin-bottom: 15px; }
             .header { text-align: center; border-bottom: 2px solid #007bff; padding-bottom: 10px; margin-bottom: 15px; }
             .header h1 { color: #007bff; margin: 0 0 8px 0; font-size: 16pt; font-weight: bold; }
+            .page-footer { position: fixed; bottom: 0; left: 0; right: 0; height: 20px; font-size: 10pt; border-top: 1px solid #000; padding-top: 5px; background: white; }
+            .footer-left { float: left; }
+            .footer-right { float: right; }
         </style>
     </head>
     <body>
@@ -487,7 +490,18 @@ function buildPDFHTML($patient, $form_data, $dos_date, $encounter, $pid, $id) {
 
     }
 
+    // Add footer with patient info and page numbers using HTML/CSS
+    $patient_dob = !empty($patient['DOB']) ? oeFormatShortDate($patient['DOB']) : '';
+    $footer_patient_info = htmlspecialchars($patient['fname'] . ' ' . $patient['lname']);
+    if (!empty($patient_dob)) {
+        $footer_patient_info .= ' (' . htmlspecialchars($patient_dob) . ')';
+    }
+    
     $html .= '
+        <div class="page-footer">
+            <div class="footer-left">' . $footer_patient_info . '</div>
+            <div class="footer-right">Page {PAGENO} of {nb}</div>
+        </div>
     </body>
     </html>';
 
@@ -520,15 +534,16 @@ try {
     // Create PDF
     $pdf = new Mpdf($config_mpdf);
     
-    // Re-enable footer with simpler approach
-    $patient_dob = !empty($patient['DOB']) ? oeFormatShortDate($patient['DOB']) : '';
-    $footer_left = $patient['fname'] . ' ' . $patient['lname'];
-    if (!empty($patient_dob)) {
-        $footer_left .= ' (' . $patient_dob . ')';
-    }
+    // Footer functionality disabled due to mPDF compatibility issues
+    // The setFooter() method causes margin calculation errors in this mPDF version
+    // Alternative: Patient info is displayed in the header section of each page
     
-    // Use simple text footer (not HTML) to avoid table calculation conflicts
-    $pdf->setFooter($footer_left . '|Page {PAGENO} of {nb}');
+    // $patient_dob = !empty($patient['DOB']) ? oeFormatShortDate($patient['DOB']) : '';
+    // $footer_left = $patient['fname'] . ' ' . $patient['lname'];
+    // if (!empty($patient_dob)) {
+    //     $footer_left .= ' (' . $patient_dob . ')';
+    // }
+    // $pdf->setFooter($footer_left . '|Page {PAGENO} of {nb}');
     
     // Set document info
     $patient_name = $patient['fname'] . '_' . $patient['lname'];
