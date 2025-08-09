@@ -110,8 +110,8 @@ function buildPDFHTML($patient, $form_data, $dos_date, $encounter, $pid, $id) {
             .field { padding: 8px 12px; border-bottom: 1px solid #eee; }
             .field-label { font-weight: bold; color: #333; display: inline-block; width: 150px; }
             .field-value { color: #000; }
-            .patient-info { background: #f9f9f9; padding: 12px; border: 1px solid #ddd; margin: 15px 0; text-align: center; }
-            .header { border-bottom: 2px solid #007bff; padding-bottom: 10px; margin-bottom: 15px; }
+            .patient-info { background: #f9f9f9; padding: 12px; margin: 15px 0; text-align: center; }
+            .header { padding-bottom: 10px; margin-bottom: 15px; }
 
         </style>
     </head>
