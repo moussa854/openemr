@@ -113,9 +113,7 @@ function buildPDFHTML($patient, $form_data, $dos_date, $encounter, $pid, $id) {
             .patient-info { background: #f9f9f9; padding: 12px; border: 1px solid #ddd; margin-bottom: 15px; }
             .header { text-align: center; border-bottom: 2px solid #007bff; padding-bottom: 10px; margin-bottom: 15px; }
             .header h1 { color: #007bff; margin: 0 0 8px 0; font-size: 16pt; font-weight: bold; }
-            .page-footer { position: fixed; bottom: 0; left: 0; right: 0; height: 20px; font-size: 10pt; border-top: 1px solid #000; padding-top: 5px; background: white; }
-            .footer-left { float: left; }
-            .footer-right { float: right; }
+
         </style>
     </head>
     <body>
@@ -490,18 +488,7 @@ function buildPDFHTML($patient, $form_data, $dos_date, $encounter, $pid, $id) {
 
     }
 
-    // Add footer with patient info and page numbers using HTML/CSS
-    $patient_dob = !empty($patient['DOB']) ? oeFormatShortDate($patient['DOB']) : '';
-    $footer_patient_info = htmlspecialchars($patient['fname'] . ' ' . $patient['lname']);
-    if (!empty($patient_dob)) {
-        $footer_patient_info .= ' (' . htmlspecialchars($patient_dob) . ')';
-    }
-    
     $html .= '
-        <div class="page-footer">
-            <div class="footer-left">' . $footer_patient_info . '</div>
-            <div class="footer-right">Page {PAGENO} of {nb}</div>
-        </div>
     </body>
     </html>';
 
@@ -521,29 +508,39 @@ $form_data = sqlQuery($sql, [$id, $pid]);
 $htmlContent = buildPDFHTML($patient, $form_data, $dos_date, $encounter, $pid, $id);
 
 try {
-    // Configure mPDF with simpler settings
-    $config_mpdf = Config_Mpdf::getConfigMpdf();
-    $config_mpdf['margin_left'] = 15;
-    $config_mpdf['margin_right'] = 15;
-    $config_mpdf['margin_top'] = 15;
-    $config_mpdf['margin_bottom'] = 25;
-    $config_mpdf['default_font_size'] = 11;
-    $config_mpdf['mode'] = 'utf-8';
-    $config_mpdf['format'] = 'A4';
+    // Configure mPDF with strict numeric margins (ChatGPT's PHP 8 fix)
+    $pdf = new Mpdf([
+        'mode'           => 'utf-8',
+        'format'         => 'A4',
+        'margin_left'    => 15,    // numbers only, no "mm" strings
+        'margin_right'   => 15,
+        'margin_top'     => 15,
+        'margin_bottom'  => 25,
+        'margin_header'  => 0,
+        'margin_footer'  => 10,    // reserve space for footer
+        'default_font_size' => 11,
+    ]);
     
-    // Create PDF
-    $pdf = new Mpdf($config_mpdf);
+    // Set auto margin properties to avoid calculation conflicts
+    $pdf->setAutoBottomMargin = 'stretch';
+    $pdf->autoMarginPadding = 0.0;
     
-    // Footer functionality disabled due to mPDF compatibility issues
-    // The setFooter() method causes margin calculation errors in this mPDF version
-    // Alternative: Patient info is displayed in the header section of each page
+    // Now safely set footer with patient info
+    $patient_dob = !empty($patient['DOB']) ? oeFormatShortDate($patient['DOB']) : '';
+    $footer_left = $patient['fname'] . ' ' . $patient['lname'];
+    if (!empty($patient_dob)) {
+        $footer_left .= ' (' . $patient_dob . ')';
+    }
     
-    // $patient_dob = !empty($patient['DOB']) ? oeFormatShortDate($patient['DOB']) : '';
-    // $footer_left = $patient['fname'] . ' ' . $patient['lname'];
-    // if (!empty($patient_dob)) {
-    //     $footer_left .= ' (' . $patient_dob . ')';
-    // }
-    // $pdf->setFooter($footer_left . '|Page {PAGENO} of {nb}');
+    // Use SetHTMLFooter for more control and PHP 8 compatibility
+    $pdf->SetHTMLFooter('
+        <table width="100%" style="font-size: 9pt; color: #333;">
+            <tr>
+                <td style="text-align: left;">' . htmlspecialchars($footer_left) . '</td>
+                <td style="text-align: right;">Page {PAGENO} of {nb}</td>
+            </tr>
+        </table>
+    ');
     
     // Set document info
     $patient_name = $patient['fname'] . '_' . $patient['lname'];
