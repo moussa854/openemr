@@ -104,181 +104,30 @@ function buildPDFHTML($patient, $form_data, $dos_date, $encounter, $pid, $id) {
         <meta charset="utf-8">
         <title>Infusion & Injection Form</title>
         <style>
-            body { 
-                font-family: Arial, sans-serif; 
-                font-size: 11pt; 
-                line-height: 1.4;
-                margin: 0;
-                padding: 20px;
-                background: white;
-            }
-            .container { 
-                max-width: 100%; 
-                margin: 0 auto; 
-                background: white; 
-            }
-            .header { 
-                text-align: center; 
-                border-bottom: 2px solid #007bff; 
-                padding-bottom: 15px; 
-                margin-bottom: 20px; 
-            }
-            .header h1 { 
-                color: #007bff; 
-                margin: 0 0 10px 0; 
-                font-size: 18pt;
-                font-weight: bold;
-            }
-            .patient-info { 
-                background: #f8f9fa; 
-                padding: 15px; 
-                border: 1px solid #e9ecef; 
-                margin-bottom: 20px; 
-                border-radius: 5px;
-            }
-            .info-pair { 
-                display: flex; 
-                justify-content: space-between; 
-                margin-bottom: 8px; 
-            }
-            .info-item { 
-                flex: 1; 
-            }
-            .info-item:first-child { 
-                margin-right: 20px; 
-            }
-            .info-label { 
-                font-weight: bold; 
-                color: #495057; 
-                margin-right: 8px;
-            }
-            .info-value { 
-                color: #212529; 
-                font-weight: 500; 
-            }
-            .section { 
-                margin-bottom: 20px; 
-                border: 1px solid #dee2e6; 
-                border-radius: 5px; 
-                overflow: hidden; 
-                page-break-inside: avoid; 
-            }
-            .section-title { 
-                background: #007bff; 
-                color: white; 
-                padding: 10px 15px; 
-                font-weight: bold; 
-                font-size: 12pt; 
-                margin: 0;
-            }
-            .field { 
-                padding: 10px 15px; 
-                border-bottom: 1px solid #dee2e6; 
-                display: flex; 
-                align-items: flex-start;
-            }
-            .field:last-child { 
-                border-bottom: none; 
-            }
-            .field-label { 
-                font-weight: bold; 
-                color: #495057; 
-                min-width: 120px; 
-                margin-right: 10px;
-                flex-shrink: 0;
-            }
-            .field-value { 
-                color: #212529; 
-                font-weight: 500; 
-                flex: 1;
-                word-wrap: break-word;
-            }
-            .signature-entry { 
-                border: 1px solid #dee2e6; 
-                border-radius: 5px; 
-                margin-bottom: 15px; 
-                padding: 15px; 
-                background: #f8f9fa; 
-                page-break-inside: avoid; 
-            }
-            .signature-header { 
-                display: flex; 
-                justify-content: space-between; 
-                align-items: center; 
-                margin-bottom: 10px; 
-                flex-wrap: wrap; 
-            }
-            .signature-user { 
-                font-weight: bold; 
-                color: #007bff; 
-                font-size: 11pt; 
-            }
-            .signature-type { 
-                background: #007bff; 
-                color: white; 
-                padding: 4px 8px; 
-                border-radius: 12px; 
-                font-size: 9pt; 
-                font-weight: bold; 
-                text-transform: uppercase; 
-            }
-            .signature-date { 
-                color: #6c757d; 
-                font-size: 10pt; 
-            }
-            .signature-text { 
-                margin-top: 8px; 
-                padding-top: 8px; 
-                border-top: 1px solid #dee2e6; 
-            }
-            .signature-label { 
-                font-weight: bold; 
-                color: #495057; 
-                margin-right: 8px; 
-            }
-            .signature-value { 
-                color: #212529; 
-                font-style: italic; 
-            }
+            body { font-family: Arial, sans-serif; font-size: 11pt; margin: 20px; }
+            .section { margin-bottom: 20px; border: 1px solid #dee2e6; border-radius: 5px; overflow: hidden; }
+            .section-title { background: #007bff; color: white; padding: 10px 15px; font-weight: bold; font-size: 12pt; margin: 0; }
+            .field { padding: 10px 15px; border-bottom: 1px solid #dee2e6; }
+            .field:last-child { border-bottom: none; }
+            .field-label { font-weight: bold; color: #495057; display: inline-block; min-width: 120px; }
+            .field-value { color: #212529; font-weight: 500; }
+            .patient-info { background: #f8f9fa; padding: 15px; border: 1px solid #e9ecef; margin-bottom: 20px; border-radius: 5px; }
+            .header { text-align: center; border-bottom: 2px solid #007bff; padding-bottom: 15px; margin-bottom: 20px; }
+            .header h1 { color: #007bff; margin: 0 0 10px 0; font-size: 18pt; font-weight: bold; }
         </style>
     </head>
     <body>
-        <div class="container">
-            <div class="header">
-                <h1>Infusion & Injection Form</h1>
-                <div class="patient-info">
-                    <div class="info-pair">
-                        <div class="info-item">
-                            <span class="info-label">Patient:</span>
-                            <span class="info-value">' . htmlspecialchars($patient['fname'] . ' ' . $patient['lname']) . '</span>
-                        </div>
-                        <div class="info-item">
-                            <span class="info-label">DOB:</span>
-                            <span class="info-value">' . htmlspecialchars(oeFormatShortDate($patient['DOB'] ?? '')) . '</span>
-                        </div>
-                    </div>
-                    <div class="info-pair">
-                        <div class="info-item">
-                            <span class="info-label">DOS:</span>
-                            <span class="info-value">' . oeFormatShortDate($dos_date) . '</span>
-                        </div>
-                        <div class="info-item">
-                            <span class="info-label">Encounter:</span>
-                            <span class="info-value">' . htmlspecialchars($encounter) . '</span>
-                        </div>
-                    </div>
-                    <div class="info-pair">
-                        <div class="info-item">
-                            <span class="info-label">Provider:</span>
-                            <span class="info-value">' . htmlspecialchars($form_data['order_servicing_provider'] ?? 'Moussa El-hallak, M.D.') . '</span>
-                        </div>
-                        <div class="info-item">
-                            <span class="info-label">NPI:</span>
-                            <span class="info-value">' . htmlspecialchars($form_data['order_npi'] ?? '1831381524') . '</span>
-                        </div>
-                    </div>
-                </div>
-            </div>';
+        <div class="header">
+            <h1>Infusion & Injection Form</h1>
+            <div class="patient-info">
+                <strong>Patient:</strong> ' . htmlspecialchars($patient['fname'] . ' ' . $patient['lname']) . '<br>
+                <strong>DOB:</strong> ' . htmlspecialchars(oeFormatShortDate($patient['DOB'] ?? '')) . '<br>
+                <strong>DOS:</strong> ' . oeFormatShortDate($dos_date) . '<br>
+                <strong>Encounter:</strong> ' . htmlspecialchars($encounter) . '<br>
+                <strong>Provider:</strong> ' . htmlspecialchars($form_data['order_servicing_provider'] ?? 'Moussa El-hallak, M.D.') . '<br>
+                <strong>NPI:</strong> ' . htmlspecialchars($form_data['order_npi'] ?? '1831381524') . '
+            </div>
+        </div>';
 
     if ($form_data) {
         // Assessment section
@@ -367,6 +216,8 @@ function buildPDFHTML($patient, $form_data, $dos_date, $encounter, $pid, $id) {
         
         $html .= '</div>';
 
+        // Only add other sections if they have data
+        
         // Allergies section
         $html .= '<div class="section">
             <div class="section-title">Allergies</div>
@@ -376,7 +227,7 @@ function buildPDFHTML($patient, $form_data, $dos_date, $encounter, $pid, $id) {
             </div>
         </div>';
 
-        // Vital Signs section
+        // Vital Signs section - complete with all parameters
         $html .= '<div class="section">
             <div class="section-title">Vital Signs</div>';
         
@@ -428,7 +279,7 @@ function buildPDFHTML($patient, $form_data, $dos_date, $encounter, $pid, $id) {
         // IV Access section
         $html .= '<div class="section">
             <div class="section-title">IV Access</div>';
-            
+        
         if (hasValue($form_data['iv_access_type'])) {
             $html .= '<div class="field">
                 <span class="field-label">Access Type:</span>
@@ -474,7 +325,7 @@ function buildPDFHTML($patient, $form_data, $dos_date, $encounter, $pid, $id) {
         
         $html .= '</div>';
 
-        // Administration section (expanded)
+        // Administration section
         $html .= '<div class="section">
             <div class="section-title">Administration</div>';
             
@@ -596,29 +447,25 @@ function buildPDFHTML($patient, $form_data, $dos_date, $encounter, $pid, $id) {
                 $formatted_date = oeFormatShortDate($signature_date);
                 $formatted_time = date('g:i A', strtotime($signature_date));
                 
-                $html .= '<div class="signature-entry">
-                    <div class="signature-header">
-                        <span class="signature-user">' . htmlspecialchars(trim($signature['fname'] . ' ' . $signature['lname'])) . '</span>
-                        <span class="signature-type">' . htmlspecialchars($signature['type_display_name'] ?? ucfirst($signature['signature_type'])) . '</span>
-                        <span class="signature-date">' . htmlspecialchars($formatted_date . ' ' . $formatted_time) . '</span>
-                    </div>';
+                $html .= '<div class="field">
+                    <span class="field-label">Signed by:</span>
+                    <span class="field-value">' . htmlspecialchars(trim($signature['fname'] . ' ' . $signature['lname'])) . ' (' . htmlspecialchars($signature['type_display_name'] ?? ucfirst($signature['signature_type'])) . ') - ' . htmlspecialchars($formatted_date . ' ' . $formatted_time) . '</span>
+                </div>';
                 
                 if (!empty(trim($signature['signature_text']))) {
-                    $html .= '<div class="signature-text">
-                        <span class="signature-label">Signature Text:</span>
-                        <span class="signature-value">' . htmlspecialchars($signature['signature_text']) . '</span>
+                    $html .= '<div class="field">
+                        <span class="field-label">Signature Text:</span>
+                        <span class="field-value">' . htmlspecialchars($signature['signature_text']) . '</span>
                     </div>';
                 }
-                
-                $html .= '</div>';
             }
             
             $html .= '</div>';
         }
+
     }
 
     $html .= '
-        </div>
     </body>
     </html>';
 
