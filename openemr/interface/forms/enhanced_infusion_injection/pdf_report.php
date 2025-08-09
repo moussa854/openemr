@@ -98,25 +98,50 @@ function buildPDFHTML($patient, $form_data, $dos_date, $encounter, $pid, $id) {
         return $html;
     };
 
+    // Get logo path and create header HTML for first page
+    $logo_path = '/var/www/emr.carepointinfusion.com/sites/default/images/practice_logo.png';
+    $logo_html = '';
+    if (file_exists($logo_path)) {
+        $logo_html = '<img src="' . $logo_path . '" style="max-height: 70px; max-width: 140px;" alt="CarePoint Logo">';
+    } else {
+        $logo_html = '<div style="width: 140px; height: 70px; border: 1px solid #ccc; text-align: center; line-height: 70px; font-size: 8pt;">Logo</div>';
+    }
+
     $html = '<!DOCTYPE html>
     <html>
     <head>
         <meta charset="utf-8">
         <title>Infusion & Injection Form</title>
         <style>
-            body { font-family: Arial, sans-serif; font-size: 11pt; margin: 20px; }
+            body { font-family: Arial, sans-serif; font-size: 11pt; margin: 0; }
             .section { margin-bottom: 15px; border: 1px solid #ccc; }
             .section-title { background: #007bff; color: white; padding: 8px 12px; font-weight: bold; font-size: 12pt; margin: 0; }
             .field { padding: 8px 12px; border-bottom: 1px solid #eee; }
             .field-label { font-weight: bold; color: #333; display: inline-block; width: 150px; }
             .field-value { color: #000; }
             .patient-info { background: #f9f9f9; padding: 12px; margin: 15px 0; text-align: center; }
-            .header { padding-bottom: 10px; margin-bottom: 15px; }
+            .pdf-header { margin-bottom: 15px; }
+            .pdf-header table { width: 100%; font-size: 10pt; color: #333; padding-bottom: 15px; }
 
         </style>
     </head>
     <body>
-        <div class="header"></div>
+        <div class="pdf-header">
+            <table>
+                <tr>
+                    <td width="25%" style="vertical-align: top;">' . $logo_html . '</td>
+                    <td width="75%" style="text-align: right; vertical-align: top;">
+                        <div style="font-weight: bold; font-size: 12pt; color: #007bff; margin-bottom: 3px;">CarePoint Infusion Center</div>
+                        <div style="line-height: 1.3;">
+                            23215 Commerce Park Suite 318<br>
+                            Beachwood, OH 44122-5803<br>
+                            Phone: (216) 755-4044<br>
+                            Fax: (330) 967-0571
+                        </div>
+                    </td>
+                </tr>
+            </table>
+        </div>
         <div class="patient-info">
             <strong>Patient:</strong> ' . htmlspecialchars($patient['fname'] . ' ' . $patient['lname']) . '<br>
             <strong>DOB:</strong> ' . htmlspecialchars(oeFormatShortDate($patient['DOB'] ?? '')) . '<br>
@@ -511,9 +536,9 @@ try {
         'format'         => 'A4',
         'margin_left'    => 15,    // numbers only, no "mm" strings
         'margin_right'   => 15,
-        'margin_top'     => 35,    // increased for header space on first page
+        'margin_top'     => 15,    // normal top margin for all pages
         'margin_bottom'  => 25,
-        'margin_header'  => 20,    // space for header
+        'margin_header'  => 0,     // no header space for subsequent pages
         'margin_footer'  => 10,    // reserve space for footer
         'default_font_size' => 11,
     ]);
@@ -521,37 +546,6 @@ try {
     // Set auto margin properties to avoid calculation conflicts
     $pdf->setAutoBottomMargin = 'stretch';
     $pdf->autoMarginPadding = 0.0;
-    
-    // Set professional header for first page only
-    $logo_path = '/var/www/emr.carepointinfusion.com/sites/default/images/practice_logo.png';
-    $header_html = '
-        <table width="100%" style="font-size: 10pt; color: #333; padding-bottom: 5px;">
-            <tr>
-                <td width="25%" style="vertical-align: top;">';
-    
-    // Check if logo exists and add it
-    if (file_exists($logo_path)) {
-        $header_html .= '<img src="' . $logo_path . '" style="max-height: 70px; max-width: 140px;" alt="CarePoint Logo">';
-    } else {
-        $header_html .= '<div style="width: 140px; height: 70px; border: 1px solid #ccc; text-align: center; line-height: 70px; font-size: 8pt;">Logo</div>';
-    }
-    
-    $header_html .= '</td>
-                <td width="75%" style="text-align: right; vertical-align: top;">
-                    <div style="font-weight: bold; font-size: 12pt; color: #007bff; margin-bottom: 3px;">CarePoint Infusion Center</div>
-                    <div style="line-height: 1.3;">
-                        23215 Commerce Park Suite 318<br>
-                        Beachwood, OH 44122-5803<br>
-                        Phone: (216) 755-4044<br>
-                        Fax: (330) 967-0571
-                    </div>
-                </td>
-            </tr>
-        </table>
-    ';
-    
-    // Set header for first page only
-    $pdf->SetHTMLHeader($header_html, 'O'); // 'O' for odd pages (first page)
     
     // Now safely set footer with patient info
     $patient_dob = !empty($patient['DOB']) ? oeFormatShortDate($patient['DOB']) : '';
