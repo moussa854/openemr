@@ -64,7 +64,7 @@ try {
     $pdf->SetSubject("Enhanced Infusion & Injection Form");
     $pdf->SetKeywords("OpenEMR, Enhanced Infusion, Injection, Medical Form");
     
-    // Custom CSS for better PDF rendering
+    // Custom CSS to match the exact design from the image
     $pdfCSS = "
     <style>
         @page {
@@ -74,104 +74,147 @@ try {
         }
         body { 
             font-family: 'DejaVu Sans', Arial, sans-serif; 
-            font-size: 10pt; 
-            line-height: 1.3;
+            font-size: 11pt; 
+            line-height: 1.4;
+            background: #f5f5f5;
         }
         .container { 
             width: 100%; 
-            margin: 0; 
-            padding: 0; 
+            margin: 0 auto; 
+            background: white; 
+            padding: 20px; 
+            border-radius: 8px; 
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1); 
         }
         .header { 
             text-align: center; 
-            border-bottom: 2px solid #000; 
-            padding-bottom: 10px; 
-            margin-bottom: 15px; 
+            border-bottom: 2px solid #007bff; 
+            padding-bottom: 15px; 
+            margin-bottom: 20px; 
         }
         .header h1 { 
-            color: #000; 
-            margin: 0 0 5px 0; 
-            font-size: 16pt; 
+            color: #007bff; 
+            margin: 0 0 10px 0; 
+            font-size: 18pt; 
+            font-weight: bold;
         }
         .patient-info { 
             background: #f8f9fa; 
-            padding: 10px; 
-            border: 1px solid #000; 
-            margin-bottom: 15px; 
+            padding: 15px; 
+            border: 1px solid #e9ecef; 
+            margin-bottom: 20px; 
+            border-radius: 5px;
+        }
+        .info-pair { 
+            display: flex; 
+            justify-content: space-between; 
+            margin-bottom: 8px; 
+        }
+        .info-item { 
+            flex: 1; 
+        }
+        .info-item:first-child { 
+            margin-right: 20px; 
+        }
+        .info-label { 
+            font-weight: bold; 
+            color: #495057; 
+            margin-right: 8px;
+        }
+        .info-value { 
+            color: #212529; 
+            font-weight: 500; 
         }
         .section { 
-            margin-bottom: 15px; 
-            border: 1px solid #000; 
+            margin-bottom: 20px; 
+            border: 1px solid #dee2e6; 
+            border-radius: 5px; 
+            overflow: hidden; 
             page-break-inside: avoid; 
         }
         .section-title { 
-            background: #000; 
-            color: #fff; 
-            padding: 5px 10px; 
+            background: #007bff; 
+            color: white; 
+            padding: 10px 15px; 
             font-weight: bold; 
-            font-size: 11pt; 
+            font-size: 12pt; 
+            margin: 0;
         }
         .field { 
-            padding: 5px 10px; 
-            border-bottom: 1px solid #ccc; 
-            display: block; 
+            padding: 10px 15px; 
+            border-bottom: 1px solid #dee2e6; 
+            display: flex; 
+            align-items: flex-start;
         }
         .field:last-child { 
             border-bottom: none; 
         }
         .field-label { 
             font-weight: bold; 
-            color: #333; 
-            display: inline-block; 
+            color: #495057; 
             min-width: 120px; 
+            margin-right: 10px;
+            flex-shrink: 0;
         }
         .field-value { 
-            color: #000; 
+            color: #212529; 
+            font-weight: 500; 
+            flex: 1;
+            word-wrap: break-word;
         }
         .signature-entry { 
-            border: 1px solid #ccc; 
-            margin-bottom: 10px; 
-            padding: 8px; 
+            border: 1px solid #dee2e6; 
+            border-radius: 5px; 
+            margin-bottom: 15px; 
+            padding: 15px; 
             background: #f8f9fa; 
             page-break-inside: avoid; 
         }
         .signature-header { 
-            margin-bottom: 5px; 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center; 
+            margin-bottom: 10px; 
+            flex-wrap: wrap; 
         }
         .signature-user { 
             font-weight: bold; 
-            color: #000; 
+            color: #007bff; 
+            font-size: 11pt; 
         }
         .signature-type { 
-            background: #000; 
-            color: #fff; 
-            padding: 2px 5px; 
-            font-size: 8pt; 
+            background: #007bff; 
+            color: white; 
+            padding: 4px 8px; 
+            border-radius: 12px; 
+            font-size: 9pt; 
             font-weight: bold; 
             text-transform: uppercase; 
         }
         .signature-date { 
-            color: #666; 
-            font-size: 9pt; 
+            color: #6c757d; 
+            font-size: 10pt; 
         }
         .signature-text { 
-            margin-top: 5px; 
-            padding-top: 5px; 
-            border-top: 1px solid #ccc; 
+            margin-top: 8px; 
+            padding-top: 8px; 
+            border-top: 1px solid #dee2e6; 
         }
-        .info-pair { 
-            margin-bottom: 5px; 
-        }
-        .info-label { 
+        .signature-label { 
             font-weight: bold; 
-            color: #333; 
+            color: #495057; 
+            margin-right: 8px; 
         }
-        .info-value { 
-            color: #000; 
-            font-weight: normal; 
+        .signature-value { 
+            color: #212529; 
+            font-style: italic; 
         }
         .print-button { 
             display: none; 
+        }
+        .no-data { 
+            color: #6c757d; 
+            font-style: italic; 
         }
     </style>";
     
