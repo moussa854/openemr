@@ -110,22 +110,20 @@ function buildPDFHTML($patient, $form_data, $dos_date, $encounter, $pid, $id) {
             .field { padding: 8px 12px; border-bottom: 1px solid #eee; }
             .field-label { font-weight: bold; color: #333; display: inline-block; width: 150px; }
             .field-value { color: #000; }
-            .patient-info { background: #f9f9f9; padding: 12px; border: 1px solid #ddd; margin-bottom: 15px; }
-            .header { text-align: center; border-bottom: 2px solid #007bff; padding-bottom: 10px; margin-bottom: 15px; }
-            .header h1 { color: #007bff; margin: 0 0 8px 0; font-size: 16pt; font-weight: bold; }
+            .patient-info { background: #f9f9f9; padding: 12px; border: 1px solid #ddd; margin: 15px 0; text-align: center; }
+            .header { border-bottom: 2px solid #007bff; padding-bottom: 10px; margin-bottom: 15px; }
 
         </style>
     </head>
     <body>
-        <div class="header">
-            <div class="patient-info">
-                <strong>Patient:</strong> ' . htmlspecialchars($patient['fname'] . ' ' . $patient['lname']) . '<br>
-                <strong>DOB:</strong> ' . htmlspecialchars(oeFormatShortDate($patient['DOB'] ?? '')) . '<br>
-                <strong>DOS:</strong> ' . oeFormatShortDate($dos_date) . '<br>
-                <strong>Encounter:</strong> ' . htmlspecialchars($encounter) . '<br>
-                <strong>Provider:</strong> ' . htmlspecialchars($form_data['order_servicing_provider'] ?? 'Moussa El-hallak, M.D.') . '<br>
-                <strong>NPI:</strong> ' . htmlspecialchars($form_data['order_npi'] ?? '1831381524') . '
-            </div>
+        <div class="header"></div>
+        <div class="patient-info">
+            <strong>Patient:</strong> ' . htmlspecialchars($patient['fname'] . ' ' . $patient['lname']) . '<br>
+            <strong>DOB:</strong> ' . htmlspecialchars(oeFormatShortDate($patient['DOB'] ?? '')) . '<br>
+            <strong>DOS:</strong> ' . oeFormatShortDate($dos_date) . '<br>
+            <strong>Encounter:</strong> ' . htmlspecialchars($encounter) . '<br>
+            <strong>Provider:</strong> ' . htmlspecialchars($form_data['order_servicing_provider'] ?? 'Moussa El-hallak, M.D.') . '<br>
+            <strong>NPI:</strong> ' . htmlspecialchars($form_data['order_npi'] ?? '1831381524') . '
         </div>';
 
     if ($form_data) {
