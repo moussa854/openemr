@@ -520,13 +520,15 @@ try {
     // Create PDF
     $pdf = new Mpdf($config_mpdf);
     
-    // Temporarily disable footer to isolate table height issue
-    // $patient_dob = !empty($patient['DOB']) ? oeFormatShortDate($patient['DOB']) : '';
-    // $footer_left = $patient['fname'] . ' ' . $patient['lname'];
-    // if (!empty($patient_dob)) {
-    //     $footer_left .= ' (' . $patient_dob . ')';
-    // }
-    // $pdf->setFooter($footer_left . '|Page {PAGENO} of {nb}');
+    // Re-enable footer with simpler approach
+    $patient_dob = !empty($patient['DOB']) ? oeFormatShortDate($patient['DOB']) : '';
+    $footer_left = $patient['fname'] . ' ' . $patient['lname'];
+    if (!empty($patient_dob)) {
+        $footer_left .= ' (' . $patient_dob . ')';
+    }
+    
+    // Use simple text footer (not HTML) to avoid table calculation conflicts
+    $pdf->setFooter($footer_left . '|Page {PAGENO} of {nb}');
     
     // Set document info
     $patient_name = $patient['fname'] . '_' . $patient['lname'];
