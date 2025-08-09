@@ -64,94 +64,16 @@ try {
     $pdf->SetSubject("Enhanced Infusion & Injection Form");
     $pdf->SetKeywords("OpenEMR, Enhanced Infusion, Injection, Medical Form");
     
-    // PDF-specific CSS overrides to enhance the existing report.php styling for PDF
-    $pdfCSS = "
-    <style>
-        /* PDF page settings */
-        @page {
-            margin: 15mm;
-            margin-header: 5mm;
-            margin-footer: 5mm;
-        }
-        
-        /* PDF-specific overrides for better rendering */
-        body { 
-            background: white !important; 
-            margin: 0 !important; 
-            padding: 0 !important;
-        }
-        
-        .container { 
-            box-shadow: none !important; 
-            border-radius: 0 !important; 
-            margin: 0 !important; 
-            padding: 20px !important; 
-            max-width: none !important; 
-            background: white !important;
-        }
-        
-        .header { 
-            margin-bottom: 20px !important; 
-            padding-bottom: 15px !important; 
-            border-bottom: 2px solid #007bff !important; 
-        }
-        
-        .section { 
-            margin-bottom: 20px !important; 
-            page-break-inside: avoid !important; 
-            border: 1px solid #dee2e6 !important; 
-        }
-        
-        .section-title { 
-            background: #007bff !important; 
-            color: white !important; 
-            -webkit-print-color-adjust: exact !important; 
-            print-color-adjust: exact !important; 
-        }
-        
-        .signature-entry { 
-            page-break-inside: avoid !important; 
-            border: 1px solid #dee2e6 !important; 
-            background: #f8f9fa !important; 
-            -webkit-print-color-adjust: exact !important; 
-            print-color-adjust: exact !important; 
-        }
-        
-        .signature-type { 
-            background: #007bff !important; 
-            color: white !important; 
-            -webkit-print-color-adjust: exact !important; 
-            print-color-adjust: exact !important; 
-        }
-        
-        .signature-user {
-            color: #007bff !important;
-        }
-        
-        .patient-info { 
-            background: #f8f9fa !important; 
-            border: 1px solid #e9ecef !important; 
-            -webkit-print-color-adjust: exact !important; 
-            print-color-adjust: exact !important; 
-        }
-        
-        /* Hide print buttons */
-        .print-button, button { 
-            display: none !important; 
-        }
-        
-        /* Force color printing */
-        * {
-            -webkit-print-color-adjust: exact !important;
-            print-color-adjust: exact !important;
-        }
-    </style>";
+    // Don't add additional CSS - let the existing report.php CSS handle everything
+    // Just remove the print buttons and ensure it's optimized for PDF
+    $pdfCSS = "";
     
-    // Clean the HTML and add PDF-specific CSS
-    $cleanedHTML = $pdfCSS . $htmlContent;
+    // Use the HTML as-is from report.php, just remove print buttons
+    $cleanedHTML = $htmlContent;
     
-    // Remove any remaining print buttons
+    // Remove any remaining print buttons and scripts
     $cleanedHTML = preg_replace('/<button[^>]*class="print-button"[^>]*>.*?<\/button>/is', '', $cleanedHTML);
+    $cleanedHTML = preg_replace('/<script[^>]*>.*?<\/script>/is', '', $cleanedHTML);
     
     // Write HTML to PDF
     $pdf->WriteHTML($cleanedHTML);
