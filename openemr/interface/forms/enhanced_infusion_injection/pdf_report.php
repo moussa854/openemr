@@ -118,7 +118,6 @@ function buildPDFHTML($patient, $form_data, $dos_date, $encounter, $pid, $id) {
     </head>
     <body>
         <div class="header">
-            <h1>Infusion & Injection Form</h1>
             <div class="patient-info">
                 <strong>Patient:</strong> ' . htmlspecialchars($patient['fname'] . ' ' . $patient['lname']) . '<br>
                 <strong>DOB:</strong> ' . htmlspecialchars(oeFormatShortDate($patient['DOB'] ?? '')) . '<br>
