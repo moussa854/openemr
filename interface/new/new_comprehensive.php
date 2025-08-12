@@ -907,10 +907,10 @@ $(function () {
                 url += 'mf_' + flds[i] + '=' + encodeURIComponent(fval);
             }
         }
-        if (flds == '') {
-            url += "?close";
+        if (flds.length == 0) {
+            url += separator + "close";
         } else {
-            url+="&close";
+            url += separator + "close";
         }
         dlgopen(url, '_blank', 875, 500);
         } // end function
