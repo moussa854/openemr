@@ -1,3 +1,4 @@
+ob_start();
 <?php
 /**
  * Save Enhanced Infusion Form with Multi-Medication Support
@@ -188,7 +189,7 @@ try {
     sqlStatement("COMMIT");
     
     // Return success response
-    echo json_encode([
+    ob_clean(); echo json_encode([
         'success' => true,
         'message' => 'Form saved successfully!',
         'form_id' => $formId
@@ -199,7 +200,7 @@ try {
     sqlStatement("ROLLBACK");
     
     error_log("Error saving enhanced infusion form: " . $e->getMessage());
-    echo json_encode([
+    ob_clean(); echo json_encode([
         'success' => false,
         'message' => 'Error saving form: ' . $e->getMessage()
     ]);
