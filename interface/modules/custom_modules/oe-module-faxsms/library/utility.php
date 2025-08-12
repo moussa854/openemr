@@ -242,7 +242,7 @@ $form_regdate = $_POST['regdate'] ?? '' ? trim($_POST['regdate']) : date('Y-m-d'
                         url += 'mf_' + flds[i] + '=' + encodeURIComponent(fval);
                     }
                 }
-                url += separator + "close&simple_search=1";
+                url += separator + "close" + "&" + "simple_search=1";
 
                 dlgopen(url, '_blank', 950, 500);
             }
