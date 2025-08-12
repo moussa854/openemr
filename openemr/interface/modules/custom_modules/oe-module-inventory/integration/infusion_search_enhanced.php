@@ -583,7 +583,7 @@ $csrf_token = CsrfUtils::collectCsrfToken();
                             <div class="col-md-4">
                                 <div class="form-group">
                                     <label for="iv_access_date" class="control-label">Access Date:</label>
-                                    <input type="datetime-local" name="iv_access_date" id="iv_access_date" class="form-control" value="<?php echo htmlspecialchars(date('Y-m-dTH:i', strtotime($saved_data["iv_access_date"] ?? 'now'))); ?>" placeholder="Date and time">
+                                    <input type="datetime-local" name="iv_access_date" id="iv_access_date" class="form-control" value="<?php echo htmlspecialchars(date('Y-m-d' . 'T' . 'H:i', strtotime($saved_data["iv_access_date"] ?? 'now'))); ?>" placeholder="Date and time">
                                 </div>
                             </div>
                         </div>
@@ -829,13 +829,13 @@ $csrf_token = CsrfUtils::collectCsrfToken();
                             <div class="col-md-4">
                                 <div class="form-group">
                                     <label for="administration_start" class="control-label">Start Time:</label>
-                                    <input type="datetime-local" name="administration_start" id="administration_start" class="form-control" value="<?php echo htmlspecialchars(date('Y-m-dTH:i', strtotime($saved_data["administration_start"] ?? 'now'))); ?>" onchange="calculateDuration()" placeholder="Date and time">
+                                    <input type="datetime-local" name="administration_start" id="administration_start" class="form-control" value="<?php echo htmlspecialchars(date('Y-m-d' . 'T' . 'H:i', strtotime($saved_data["administration_start"] ?? 'now'))); ?>" onchange="calculateDuration()" placeholder="Date and time">
                                 </div>
                             </div>
                             <div class="col-md-4">
                                 <div class="form-group">
                                     <label for="administration_end" class="control-label">End Time:</label>
-                                    <input type="datetime-local" name="administration_end" id="administration_end" class="form-control" value="<?php echo htmlspecialchars(date('Y-m-dTH:i', strtotime($saved_data["administration_end"] ?? 'now'))); ?>" onchange="calculateDuration()" placeholder="Date and time">
+                                    <input type="datetime-local" name="administration_end" id="administration_end" class="form-control" value="<?php echo htmlspecialchars(date('Y-m-d' . 'T' . 'H:i', strtotime($saved_data["administration_end"] ?? 'now'))); ?>" onchange="calculateDuration()" placeholder="Date and time">
                                 </div>
                             </div>
                             <div class="col-md-4">
@@ -948,7 +948,7 @@ $csrf_token = CsrfUtils::collectCsrfToken();
                                 <div class="col-md-4">
                                     <div class="form-group">
                                         <label for="signature_datetime" class="control-label">Date & Time:</label>
-                                        <input type="datetime-local" id="signature_datetime" class="form-control" value="<?php echo date('Y-m-dTH:i'); ?>">
+                                        <input type="datetime-local" id="signature_datetime" class="form-control" value="<?php echo date('Y-m-d' . 'T' . 'H:i'); ?>">
                                     </div>
                                 </div>
                                 <div class="col-md-4">
