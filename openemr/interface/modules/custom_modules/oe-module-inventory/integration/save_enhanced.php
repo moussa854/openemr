@@ -127,6 +127,8 @@ try {
         
         sqlStatement($insertSql, array_values($mainFormData));
         $formId = sqlGetLastInsertId();
+        // Register form in forms table for encounter report
+        addForm($encounter, "Enhanced Infusion Form", $formId, "enhanced_infusion", $pid, $userauthorized);
     }
     
     // Save secondary medications
