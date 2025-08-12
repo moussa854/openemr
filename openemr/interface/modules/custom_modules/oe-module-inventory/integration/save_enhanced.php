@@ -125,7 +125,7 @@ try {
         $insertSql .= ") VALUES (" . str_repeat('?,', count($mainFormData) - 1) . "?)";
         
         sqlStatement($insertSql, array_values($mainFormData));
-        $formId = sqlInsertId();
+        $formId = sqlGetLastInsertId();
     }
     
     // Save secondary medications
