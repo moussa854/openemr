@@ -1713,14 +1713,14 @@ $csrf_token = CsrfUtils::collectCsrfToken();
                 }
                 if (expirationDateInput && expirationDateInput.value) {
                     expirationDateInput.value = DateToYYYYMMDD_js(expirationDateInput.value);
-if (document.getElementById("iv_access_date") && document.getElementById("iv_access_date").value) {
-                    document.getElementById("iv_access_date").value = DateToYYYYMMDD_js(document.getElementById("iv_access_date").value);
+                if (document.getElementById("iv_access_date") && document.getElementById("iv_access_date").value) {
+                    // Removed DateToYYYYMMDD_js for datetime-local input
                 }
                 if (document.getElementById("administration_start") && document.getElementById("administration_start").value) {
-                    document.getElementById("administration_start").value = DateToYYYYMMDD_js(document.getElementById("administration_start").value);
+                    // Removed DateToYYYYMMDD_js for datetime-local input
                 }
                 if (document.getElementById("administration_end") && document.getElementById("administration_end").value) {
-                    document.getElementById("administration_end").value = DateToYYYYMMDD_js(document.getElementById("administration_end").value);
+                    // Removed DateToYYYYMMDD_js for datetime-local input
                 }
                 }
                 
