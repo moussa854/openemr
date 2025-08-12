@@ -1,4 +1,3 @@
-ob_start();
 <?php
 /**
  * Save Enhanced Infusion Form with Multi-Medication Support

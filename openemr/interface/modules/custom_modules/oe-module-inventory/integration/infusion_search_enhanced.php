@@ -583,7 +583,7 @@ $csrf_token = CsrfUtils::collectCsrfToken();
                             <div class="col-md-4">
                                 <div class="form-group">
                                     <label for="iv_access_date" class="control-label">Access Date:</label>
-                                    <input type="datetime-local" name="iv_access_date" id="iv_access_date" class="form-control" value="<?php echo htmlspecialchars(date('Y-m-d\TH:i', strtotime($saved_data["iv_access_date"] ?? 'now'))); ?>" placeholder="Date and time">
+                                    <input type="datetime-local" name="iv_access_date" id="iv_access_date" class="form-control" value="<?php echo htmlspecialchars(date('Y-m-dTH:i', strtotime($saved_data["iv_access_date"] ?? 'now'))); ?>" placeholder="Date and time">
                                 </div>
                             </div>
                         </div>
@@ -829,13 +829,13 @@ $csrf_token = CsrfUtils::collectCsrfToken();
                             <div class="col-md-4">
                                 <div class="form-group">
                                     <label for="administration_start" class="control-label">Start Time:</label>
-                                    <input type="datetime-local" name="administration_start" id="administration_start" class="form-control" value="<?php echo htmlspecialchars(date('Y-m-d\TH:i', strtotime($saved_data["administration_start"] ?? 'now'))); ?>" onchange="calculateDuration()" placeholder="Date and time">
+                                    <input type="datetime-local" name="administration_start" id="administration_start" class="form-control" value="<?php echo htmlspecialchars(date('Y-m-dTH:i', strtotime($saved_data["administration_start"] ?? 'now'))); ?>" onchange="calculateDuration()" placeholder="Date and time">
                                 </div>
                             </div>
                             <div class="col-md-4">
                                 <div class="form-group">
                                     <label for="administration_end" class="control-label">End Time:</label>
-                                    <input type="datetime-local" name="administration_end" id="administration_end" class="form-control" value="<?php echo htmlspecialchars(date('Y-m-d\TH:i', strtotime($saved_data["administration_end"] ?? 'now'))); ?>" onchange="calculateDuration()" placeholder="Date and time">
+                                    <input type="datetime-local" name="administration_end" id="administration_end" class="form-control" value="<?php echo htmlspecialchars(date('Y-m-dTH:i', strtotime($saved_data["administration_end"] ?? 'now'))); ?>" onchange="calculateDuration()" placeholder="Date and time">
                                 </div>
                             </div>
                             <div class="col-md-4">
@@ -948,7 +948,7 @@ $csrf_token = CsrfUtils::collectCsrfToken();
                                 <div class="col-md-4">
                                     <div class="form-group">
                                         <label for="signature_datetime" class="control-label">Date & Time:</label>
-                                        <input type="datetime-local" id="signature_datetime" class="form-control" value="<?php echo date('Y-m-d\TH:i'); ?>">
+                                        <input type="datetime-local" id="signature_datetime" class="form-control" value="<?php echo date('Y-m-dTH:i'); ?>">
                                     </div>
                                 </div>
                                 <div class="col-md-4">
@@ -1855,7 +1855,7 @@ if (document.getElementById("iv_access_date") && document.getElementById("iv_acc
                     }
                 }
                 if (input.id) {
-                    input.id = `${input.id}_${medicationId}`;
+                    input.id = input.id + '_' + medicationId;
                 }
             });
         }
@@ -1974,12 +1974,12 @@ if (document.getElementById("iv_access_date") && document.getElementById("iv_acc
             const hours = Math.floor(diffInMinutes / 60);
             const minutes = diffInMinutes % 60;
 
-            durationInput.value = `${hours}:${minutes.toString().padStart(2, '0')}`;
+            durationInput.value = hours + ':' + minutes.toString().padStart(2, '0');
         }
 
         function performMedicationSearch(query, searchType, suggestionsContainer, searchInput, medicationSection) {
             // Use the same search logic as the primary medication
-            fetch(`search_inventory.php?query=${encodeURIComponent(query)}&type=${searchType}`)
+            fetch('search_inventory.php?query=' + encodeURIComponent(query) + '&type=' + encodeURIComponent(searchType))
                 .then(response => response.json())
                 .then(data => {
                     suggestionsContainer.innerHTML = '';
@@ -1988,7 +1988,7 @@ if (document.getElementById("iv_access_date") && document.getElementById("iv_acc
                         data.results.forEach((drug, index) => {
                             const item = document.createElement('div');
                             item.className = 'suggestion-item';
-                            item.textContent = `${drug.name} - ${drug.strength} (${drug.lot_number})`;
+                            item.textContent = (drug.name + ' - ' + (drug.strength || '') + ' (' + (drug.lot_number || '') + ')');
                             item.dataset.drug = JSON.stringify(drug);
                             
                             item.addEventListener('click', () => {
@@ -2110,7 +2110,7 @@ if (document.getElementById("iv_access_date") && document.getElementById("iv_acc
             console.log('Loading previous diagnoses for PID:', pid, 'Current Encounter:', currentEncounter);
             
             // Fetch diagnoses from previous encounters using simple API
-            fetch(`get_previous_diagnoses_simple.php?pid=${pid}&current_encounter=${currentEncounter}`)
+            fetch('get_previous_diagnoses_simple.php?pid=' + pid + '&current_encounter=' + currentEncounter)
                 .then(response => {
                     console.log('Response status:', response.status);
                     return response.json();
@@ -2190,7 +2190,7 @@ if (document.getElementById("iv_access_date") && document.getElementById("iv_acc
             const hours = Math.floor(diffInMinutes / 60);
             const minutes = diffInMinutes % 60;
 
-            durationInput.value = `${hours}:${minutes.toString().padStart(2, '0')}`;
+            durationInput.value = hours + ':' + minutes.toString().padStart(2, '0');
         }
 
         function loadPreviousMedication() {
@@ -2200,7 +2200,7 @@ if (document.getElementById("iv_access_date") && document.getElementById("iv_acc
             console.log('Loading previous medication orders for PID:', pid, 'Current Encounter:', currentEncounter);
             
             // Fetch medication orders from previous encounters
-            fetch(`get_previous_medication.php?pid=${pid}&current_encounter=${currentEncounter}`)
+            fetch('get_previous_medication.php?pid=' + pid + '&current_encounter=' + currentEncounter)
                 .then(response => {
                     console.log('Medication response status:', response.status);
                     return response.json();
@@ -2336,7 +2336,7 @@ if (document.getElementById("iv_access_date") && document.getElementById("iv_acc
         function loadExistingSignatures() {
             if (!currentFormId) return;
             
-            fetch(`get_signatures.php?form_id=${currentFormId}&site=default`, {
+            fetch('get_signatures.php?form_id=' + currentFormId + '&site=default', {
                 credentials: 'same-origin'
             })
                 .then(response => response.json())
