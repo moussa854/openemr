@@ -52,6 +52,12 @@ if ($form_id) {
         if (empty($pid)) {
             $pid = $saved_data['pid'] ?? '';
         }
+        
+        // DEBUG: Log the retrieved data
+        error_log("=== DEBUG FORM LOAD: Retrieved PID from database: " . $pid);
+        error_log("=== DEBUG FORM LOAD: Retrieved Encounter from database: " . $encounter);
+    } else {
+        error_log("=== DEBUG FORM LOAD: No form found with ID: " . $form_id);
     }
     
     // Load secondary medications
@@ -94,6 +100,19 @@ if (empty($encounter)) {
 // If still empty, try to get from current encounter
 if (empty($encounter) && isset($GLOBALS['encounter'])) {
     $encounter = $GLOBALS['encounter'];
+}
+
+// If we have a form_id but no PID, try to get PID from the forms table
+if ($form_id && empty($pid)) {
+    // Try to get PID from the forms table
+    $forms_sql = "SELECT pid FROM forms WHERE id = ? AND form_name = 'enhanced_infusion'";
+    $forms_result = sqlStatement($forms_sql, [$form_id]);
+    if ($forms_row = sqlFetchArray($forms_result)) {
+        $pid = $forms_row['pid'];
+        error_log("=== DEBUG FORM LOAD: Retrieved PID from forms table: " . $pid);
+    } else {
+        error_log("=== DEBUG FORM LOAD: No PID found in forms table for form_id: " . $form_id);
+    }
 }
 
 // Load wastage reasons for dropdown
