@@ -16,16 +16,37 @@ function enhanced_infusion_report($pid, $encounter, $cols, $id) {
     error_log("=== DEBUG REPORT: Function called - PID: $pid, Encounter: $encounter, ID: $id");
     
     $count = 0;
+    
+    // DEBUG: Check if form exists in forms table
+    $formsCheck = sqlQuery("SELECT * FROM forms WHERE id = ? AND form_name = 'enhanced_infusion'", [$id]);
+    error_log("=== DEBUG REPORT: Forms table check - " . ($formsCheck ? 'FOUND' : 'NOT_FOUND'));
+    if ($formsCheck) {
+        error_log("=== DEBUG REPORT: Forms table data - PID: " . $formsCheck['pid'] . ", Encounter: " . $formsCheck['encounter']);
+    }
+    
+    // DEBUG: Check if form exists in form_enhanced_infusion_injection table
+    $formCheck = sqlQuery("SELECT * FROM form_enhanced_infusion_injection WHERE id = ?", [$id]);
+    error_log("=== DEBUG REPORT: Form table check - " . ($formCheck ? 'FOUND' : 'NOT_FOUND'));
+    if ($formCheck) {
+        error_log("=== DEBUG REPORT: Form table data - PID: " . $formCheck['pid'] . ", Encounter: " . $formCheck['encounter']);
+    }
+    
     $data = formFetch("form_enhanced_infusion_injection", $id);
     
     // DEBUG: Log the data retrieved
-    error_log("=== DEBUG REPORT: Data retrieved: " . ($data ? 'YES' : 'NO'));
+    error_log("=== DEBUG REPORT: formFetch result: " . ($data ? 'YES' : 'NO'));
     if ($data) {
         error_log("=== DEBUG REPORT: Form data - Assessment: " . ($data['assessment'] ?? 'NOT_SET'));
         error_log("=== DEBUG REPORT: Form data - Order Medication: " . ($data['order_medication'] ?? 'NOT_SET'));
+        error_log("=== DEBUG REPORT: Form data - PID: " . ($data['pid'] ?? 'NOT_SET'));
+        error_log("=== DEBUG REPORT: Form data - Encounter: " . ($data['encounter'] ?? 'NOT_SET'));
+    } else {
+        error_log("=== DEBUG REPORT: No data returned from formFetch");
     }
     
     if ($data) {
+        error_log("=== DEBUG REPORT: Displaying form data");
+        
         // Get secondary medications
         $secondary_medications = [];
         $sql = "SELECT * FROM form_enhanced_infusion_medications WHERE form_id = ? ORDER BY medication_order";
@@ -33,6 +54,7 @@ function enhanced_infusion_report($pid, $encounter, $cols, $id) {
         while ($row = sqlFetchArray($result)) {
             $secondary_medications[] = $row;
         }
+        error_log("=== DEBUG REPORT: Found " . count($secondary_medications) . " secondary medications");
         
         print "<table><tr>";
         

@@ -38,25 +38,34 @@ $saved_data = null;
 $saved_message = '';
 
 if ($form_id) {
+    error_log("=== DEBUG FORM LOAD: Starting form load for form_id: " . $form_id);
+    error_log("=== DEBUG FORM LOAD: Current PID: " . $pid);
+    
     // Load existing form data from database
     // First try with PID if we have it
     if (!empty($pid)) {
+        error_log("=== DEBUG FORM LOAD: PID is not empty, trying with PID");
         $form_sql = "SELECT * FROM form_enhanced_infusion_injection WHERE id = ? AND pid = ?";
         $form_result = sqlStatement($form_sql, [$form_id, $pid]);
     } else {
+        error_log("=== DEBUG FORM LOAD: PID is empty, trying to get from forms table");
         // If no PID, try to get it from the forms table first
         $forms_sql = "SELECT pid FROM forms WHERE id = ? AND form_name = 'enhanced_infusion'";
         $forms_result = sqlStatement($forms_sql, [$form_id]);
         if ($forms_row = sqlFetchArray($forms_result)) {
             $pid = $forms_row['pid'];
             error_log("=== DEBUG FORM LOAD: Retrieved PID from forms table: " . $pid);
+        } else {
+            error_log("=== DEBUG FORM LOAD: No PID found in forms table for form_id: " . $form_id);
         }
         
         // Now try to load the form with the retrieved PID
         if (!empty($pid)) {
+            error_log("=== DEBUG FORM LOAD: Loading form with retrieved PID: " . $pid);
             $form_sql = "SELECT * FROM form_enhanced_infusion_injection WHERE id = ? AND pid = ?";
             $form_result = sqlStatement($form_sql, [$form_id, $pid]);
         } else {
+            error_log("=== DEBUG FORM LOAD: No PID available, loading without PID requirement");
             // Last resort: load without PID requirement
             $form_sql = "SELECT * FROM form_enhanced_infusion_injection WHERE id = ?";
             $form_result = sqlStatement($form_sql, [$form_id]);
