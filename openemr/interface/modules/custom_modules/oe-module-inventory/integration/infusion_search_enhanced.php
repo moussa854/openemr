@@ -1404,7 +1404,7 @@ $csrf_token = CsrfUtils::collectCsrfToken();
 
         function performSearch(query) {
             const type = searchType.value;
-            const url = `/interface/modules/custom_modules/oe-module-inventory/get-drug-for-infusion.php?search=${encodeURIComponent(query)}&type=${type}`;
+            const url = '/interface/modules/custom_modules/oe-module-inventory/get-drug-for-infusion.php?search=' + encodeURIComponent(query) + '&type=' + type;
             
             fetch(url)
                 .then(response => response.json())
@@ -1423,14 +1423,14 @@ $csrf_token = CsrfUtils::collectCsrfToken();
 
         function performICD10Search(query) {
             console.log('Performing ICD-10 search for:', query);
-            const url = `/interface/modules/custom_modules/oe-module-inventory/search-icd10.php?search=${encodeURIComponent(query)}`;
+            const url = '/interface/modules/custom_modules/oe-module-inventory/search-icd10.php?search=' + encodeURIComponent(query);
             console.log('Search URL:', url);
             
             fetch(url)
                 .then(response => {
                     console.log('ICD-10 search response status:', response.status);
                     if (!response.ok) {
-                        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                        throw new Error('HTTP ' + response.status + ': ' + response.statusText);
                     }
                     return response.json();
                 })
@@ -1817,13 +1817,13 @@ $csrf_token = CsrfUtils::collectCsrfToken();
             
             // Configure new medication
             const medicationSection = newMedication.querySelector('.medication-section');
-            medicationSection.id = `medication-${medicationCounter}`;
+            medicationSection.id = 'medication-' + medicationCounter;
             medicationSection.dataset.medicationId = medicationCounter;
             
             // Set medication type
             const typeBadge = medicationSection.querySelector('.medication-type-badge');
             typeBadge.textContent = medicationCounter === 2 ? 'Secondary' : 'PRN';
-            typeBadge.className = `medication-type-badge badge ${medicationCounter === 2 ? 'badge-info' : 'badge-warning'}`;
+            typeBadge.className = 'medication-type-badge badge ' + (medicationCounter === 2 ? 'badge-info' : 'badge-warning');
             
             // Update field names with medication ID
             updateFieldNames(medicationSection, medicationCounter);
@@ -1851,7 +1851,7 @@ $csrf_token = CsrfUtils::collectCsrfToken();
                     // Update array index for secondary medications
                     const nameMatch = input.name.match(/secondary_medications\[\](\[.*\])?/);
                     if (nameMatch) {
-                        input.name = input.name.replace('[]', `[${medicationId - 2}][]`);
+                        input.name = input.name.replace('[]', '[' + (medicationId - 2) + '][]');
                     }
                 }
                 if (input.id) {
@@ -1932,12 +1932,12 @@ $csrf_token = CsrfUtils::collectCsrfToken();
             medicationSections.forEach((section, index) => {
                 const newId = index + 2; // Start from 2 (secondary)
                 section.dataset.medicationId = newId;
-                section.id = `medication-${newId}`;
+                section.id = 'medication-' + newId;
                 
                 // Update type badge
                 const typeBadge = section.querySelector('.medication-type-badge');
                 typeBadge.textContent = newId === 2 ? 'Secondary' : 'PRN';
-                typeBadge.className = `medication-type-badge badge ${newId === 2 ? 'badge-info' : 'badge-warning'}`;
+                typeBadge.className = 'medication-type-badge badge ' + (newId === 2 ? 'badge-info' : 'badge-warning');
                 
                 // Update field names
                 updateFieldNames(section, newId);
@@ -2051,7 +2051,7 @@ $csrf_token = CsrfUtils::collectCsrfToken();
                 addMedication();
                 
                 // Get the newly added medication section
-                const medicationSection = document.querySelector(`[data-medication-id="${medication.medication_order}"]`);
+                const medicationSection = document.querySelector('[data-medication-id="' + medication.medication_order + '"]');
                 if (!medicationSection) {
                     console.error('Medication section not found for order:', medication.medication_order);
                     return;
@@ -2384,7 +2384,7 @@ $csrf_token = CsrfUtils::collectCsrfToken();
             
             signatures.forEach(signature => {
                 const dateTime = new Date(signature.signature_date).toLocaleString();
-                const typeBadge = `<span class="signature-type-badge signature-type-${signature.signature_type}">${signature.type_display_name}</span>`;
+                const typeBadge = '<span class="signature-type-badge signature-type-' + signature.signature_type + '">' + signature.type_display_name + '</span>';
                 
                 let actionsHtml = '';
                 if (signature.can_edit) {
@@ -2524,7 +2524,7 @@ $csrf_token = CsrfUtils::collectCsrfToken();
         
         function showNotification(message, type = 'info') {
             const notification = document.createElement('div');
-            notification.className = `alert alert-${type} alert-dismissible fade show`;
+            notification.className = 'alert alert-' + type + ' alert-dismissible fade show';
             notification.innerHTML = `
                 ${message}
                 <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
