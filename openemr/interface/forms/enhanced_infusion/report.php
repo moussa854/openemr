@@ -18,7 +18,7 @@ function enhanced_infusion_report($pid, $encounter, $cols, $id) {
     $count = 0;
     
     // DEBUG: Check if form exists in forms table
-    $formsCheck = sqlQuery("SELECT * FROM forms WHERE id = ? AND form_name = 'enhanced_infusion'", [$id]);
+    $formsCheck = sqlQuery("SELECT * FROM forms WHERE id = ? AND form_name = 'enhanced_infusion_injection'", [$id]);
     error_log("=== DEBUG REPORT: Forms table check - " . ($formsCheck ? 'FOUND' : 'NOT_FOUND'));
     if ($formsCheck) {
         error_log("=== DEBUG REPORT: Forms table data - PID: " . $formsCheck['pid'] . ", Encounter: " . $formsCheck['encounter']);

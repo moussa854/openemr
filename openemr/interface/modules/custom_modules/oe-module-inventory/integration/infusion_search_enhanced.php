@@ -50,7 +50,7 @@ if ($form_id) {
     } else {
         error_log("=== DEBUG FORM LOAD: PID is empty, trying to get from forms table");
         // If no PID, try to get it from the forms table first
-        $forms_sql = "SELECT pid FROM forms WHERE id = ? AND form_name = 'enhanced_infusion'";
+        $forms_sql = "SELECT pid FROM forms WHERE id = ? AND form_name = 'enhanced_infusion_injection'";
         $forms_result = sqlStatement($forms_sql, [$form_id]);
         if ($forms_row = sqlFetchArray($forms_result)) {
             $pid = $forms_row['pid'];
