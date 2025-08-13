@@ -906,8 +906,6 @@ $csrf_token = CsrfUtils::collectCsrfToken();
                                               placeholder="Notes about administration, patient response, complications..."><?php echo htmlspecialchars($saved_data['administration_note'] ?? ''); ?></textarea>
                                 </div>
                             </div>
-                                </div>
-                            </div>
                         </div>
                         
                         <!-- Secondary/PRN Medications Container -->
