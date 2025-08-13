@@ -923,6 +923,23 @@ $csrf_token = CsrfUtils::collectCsrfToken();
                     <div id="secondary-medications-container">
                         <!-- Dynamic secondary/PRN medications will be added here -->
                     </div>
+                    
+                    <!-- Hidden data field for secondary medications -->
+                    <input type="hidden" id="secondary-medications-data" value="<?php 
+                        // DEBUG: Log the secondary medications data
+                        error_log("=== DEBUG: secondary_medications count: " . count($secondary_medications ?? []));
+                        error_log("=== DEBUG: secondary_medications data: " . print_r($secondary_medications ?? [], true));
+                        
+                        $medications = $secondary_medications ?? [];
+                        $json_data = json_encode($medications, JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_TAG | JSON_HEX_AMP);
+                        
+                        // DEBUG: Log the JSON encoding result
+                        error_log("=== DEBUG: json_encode result: " . ($json_data !== false ? $json_data : 'JSON_ENCODE_FAILED'));
+                        error_log("=== DEBUG: json_last_error: " . json_last_error());
+                        error_log("=== DEBUG: json_last_error_msg: " . json_last_error_msg());
+                        
+                        echo htmlspecialchars(($json_data !== false) ? $json_data : '[]');
+                    ?>">
                 </div>
 
                     <!-- Electronic Signatures Section -->
@@ -2030,15 +2047,27 @@ if (document.getElementById("iv_access_date") && document.getElementById("iv_acc
             console.log('Selected secondary drug:', drug);
         }
 
-        // Load secondary medications data
-        var secondaryMedicationsData = <?php 
-            $medications = $secondary_medications ?? [];
-            $json_data = json_encode($medications, JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_TAG | JSON_HEX_AMP);
-            echo ($json_data !== false) ? $json_data : '[]';
-        ?>;
-        
         function loadExistingSecondaryMedications() {
-            const secondaryMedications = secondaryMedicationsData;
+            console.log('=== DEBUG: loadExistingSecondaryMedications called ===');
+            
+            // Get data from a hidden input field to avoid PHP/JS mixing issues
+            const dataElement = document.getElementById('secondary-medications-data');
+            console.log('=== DEBUG: dataElement found:', !!dataElement);
+            
+            if (dataElement) {
+                console.log('=== DEBUG: dataElement.value:', dataElement.value);
+                console.log('=== DEBUG: dataElement.value type:', typeof dataElement.value);
+            }
+            
+            let secondaryMedications = [];
+            try {
+                secondaryMedications = dataElement ? JSON.parse(dataElement.value || '[]') : [];
+                console.log('=== DEBUG: JSON.parse successful, medications:', secondaryMedications);
+            } catch (e) {
+                console.error('=== DEBUG: JSON.parse failed:', e);
+                console.log('=== DEBUG: Raw value that failed:', dataElement ? dataElement.value : 'no element');
+                secondaryMedications = [];
+            }
             
             console.log('Loading existing secondary medications:', secondaryMedications);
             

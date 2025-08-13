@@ -30,6 +30,12 @@ if (!CsrfUtils::verifyCsrfToken($_POST['csrf_token_form'] ?? '')) {
 // Get form data
 $formData = $_POST;
 
+// DEBUG: Log the form data being received
+error_log("=== DEBUG SAVE: Form data received - PID: " . ($formData['pid'] ?? 'NOT_SET'));
+error_log("=== DEBUG SAVE: Form data received - Encounter: " . ($formData['encounter'] ?? 'NOT_SET'));
+error_log("=== DEBUG SAVE: Form data received - Assessment: " . ($formData['assessment'] ?? 'NOT_SET'));
+error_log("=== DEBUG SAVE: Form data received - Order Medication: " . ($formData['order_medication'] ?? 'NOT_SET'));
+
 try {
     // Start transaction
     sqlStatement("START TRANSACTION");
@@ -119,6 +125,7 @@ try {
         sqlStatement("DELETE FROM form_enhanced_infusion_medications WHERE form_id = ?", [$formId]);
         
         // Update form registration in forms table for encounter report
+        error_log("=== DEBUG SAVE: Updating form registration - Encounter: " . $formData['encounter'] . ", PID: " . $formData['pid'] . ", FormID: " . $formId);
         addForm($formData['encounter'], "Enhanced Infusion Form", $formId, "enhanced_infusion", $formData['pid'], 1);
         
     } else {
@@ -129,6 +136,7 @@ try {
         
         sqlStatement($insertSql, array_values($mainFormData));
         $formId = sqlGetLastInsertId();
+        error_log("=== DEBUG SAVE: New form created - FormID: " . $formId . ", Encounter: " . $formData['encounter'] . ", PID: " . $formData['pid']);
         // Register form in forms table for encounter report
         addForm($formData['encounter'], "Enhanced Infusion Form", $formId, "enhanced_infusion", $formData['pid'], 1);
     }

@@ -12,8 +12,18 @@ require_once("$srcdir/forms.inc.php");
 use OpenEMR\Common\Forms\FormLocator;
 
 function enhanced_infusion_report($pid, $encounter, $cols, $id) {
+    // DEBUG: Log the function call
+    error_log("=== DEBUG REPORT: Function called - PID: $pid, Encounter: $encounter, ID: $id");
+    
     $count = 0;
     $data = formFetch("form_enhanced_infusion_injection", $id);
+    
+    // DEBUG: Log the data retrieved
+    error_log("=== DEBUG REPORT: Data retrieved: " . ($data ? 'YES' : 'NO'));
+    if ($data) {
+        error_log("=== DEBUG REPORT: Form data - Assessment: " . ($data['assessment'] ?? 'NOT_SET'));
+        error_log("=== DEBUG REPORT: Form data - Order Medication: " . ($data['order_medication'] ?? 'NOT_SET'));
+    }
     
     if ($data) {
         // Get secondary medications
