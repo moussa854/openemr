@@ -2030,19 +2030,15 @@ if (document.getElementById("iv_access_date") && document.getElementById("iv_acc
             console.log('Selected secondary drug:', drug);
         }
 
+        // Load secondary medications data
+        var secondaryMedicationsData = <?php 
+            $medications = $secondary_medications ?? [];
+            $json_data = json_encode($medications, JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_TAG | JSON_HEX_AMP);
+            echo ($json_data !== false) ? $json_data : '[]';
+        ?>;
+        
         function loadExistingSecondaryMedications() {
-            const secondaryMedications = <?php 
-                try {
-                    $json_data = json_encode($secondary_medications ?? [], JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_TAG | JSON_HEX_AMP);
-                    if ($json_data === false) {
-                        echo '[]';
-                    } else {
-                        echo $json_data;
-                    }
-                } catch (Exception $e) {
-                    echo '[]';
-                }
-            ?>;
+            const secondaryMedications = secondaryMedicationsData;
             
             console.log('Loading existing secondary medications:', secondaryMedications);
             
