@@ -823,8 +823,9 @@ $csrf_token = CsrfUtils::collectCsrfToken();
                         </div>
                     </div>
 
-                                <!-- Primary Administration Section -->
-                                <h4 class="subsection-title"><i class="fa fa-clock-o"></i> Administration</h4>
+                    <!-- Primary Administration Section -->
+                    <div class="medication-order-section">
+                        <h4 class="subsection-title"><i class="fa fa-clock-o"></i> Administration</h4>
                         <div class="row">
                             <div class="col-md-4">
                                 <div class="form-group">
@@ -907,12 +908,13 @@ $csrf_token = CsrfUtils::collectCsrfToken();
                                 </div>
                             </div>
                         </div>
-                        
-                        <!-- Secondary/PRN Medications Container -->
-                        <div id="secondary-medications-container">
-                            <!-- Dynamic secondary/PRN medications will be added here -->
-                        </div>
                     </div>
+                    
+                    <!-- Secondary/PRN Medications Container -->
+                    <div id="secondary-medications-container">
+                        <!-- Dynamic secondary/PRN medications will be added here -->
+                    </div>
+                </div>
 
                     <!-- Electronic Signatures Section -->
                     <div class="form-section">
@@ -1696,7 +1698,7 @@ $csrf_token = CsrfUtils::collectCsrfToken();
                 }
                 if (expirationDateInput && expirationDateInput.value) {
                     expirationDateInput.value = DateToYYYYMMDD_js(expirationDateInput.value);
-                if (document.getElementById("iv_access_date") && document.getElementById("iv_access_date").value) {
+if (document.getElementById("iv_access_date") && document.getElementById("iv_access_date").value) {
                     // Removed DateToYYYYMMDD_js for datetime-local input
                 }
                 if (document.getElementById("administration_start") && document.getElementById("administration_start").value) {
@@ -2020,7 +2022,7 @@ $csrf_token = CsrfUtils::collectCsrfToken();
         }
 
         function loadExistingSecondaryMedications() {
-            const secondaryMedications = <?php echo json_encode($secondary_medications ?? []); ?>;
+            const secondaryMedications = <?php echo json_encode($secondary_medications ?? [], JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_TAG | JSON_HEX_AMP); ?>;
             
             console.log('Loading existing secondary medications:', secondaryMedications);
             
