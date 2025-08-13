@@ -50,7 +50,16 @@ if ($form_id) {
     $medications_sql = "SELECT * FROM form_enhanced_infusion_medications WHERE form_id = ? ORDER BY medication_order";
     $medications_result = sqlStatement($medications_sql, [$form_id]);
     while ($medication_row = sqlFetchArray($medications_result)) {
-        $secondary_medications[] = $medication_row;
+        // Sanitize the data to prevent JavaScript syntax errors
+        $sanitized_row = [];
+        foreach ($medication_row as $key => $value) {
+            if ($value === null) {
+                $sanitized_row[$key] = '';
+            } else {
+                $sanitized_row[$key] = (string)$value;
+            }
+        }
+        $secondary_medications[] = $sanitized_row;
     }
     
     // Check if this is a redirect after save
@@ -2022,7 +2031,14 @@ if (document.getElementById("iv_access_date") && document.getElementById("iv_acc
         }
 
         function loadExistingSecondaryMedications() {
-            const secondaryMedications = <?php echo json_encode($secondary_medications ?? [], JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_TAG | JSON_HEX_AMP); ?>;
+            const secondaryMedications = <?php 
+                $json_data = json_encode($secondary_medications ?? [], JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_TAG | JSON_HEX_AMP);
+                if ($json_data === false) {
+                    echo '[]';
+                } else {
+                    echo $json_data;
+                }
+            ?>;
             
             console.log('Loading existing secondary medications:', secondaryMedications);
             
