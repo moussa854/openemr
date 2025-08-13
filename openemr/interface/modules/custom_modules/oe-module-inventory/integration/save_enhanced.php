@@ -118,6 +118,9 @@ try {
         // Delete existing secondary medications
         sqlStatement("DELETE FROM form_enhanced_infusion_medications WHERE form_id = ?", [$formId]);
         
+        // Update form registration in forms table for encounter report
+        addForm($formData['encounter'], "Enhanced Infusion Form", $formId, "enhanced_infusion", $formData['pid'], 1);
+        
     } else {
         // Insert new form
         $insertSql = "INSERT INTO form_enhanced_infusion_injection (";
@@ -127,7 +130,7 @@ try {
         sqlStatement($insertSql, array_values($mainFormData));
         $formId = sqlGetLastInsertId();
         // Register form in forms table for encounter report
-        addForm($encounter, "Enhanced Infusion Form", $formId, "enhanced_infusion", $pid, $userauthorized);
+        addForm($formData['encounter'], "Enhanced Infusion Form", $formId, "enhanced_infusion", $formData['pid'], 1);
     }
     
     // Save secondary medications
