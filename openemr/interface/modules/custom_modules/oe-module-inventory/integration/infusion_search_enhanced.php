@@ -2032,11 +2032,15 @@ if (document.getElementById("iv_access_date") && document.getElementById("iv_acc
 
         function loadExistingSecondaryMedications() {
             const secondaryMedications = <?php 
-                $json_data = json_encode($secondary_medications ?? [], JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_TAG | JSON_HEX_AMP);
-                if ($json_data === false) {
+                try {
+                    $json_data = json_encode($secondary_medications ?? [], JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_TAG | JSON_HEX_AMP);
+                    if ($json_data === false) {
+                        echo '[]';
+                    } else {
+                        echo $json_data;
+                    }
+                } catch (Exception $e) {
                     echo '[]';
-                } else {
-                    echo $json_data;
                 }
             ?>;
             

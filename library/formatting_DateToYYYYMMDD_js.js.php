@@ -21,6 +21,9 @@
 require_once __DIR__ . '/../interface/globals.php';
 require_once __DIR__ . '/htmlspecialchars.inc.php';
 
+// Set proper MIME type for JavaScript
+header('Content-Type: application/javascript; charset=utf-8');
+
 ?>
 
 function DateToYYYYMMDD_js(value){
