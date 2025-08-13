@@ -37,6 +37,9 @@ $form_id = $_GET['id'] ?? null;
 $saved_data = null;
 $saved_message = '';
 
+// DEBUG: Log form loading start
+error_log("=== DEBUG FORM LOAD: Starting form loading - form_id: " . ($form_id ?? 'NULL') . ", pid: " . $pid);
+
 if ($form_id) {
     error_log("=== DEBUG FORM LOAD: Starting form load for form_id: " . $form_id);
     error_log("=== DEBUG FORM LOAD: Current PID: " . $pid);
@@ -131,6 +134,22 @@ if (empty($encounter)) {
 // If still empty, try to get from current encounter
 if (empty($encounter) && isset($GLOBALS['encounter'])) {
     $encounter = $GLOBALS['encounter'];
+}
+
+// DEBUG: Log PID status before final check
+error_log("=== DEBUG FORM LOAD: Before final PID check - pid: " . $pid . ", encounter: " . $encounter);
+
+// If we still don't have a PID but have a form_id, try to get PID from forms table
+if (empty($pid) && !empty($form_id)) {
+    error_log("=== DEBUG FORM LOAD: No PID but have form_id, trying to get PID from forms table");
+    $forms_sql = "SELECT pid FROM forms WHERE id = ? AND form_name = 'enhanced_infusion_injection'";
+    $forms_result = sqlStatement($forms_sql, [$form_id]);
+    if ($forms_row = sqlFetchArray($forms_result)) {
+        $pid = $forms_row['pid'];
+        error_log("=== DEBUG FORM LOAD: Retrieved PID from forms table: " . $pid);
+    } else {
+        error_log("=== DEBUG FORM LOAD: No PID found in forms table for form_id: " . $form_id);
+    }
 }
 
 
