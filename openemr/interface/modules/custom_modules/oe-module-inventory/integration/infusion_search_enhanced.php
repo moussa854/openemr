@@ -23,7 +23,13 @@ if (!isset($_SESSION['authUserID'])) {
 }
 
 // Get patient ID
-$pid = $_GET['pid'] ?? $GLOBALS['pid'];
+$pid = $_GET['pid'] ?? $GLOBALS['pid'] ?? '';
+
+// DEBUG: Log PID retrieval
+error_log("=== DEBUG PID: GET['pid'] = " . ($_GET['pid'] ?? 'NOT_SET'));
+error_log("=== DEBUG PID: GLOBALS['pid'] = " . ($GLOBALS['pid'] ?? 'NOT_SET'));
+error_log("=== DEBUG PID: Final pid = " . $pid);
+
 $encounter = $_GET['encounter'] ?? '';
 
 // Check if we're loading an existing form
@@ -33,15 +39,18 @@ $saved_message = '';
 
 if ($form_id) {
     // Load existing form data from database
-    $form_sql = "SELECT * FROM form_enhanced_infusion_injection WHERE id = ? AND pid = ?"; // Removed encounter from WHERE clause
-    $form_result = sqlStatement($form_sql, [$form_id, $pid]);
+    $form_sql = "SELECT * FROM form_enhanced_infusion_injection WHERE id = ?"; // Removed pid from WHERE clause to allow loading
+    $form_result = sqlStatement($form_sql, [$form_id]);
     if ($row = sqlFetchArray($form_result)) {
         $saved_data = $row;
         // Map database columns to form fields
         $saved_data["order_route"] = $saved_data["administration_route"] ?? "";
-        // Get encounter from saved data if not provided in URL
+        // Get encounter and pid from saved data if not provided in URL
         if (empty($encounter)) {
             $encounter = $saved_data['encounter'] ?? '';
+        }
+        if (empty($pid)) {
+            $pid = $saved_data['pid'] ?? '';
         }
     }
     
@@ -2134,8 +2143,8 @@ if (document.getElementById("iv_access_date") && document.getElementById("iv_acc
         }
 
         function loadPreviousDiagnoses() {
-            const pid = <?php echo $pid; ?>;
-            const currentEncounter = <?php echo $encounter; ?>;
+            const pid = <?php echo json_encode($pid); ?>;
+            const currentEncounter = <?php echo json_encode($encounter); ?>;
             
             console.log('Loading previous diagnoses for PID:', pid, 'Current Encounter:', currentEncounter);
             
@@ -2189,7 +2198,7 @@ if (document.getElementById("iv_access_date") && document.getElementById("iv_acc
             if (window.opener) {
                 window.close();
             } else {
-                window.location.href = '<?php echo $GLOBALS['webroot']; ?>/interface/patient_file/encounter/encounter_top.php?set_encounter=<?php echo $encounter; ?>';
+                window.location.href = '<?php echo $GLOBALS['webroot']; ?>/interface/patient_file/encounter/encounter_top.php?set_encounter=<?php echo json_encode($encounter); ?>';
             }
         }
 
@@ -2220,8 +2229,8 @@ if (document.getElementById("iv_access_date") && document.getElementById("iv_acc
         }
 
         function loadPreviousMedication() {
-            const pid = <?php echo $pid; ?>;
-            const currentEncounter = <?php echo $encounter; ?>;
+            const pid = <?php echo json_encode($pid); ?>;
+            const currentEncounter = <?php echo json_encode($encounter); ?>;
             
             console.log('Loading previous medication orders for PID:', pid, 'Current Encounter:', currentEncounter);
             
