@@ -39,8 +39,30 @@ $saved_message = '';
 
 if ($form_id) {
     // Load existing form data from database
-    $form_sql = "SELECT * FROM form_enhanced_infusion_injection WHERE id = ?"; // Removed pid from WHERE clause to allow loading
-    $form_result = sqlStatement($form_sql, [$form_id]);
+    // First try with PID if we have it
+    if (!empty($pid)) {
+        $form_sql = "SELECT * FROM form_enhanced_infusion_injection WHERE id = ? AND pid = ?";
+        $form_result = sqlStatement($form_sql, [$form_id, $pid]);
+    } else {
+        // If no PID, try to get it from the forms table first
+        $forms_sql = "SELECT pid FROM forms WHERE id = ? AND form_name = 'enhanced_infusion'";
+        $forms_result = sqlStatement($forms_sql, [$form_id]);
+        if ($forms_row = sqlFetchArray($forms_result)) {
+            $pid = $forms_row['pid'];
+            error_log("=== DEBUG FORM LOAD: Retrieved PID from forms table: " . $pid);
+        }
+        
+        // Now try to load the form with the retrieved PID
+        if (!empty($pid)) {
+            $form_sql = "SELECT * FROM form_enhanced_infusion_injection WHERE id = ? AND pid = ?";
+            $form_result = sqlStatement($form_sql, [$form_id, $pid]);
+        } else {
+            // Last resort: load without PID requirement
+            $form_sql = "SELECT * FROM form_enhanced_infusion_injection WHERE id = ?";
+            $form_result = sqlStatement($form_sql, [$form_id]);
+        }
+    }
+    
     if ($row = sqlFetchArray($form_result)) {
         $saved_data = $row;
         // Map database columns to form fields
@@ -102,18 +124,7 @@ if (empty($encounter) && isset($GLOBALS['encounter'])) {
     $encounter = $GLOBALS['encounter'];
 }
 
-// If we have a form_id but no PID, try to get PID from the forms table
-if ($form_id && empty($pid)) {
-    // Try to get PID from the forms table
-    $forms_sql = "SELECT pid FROM forms WHERE id = ? AND form_name = 'enhanced_infusion'";
-    $forms_result = sqlStatement($forms_sql, [$form_id]);
-    if ($forms_row = sqlFetchArray($forms_result)) {
-        $pid = $forms_row['pid'];
-        error_log("=== DEBUG FORM LOAD: Retrieved PID from forms table: " . $pid);
-    } else {
-        error_log("=== DEBUG FORM LOAD: No PID found in forms table for form_id: " . $form_id);
-    }
-}
+
 
 // Load wastage reasons for dropdown
 $wastage_reasons = [];
