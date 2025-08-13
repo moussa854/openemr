@@ -848,13 +848,27 @@ $csrf_token = CsrfUtils::collectCsrfToken();
                             <div class="col-md-4">
                                 <div class="form-group">
                                     <label for="administration_start" class="control-label">Start Time:</label>
-                                    <input type="datetime-local" name="administration_start" id="administration_start" class="form-control" value="<?php echo htmlspecialchars(date('Y-m-d') . 'T' . date('H:i', strtotime($saved_data["administration_start"] ?? 'now'))); ?>" onchange="calculateDuration()" placeholder="Date and time">
+                                    <input type="datetime-local" name="administration_start" id="administration_start" class="form-control" value="<?php 
+                                        $start_time = $saved_data["administration_start"] ?? null;
+                                        if ($start_time && $start_time !== '0000-00-00 00:00:00') {
+                                            echo htmlspecialchars(date('Y-m-d') . 'T' . date('H:i', strtotime($start_time)));
+                                        } else {
+                                            echo htmlspecialchars(date('Y-m-d') . 'T' . date('H:i'));
+                                        }
+                                    ?>" onchange="calculateDuration()" placeholder="Date and time">
                                 </div>
                             </div>
                             <div class="col-md-4">
                                 <div class="form-group">
                                     <label for="administration_end" class="control-label">End Time:</label>
-                                    <input type="datetime-local" name="administration_end" id="administration_end" class="form-control" value="<?php echo htmlspecialchars(date('Y-m-d') . 'T' . date('H:i', strtotime($saved_data["administration_end"] ?? 'now'))); ?>" onchange="calculateDuration()" placeholder="Date and time">
+                                    <input type="datetime-local" name="administration_end" id="administration_end" class="form-control" value="<?php 
+                                        $end_time = $saved_data["administration_end"] ?? null;
+                                        if ($end_time && $end_time !== '0000-00-00 00:00:00') {
+                                            echo htmlspecialchars(date('Y-m-d') . 'T' . date('H:i', strtotime($end_time)));
+                                        } else {
+                                            echo htmlspecialchars(date('Y-m-d') . 'T' . date('H:i'));
+                                        }
+                                    ?>" onchange="calculateDuration()" placeholder="Date and time">
                                 </div>
                             </div>
                             <div class="col-md-4">
