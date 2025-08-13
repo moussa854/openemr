@@ -1476,10 +1476,7 @@ $csrf_token = CsrfUtils::collectCsrfToken();
                 }
                 const item = document.createElement('div');
                 item.className = 'suggestion-item';
-                item.innerHTML = `
-                    <strong>${drug.name}</strong><br>
-                    <small>${drug.form} | Lot: ${drug.lot_number || 'N/A'} | Available: ${drug.quantity} ${drug.quantity_unit} | Exp: ${drug.expiration_date || 'N/A'}</small>
-                `;
+                item.innerHTML = '<strong>' + drug.name + '</strong><br><small>' + drug.form + ' | Lot: ' + (drug.lot_number || 'N/A') + ' | Available: ' + drug.quantity + ' ' + drug.quantity_unit + ' | Exp: ' + (drug.expiration_date || 'N/A') + '</small>';
                 item.addEventListener('click', () => selectDrug(item, drug));
                 searchSuggestions.appendChild(item);
             });
@@ -1506,10 +1503,7 @@ $csrf_token = CsrfUtils::collectCsrfToken();
             diagnoses.forEach(diagnosis => {
                 const item = document.createElement('div');
                 item.className = 'suggestion-item';
-                item.innerHTML = `
-                    <strong>${diagnosis.code || 'N/A'}</strong><br>
-                    <small>${diagnosis.description || 'No description'}</small>
-                `;
+                item.innerHTML = '<strong>' + (diagnosis.code || 'N/A') + '</strong><br><small>' + (diagnosis.description || 'No description') + '</small>';
                 item.addEventListener('click', () => selectICD10Diagnosis(item, diagnosis));
                 icd10Suggestions.appendChild(item);
             });
@@ -1640,16 +1634,7 @@ $csrf_token = CsrfUtils::collectCsrfToken();
                 const diagnosisDiv = document.createElement('div');
                 diagnosisDiv.className = 'row';
                 diagnosisDiv.style.marginBottom = '10px';
-                diagnosisDiv.innerHTML = `
-                    <div class="col-md-8">
-                        <strong>${diagnosis.code}</strong> - ${diagnosis.description}
-                    </div>
-                    <div class="col-md-4">
-                        <button type="button" class="btn btn-sm btn-danger" onclick="removeDiagnosis(${index})">
-                            <i class="fa fa-times"></i> Remove
-                        </button>
-                    </div>
-                `;
+                diagnosisDiv.innerHTML = '<div class="col-md-8"><strong>' + diagnosis.code + '</strong> - ' + diagnosis.description + '</div><div class="col-md-4"><button type="button" class="btn btn-sm btn-danger" onclick="removeDiagnosis(' + index + ')"><i class="fa fa-times"></i> Remove</button></div>';
                 diagnosesList.appendChild(diagnosisDiv);
             });
         }
@@ -2146,11 +2131,7 @@ $csrf_token = CsrfUtils::collectCsrfToken();
             const notification = document.createElement('div');
             notification.className = 'alert alert-info';
             notification.style.marginBottom = '15px';
-            notification.innerHTML = `
-                <i class="fa fa-info-circle"></i> 
-                <strong>Previous Diagnoses Loaded:</strong> ${count} diagnosis(es) from previous encounters have been added to this form.
-                <button type="button" class="close" onclick="this.parentElement.remove()" style="float: right; background: none; border: none; font-size: 18px;">&times;</button>
-            `;
+            notification.innerHTML = '<i class="fa fa-info-circle"></i> <strong>Previous Diagnoses Loaded:</strong> ' + count + ' diagnosis(es) from previous encounters have been added to this form. <button type="button" class="close" onclick="this.parentElement.remove()" style="float: right; background: none; border: none; font-size: 18px;">&times;</button>';
             
             // Insert before the ICD-10 Diagnosis section
             const diagnosisSection = document.querySelector('.form-section');
@@ -2271,11 +2252,7 @@ $csrf_token = CsrfUtils::collectCsrfToken();
             // Create notification element
             const notification = document.createElement('div');
             notification.className = 'alert alert-info alert-dismissible fade show';
-            notification.innerHTML = `
-                <strong>Previous Medication Loaded!</strong> 
-                Medication order for "${medicationName}" has been loaded from the previous encounter.
-                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-            `;
+            notification.innerHTML = '<strong>Previous Medication Loaded!</strong> Medication order for "' + medicationName + '" has been loaded from the previous encounter. <button type="button" class="btn-close" data-bs-dismiss="alert"></button>';
             
             // Insert at the top of the form
             const form = document.querySelector('form');
@@ -2356,31 +2333,11 @@ $csrf_token = CsrfUtils::collectCsrfToken();
             const container = document.getElementById('existing-signatures');
             
             if (signatures.length === 0) {
-                container.innerHTML = `
-                    <div class="row">
-                        <div class="col-md-12">
-                            <div class="alert alert-info">
-                                <i class="fa fa-info-circle"></i> No signatures yet. Add the first signature below.
-                            </div>
-                        </div>
-                    </div>
-                `;
+                container.innerHTML = '<div class="row"><div class="col-md-12"><div class="alert alert-info"><i class="fa fa-info-circle"></i> No signatures yet. Add the first signature below.</div></div></div>';
                 return;
             }
             
-            let tableHtml = `
-                <table class="signature-table">
-                    <thead>
-                        <tr>
-                            <th>User</th>
-                            <th>Type</th>
-                            <th>Date & Time</th>
-                            <th>Signature Text</th>
-                            <th>Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-            `;
+            let tableHtml = '<table class="signature-table"><thead><tr><th>User</th><th>Type</th><th>Date & Time</th><th>Signature Text</th><th>Actions</th></tr></thead><tbody>';
             
             signatures.forEach(signature => {
                 const dateTime = new Date(signature.signature_date).toLocaleString();
@@ -2388,27 +2345,10 @@ $csrf_token = CsrfUtils::collectCsrfToken();
                 
                 let actionsHtml = '';
                 if (signature.can_edit) {
-                    actionsHtml = `
-                        <div class="signature-actions">
-                            <button class="btn btn-sm btn-warning" onclick="editSignature(${signature.id})">
-                                <i class="fa fa-edit"></i> Edit
-                            </button>
-                            <button class="btn btn-sm btn-danger" onclick="deleteSignature(${signature.id})">
-                                <i class="fa fa-trash"></i> Delete
-                            </button>
-                        </div>
-                    `;
+                    actionsHtml = '<div class="signature-actions"><button class="btn btn-sm btn-warning" onclick="editSignature(' + signature.id + ')"><i class="fa fa-edit"></i> Edit</button><button class="btn btn-sm btn-danger" onclick="deleteSignature(' + signature.id + ')"><i class="fa fa-trash"></i> Delete</button></div>';
                 }
                 
-                tableHtml += `
-                    <tr>
-                        <td>${signature.user_name}</td>
-                        <td>${typeBadge}</td>
-                        <td>${dateTime}</td>
-                        <td>${signature.signature_text}</td>
-                        <td>${actionsHtml}</td>
-                    </tr>
-                `;
+                tableHtml += '<tr><td>' + signature.user_name + '</td><td>' + typeBadge + '</td><td>' + dateTime + '</td><td>' + signature.signature_text + '</td><td>' + actionsHtml + '</td></tr>';
             });
             
             tableHtml += '</tbody></table>';
@@ -2525,10 +2465,7 @@ $csrf_token = CsrfUtils::collectCsrfToken();
         function showNotification(message, type = 'info') {
             const notification = document.createElement('div');
             notification.className = 'alert alert-' + type + ' alert-dismissible fade show';
-            notification.innerHTML = `
-                ${message}
-                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-            `;
+            notification.innerHTML = message + '<button type="button" class="btn-close" data-bs-dismiss="alert"></button>';
             
             // Insert at the top of the form
             const form = document.querySelector('form');
