@@ -15,7 +15,7 @@ $pid = $_GET['pid'] ?? '';
 $encounter = $_GET['encounter'] ?? '';
 
 // Redirect to the custom module view with proper parameters
-$redirect_url = $GLOBALS['web_root'] . "/interface/modules/custom_modules/oe-module-inventory/integration/infusion_search_enhanced.php?pid=" . urlencode($pid) . "&encounter=" . urlencode($encounter) . "&form_id=" . urlencode($form_id);
+$redirect_url = $GLOBALS['web_root'] . "/interface/modules/custom_modules/oe-module-inventory/integration/infusion_search_enhanced.php?pid=" . urlencode($pid) . "&encounter=" . urlencode($encounter) . "&id=" . urlencode($form_id);
 
 // Use JavaScript redirect to maintain session
 echo "<script>window.location.href = '" . addslashes($redirect_url) . "';</script>";
