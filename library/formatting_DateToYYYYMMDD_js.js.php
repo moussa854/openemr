@@ -5,6 +5,9 @@ header('Content-Type: application/javascript');
 // Use a default date display format if globals aren't available
 $date_display_format = 1; // mm/dd/yyyy format
 
+// Set proper MIME type for JavaScript
+header('Content-Type: application/javascript; charset=utf-8');
+
 ?>
 
 function DateToYYYYMMDD_js(value){

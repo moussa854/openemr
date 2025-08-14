@@ -23,7 +23,13 @@ if (!isset($_SESSION['authUserID'])) {
 }
 
 // Get patient ID
-$pid = $_GET['pid'] ?? $GLOBALS['pid'];
+$pid = $_GET['pid'] ?? $GLOBALS['pid'] ?? '';
+
+// DEBUG: Log PID retrieval
+error_log("=== DEBUG PID: GET['pid'] = " . ($_GET['pid'] ?? 'NOT_SET'));
+error_log("=== DEBUG PID: GLOBALS['pid'] = " . ($GLOBALS['pid'] ?? 'NOT_SET'));
+error_log("=== DEBUG PID: Final pid = " . $pid);
+
 $encounter = $_GET['encounter'] ?? '';
 
 // Check if we're loading an existing form
@@ -31,18 +37,78 @@ $form_id = $_GET['id'] ?? null;
 $saved_data = null;
 $saved_message = '';
 
+// DEBUG: Log form loading start
+error_log("=== DEBUG FORM LOAD: Starting form loading - form_id: " . ($form_id ?? 'NULL') . ", pid: " . $pid);
+
 if ($form_id) {
+    error_log("=== DEBUG FORM LOAD: Starting form load for form_id: " . $form_id);
+    error_log("=== DEBUG FORM LOAD: Current PID: " . $pid);
+    
     // Load existing form data from database
-    $form_sql = "SELECT * FROM form_enhanced_infusion_injection WHERE id = ? AND pid = ?"; // Removed encounter from WHERE clause
-    $form_result = sqlStatement($form_sql, [$form_id, $pid]);
+    // First try with PID if we have it
+    if (!empty($pid)) {
+        error_log("=== DEBUG FORM LOAD: PID is not empty, trying with PID");
+        $form_sql = "SELECT * FROM form_enhanced_infusion_injection WHERE id = ? AND pid = ?";
+        $form_result = sqlStatement($form_sql, [$form_id, $pid]);
+    } else {
+        error_log("=== DEBUG FORM LOAD: PID is empty, trying to get from forms table");
+        // If no PID, try to get it from the forms table first
+        $forms_sql = "SELECT pid FROM forms WHERE id = ? AND form_name = 'enhanced_infusion_injection'";
+        $forms_result = sqlStatement($forms_sql, [$form_id]);
+        if ($forms_row = sqlFetchArray($forms_result)) {
+            $pid = $forms_row['pid'];
+            error_log("=== DEBUG FORM LOAD: Retrieved PID from forms table: " . $pid);
+        } else {
+            error_log("=== DEBUG FORM LOAD: No PID found in forms table for form_id: " . $form_id);
+        }
+        
+        // Now try to load the form with the retrieved PID
+        if (!empty($pid)) {
+            error_log("=== DEBUG FORM LOAD: Loading form with retrieved PID: " . $pid);
+            $form_sql = "SELECT * FROM form_enhanced_infusion_injection WHERE id = ? AND pid = ?";
+            $form_result = sqlStatement($form_sql, [$form_id, $pid]);
+        } else {
+            error_log("=== DEBUG FORM LOAD: No PID available, loading without PID requirement");
+            // Last resort: load without PID requirement
+            $form_sql = "SELECT * FROM form_enhanced_infusion_injection WHERE id = ?";
+            $form_result = sqlStatement($form_sql, [$form_id]);
+        }
+    }
+    
     if ($row = sqlFetchArray($form_result)) {
         $saved_data = $row;
         // Map database columns to form fields
         $saved_data["order_route"] = $saved_data["administration_route"] ?? "";
-        // Get encounter from saved data if not provided in URL
+        // Get encounter and pid from saved data if not provided in URL
         if (empty($encounter)) {
             $encounter = $saved_data['encounter'] ?? '';
         }
+        if (empty($pid)) {
+            $pid = $saved_data['pid'] ?? '';
+        }
+        
+        // DEBUG: Log the retrieved data
+        error_log("=== DEBUG FORM LOAD: Retrieved PID from database: " . $pid);
+        error_log("=== DEBUG FORM LOAD: Retrieved Encounter from database: " . $encounter);
+    } else {
+        error_log("=== DEBUG FORM LOAD: No form found with ID: " . $form_id);
+    }
+    
+    // Load secondary medications
+    $secondary_medications = [];
+    $medications_sql = "SELECT * FROM form_enhanced_infusion_medications WHERE form_id = ? ORDER BY medication_order";
+    $medications_result = sqlStatement($medications_sql, [$form_id]);
+    while ($medication_row = sqlFetchArray($medications_result)) {
+        // Sanitize the data to prevent JavaScript syntax errors
+        $sanitized_row = [];
+        foreach ($medication_row as $key => $value) {
+            if ($value === null) {
+                $sanitized_row[$key] = '';
+            } else {
+                $sanitized_row[$key] = (string)$value;
+            }
+        }
+        $secondary_medications[] = $sanitized_row;
     }
     
     // Check if this is a redirect after save
@@ -69,6 +135,24 @@ if (empty($encounter)) {
 if (empty($encounter) && isset($GLOBALS['encounter'])) {
     $encounter = $GLOBALS['encounter'];
 }
+
+// DEBUG: Log PID status before final check
+error_log("=== DEBUG FORM LOAD: Before final PID check - pid: " . $pid . ", encounter: " . $encounter);
+
+// If we still don't have a PID but have a form_id, try to get PID from forms table
+if (empty($pid) && !empty($form_id)) {
+    error_log("=== DEBUG FORM LOAD: No PID but have form_id, trying to get PID from forms table");
+    $forms_sql = "SELECT pid FROM forms WHERE id = ? AND form_name = 'enhanced_infusion_injection'";
+    $forms_result = sqlStatement($forms_sql, [$form_id]);
+    if ($forms_row = sqlFetchArray($forms_result)) {
+        $pid = $forms_row['pid'];
+        error_log("=== DEBUG FORM LOAD: Retrieved PID from forms table: " . $pid);
+    } else {
+        error_log("=== DEBUG FORM LOAD: No PID found in forms table for form_id: " . $form_id);
+    }
+}
+
+
 
 // Load wastage reasons for dropdown
 $wastage_reasons = [];
@@ -280,6 +364,82 @@ $csrf_token = CsrfUtils::collectCsrfToken();
         .signature-type-reviewer { background-color: #ffc107; color: #212529; }
         .signature-type-custom { background-color: #6c757d; color: white; }
         .mt-3 { margin-top: 15px; }
+        
+        /* Multi-Medication Styles */
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        
+        .medication-section {
+            background-color: #ffffff;
+            border: 1px solid #dee2e6;
+            border-radius: 5px;
+            margin-bottom: 20px;
+            overflow: hidden;
+        }
+        
+        .primary-medication {
+            border-left: 4px solid #007bff;
+        }
+        
+        .secondary-medication {
+            border-left: 4px solid #17a2b8;
+        }
+        
+        .medication-header {
+            background-color: #f8f9fa;
+            padding: 15px 20px;
+            border-bottom: 1px solid #dee2e6;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .medication-title {
+            margin: 0;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .medication-type-badge {
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 11px;
+            font-weight: bold;
+            text-transform: uppercase;
+        }
+        
+        .badge-primary { background-color: #007bff; color: white; }
+        .badge-info { background-color: #17a2b8; color: white; }
+        .badge-warning { background-color: #ffc107; color: #212529; }
+        
+        .medication-actions {
+            display: flex;
+            gap: 5px;
+        }
+        
+        .medication-actions .btn {
+            padding: 4px 8px;
+            font-size: 12px;
+        }
+        
+        .medication-content {
+            padding: 20px;
+        }
+        
+        .subsection-title {
+            color: #495057;
+            border-bottom: 1px solid #dee2e6;
+            padding-bottom: 8px;
+            margin-bottom: 15px;
+            font-size: 16px;
+        }
+        
+        .input-group {
             display: flex;
             align-items: stretch;
             width: 100%;
@@ -499,7 +659,7 @@ $csrf_token = CsrfUtils::collectCsrfToken();
                             <div class="col-md-4">
                                 <div class="form-group">
                                     <label for="iv_access_date" class="control-label">Access Date:</label>
-                                    <input type="datetime-local" name="iv_access_date" id="iv_access_date" class="form-control" value="<?php echo htmlspecialchars(date('Y-m-d\TH:i', strtotime($saved_data["iv_access_date"] ?? 'now'))); ?>" placeholder="Date and time">
+                                    <input type="datetime-local" name="iv_access_date" id="iv_access_date" class="form-control" value="<?php echo htmlspecialchars(date('Y-m-d') . 'T' . date('H:i', strtotime($saved_data["iv_access_date"] ?? 'now'))); ?>" placeholder="Date and time">
                                 </div>
                             </div>
                         </div>
@@ -543,9 +703,27 @@ $csrf_token = CsrfUtils::collectCsrfToken();
                         </div>
                     </div>
 
-                    <!-- Medication Order Section -->
+                    <!-- Medications Section -->
                     <div class="form-section">
-                        <h3 class="section-title"><i class="fa fa-prescription"></i> Medication Order</h3>
+                        <div class="section-header">
+                            <h3 class="section-title"><i class="fa fa-prescription"></i> Medications</h3>
+                            <button type="button" class="btn btn-primary btn-sm" onclick="addMedication()">
+                                <i class="fa fa-plus"></i> Add Secondary/PRN Medication
+                            </button>
+                        </div>
+                        
+                        <!-- Primary Medication -->
+                        <div id="medication-1" class="medication-section primary-medication" data-medication-id="1">
+                            <div class="medication-header">
+                                <h4 class="medication-title">
+                                    <span class="medication-type-badge badge badge-primary">Primary</span>
+                                    <span class="medication-name">Primary Medication</span>
+                                </h4>
+                            </div>
+                            
+                            <!-- Primary Medication Order Section -->
+                            <div class="medication-content">
+                                <h4 class="subsection-title"><i class="fa fa-prescription"></i> Medication Order</h4>
                         
                         <!-- Search Inventory -->
                         <div class="row">
@@ -721,20 +899,34 @@ $csrf_token = CsrfUtils::collectCsrfToken();
                         </div>
                     </div>
 
-                    <!-- Administration Section -->
-                    <div class="form-section">
-                        <h3 class="section-title"><i class="fa fa-clock-o"></i> Administration</h3>
+                    <!-- Primary Administration Section -->
+                    <div class="medication-order-section">
+                        <h4 class="subsection-title"><i class="fa fa-clock-o"></i> Administration</h4>
                         <div class="row">
                             <div class="col-md-4">
                                 <div class="form-group">
                                     <label for="administration_start" class="control-label">Start Time:</label>
-                                    <input type="datetime-local" name="administration_start" id="administration_start" class="form-control" value="<?php echo htmlspecialchars(date('Y-m-d\TH:i', strtotime($saved_data["administration_start"] ?? 'now'))); ?>" onchange="calculateDuration()" placeholder="Date and time">
+                                    <input type="datetime-local" name="administration_start" id="administration_start" class="form-control" value="<?php 
+                                        $start_time = $saved_data["administration_start"] ?? null;
+                                        if ($start_time && $start_time !== '0000-00-00 00:00:00') {
+                                            echo htmlspecialchars(date('Y-m-d') . 'T' . date('H:i', strtotime($start_time)));
+                                        } else {
+                                            echo htmlspecialchars(date('Y-m-d') . 'T' . date('H:i'));
+                                        }
+                                    ?>" onchange="calculateDuration()" placeholder="Date and time">
                                 </div>
                             </div>
                             <div class="col-md-4">
                                 <div class="form-group">
                                     <label for="administration_end" class="control-label">End Time:</label>
-                                    <input type="datetime-local" name="administration_end" id="administration_end" class="form-control" value="<?php echo htmlspecialchars(date('Y-m-d\TH:i', strtotime($saved_data["administration_end"] ?? 'now'))); ?>" onchange="calculateDuration()" placeholder="Date and time">
+                                    <input type="datetime-local" name="administration_end" id="administration_end" class="form-control" value="<?php 
+                                        $end_time = $saved_data["administration_end"] ?? null;
+                                        if ($end_time && $end_time !== '0000-00-00 00:00:00') {
+                                            echo htmlspecialchars(date('Y-m-d') . 'T' . date('H:i', strtotime($end_time)));
+                                        } else {
+                                            echo htmlspecialchars(date('Y-m-d') . 'T' . date('H:i'));
+                                        }
+                                    ?>" onchange="calculateDuration()" placeholder="Date and time">
                                 </div>
                             </div>
                             <div class="col-md-4">
@@ -807,6 +999,29 @@ $csrf_token = CsrfUtils::collectCsrfToken();
                             </div>
                         </div>
                     </div>
+                    
+                    <!-- Secondary/PRN Medications Container -->
+                    <div id="secondary-medications-container">
+                        <!-- Dynamic secondary/PRN medications will be added here -->
+                    </div>
+                    
+                    <!-- Hidden data field for secondary medications -->
+                    <input type="hidden" id="secondary-medications-data" value="<?php 
+                        // DEBUG: Log the secondary medications data
+                        error_log("=== DEBUG: secondary_medications count: " . count($secondary_medications ?? []));
+                        error_log("=== DEBUG: secondary_medications data: " . print_r($secondary_medications ?? [], true));
+                        
+                        $medications = $secondary_medications ?? [];
+                        $json_data = json_encode($medications, JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_TAG | JSON_HEX_AMP);
+                        
+                        // DEBUG: Log the JSON encoding result
+                        error_log("=== DEBUG: json_encode result: " . ($json_data !== false ? $json_data : 'JSON_ENCODE_FAILED'));
+                        error_log("=== DEBUG: json_last_error: " . json_last_error());
+                        error_log("=== DEBUG: json_last_error_msg: " . json_last_error_msg());
+                        
+                        echo htmlspecialchars(($json_data !== false) ? $json_data : '[]');
+                    ?>">
+                </div>
 
                     <!-- Electronic Signatures Section -->
                     <div class="form-section">
@@ -840,7 +1055,7 @@ $csrf_token = CsrfUtils::collectCsrfToken();
                                 <div class="col-md-4">
                                     <div class="form-group">
                                         <label for="signature_datetime" class="control-label">Date & Time:</label>
-                                        <input type="datetime-local" id="signature_datetime" class="form-control" value="<?php echo date('Y-m-d\TH:i'); ?>">
+                                        <input type="datetime-local" id="signature_datetime" class="form-control" value="<?php echo date('Y-m-d') . 'T' . date('H:i'); ?>">
                                     </div>
                                 </div>
                                 <div class="col-md-4">
@@ -876,10 +1091,299 @@ $csrf_token = CsrfUtils::collectCsrfToken();
         </div>
     </div>
 
+    <!-- Medication Template for Secondary/PRN Medications -->
+    <template id="medication-template">
+        <div class="medication-section secondary-medication" data-medication-id="">
+            <div class="medication-header">
+                <h4 class="medication-title">
+                    <span class="medication-type-badge"></span>
+                    <span class="medication-name">New Medication</span>
+                </h4>
+                <div class="medication-actions">
+                    <button type="button" class="btn btn-sm btn-outline-primary" onclick="editMedication(this)">
+                        <i class="fa fa-edit"></i> Edit
+                    </button>
+                    <button type="button" class="btn btn-sm btn-outline-danger" onclick="deleteMedication(this)">
+                        <i class="fa fa-trash"></i> Delete
+                    </button>
+                </div>
+            </div>
+            
+            <!-- Collapsible Content -->
+            <div class="medication-content" style="display: none;">
+                <!-- Medication Order Section -->
+                <div class="medication-order-section">
+                    <h4 class="subsection-title"><i class="fa fa-prescription"></i> Medication Order</h4>
+                    
+                    <!-- Search Inventory -->
+                    <div class="row">
+                        <div class="col-md-8">
+                            <div class="form-group">
+                                <label class="control-label">Search Inventory:</label>
+                                <div class="search-container">
+                                    <input type="text" class="medication-search form-control" 
+                                           placeholder="Enter medication name, NDC, or barcode...">
+                                    <div class="search-suggestions"></div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="form-group">
+                                <label class="control-label">Search Type:</label>
+                                <select class="search-type form-control">
+                                    <option value="name">Medication Name</option>
+                                    <option value="ndc">NDC Code</option>
+                                    <option value="barcode">Barcode</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Selected Drug Information -->
+                    <div class="drug-info" style="display: none;">
+                        <h5><i class="fa fa-check-circle"></i> Selected Drug Information</h5>
+                        <div class="row">
+                            <div class="col-md-3">
+                                <strong>Name:</strong><br>
+                                <span class="drug-name-display"></span>
+                            </div>
+                            <div class="col-md-3">
+                                <strong>Strength:</strong><br>
+                                <span class="drug-strength-display"></span>
+                            </div>
+                            <div class="col-md-3">
+                                <strong>Lot:</strong><br>
+                                <span class="drug-lot-display"></span>
+                            </div>
+                            <div class="col-md-3">
+                                <strong>NDC:</strong><br>
+                                <span class="drug-ndc-display"></span>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-3">
+                                <strong>Expiration:</strong><br>
+                                <span class="drug-expiration-display"></span>
+                            </div>
+                            <div class="col-md-3">
+                                <strong>Available:</strong><br>
+                                <span class="drug-quantity-display"></span>
+                            </div>
+                            <div class="col-md-3">
+                                <strong>Form:</strong><br>
+                                <span class="drug-form-display"></span>
+                            </div>
+                            <div class="col-md-3">
+                                <strong>Status:</strong><br>
+                                <span class="drug-status-display"></span>
+                            </div>
+                        </div>
+                        <input type="hidden" class="selected-drug-id" name="secondary_medications[][inventory_drug_id]">
+                        <input type="hidden" class="selected-drug-lot" name="secondary_medications[][inventory_lot_number]">
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-3">
+                            <div class="form-group">
+                                <label class="control-label">Medication Name:</label>
+                                <input type="text" class="order-medication form-control" name="secondary_medications[][order_medication]" 
+                                       placeholder="Medication name">
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="form-group">
+                                <label class="control-label">Dose:</label>
+                                <input type="text" class="order-dose form-control" name="secondary_medications[][order_dose]" 
+                                       placeholder="Dose and unit">
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="form-group">
+                                <label class="control-label">Strength:</label>
+                                <input type="text" class="order-strength form-control" name="secondary_medications[][order_strength]" 
+                                       placeholder="Medication strength">
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="form-group">
+                                <label class="control-label">Route:</label>
+                                <input type="text" class="order-route form-control" name="secondary_medications[][order_route]" 
+                                       placeholder="Route of administration">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-4">
+                            <div class="form-group">
+                                <label class="control-label">Lot Number:</label>
+                                <input type="text" class="order-lot-number form-control" name="secondary_medications[][order_lot_number]" 
+                                       placeholder="Lot number">
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="form-group">
+                                <label class="control-label">NDC:</label>
+                                <input type="text" class="order-ndc form-control" name="secondary_medications[][order_ndc]" 
+                                       placeholder="NDC code">
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="form-group">
+                                <label class="control-label">Expiration Date:</label>
+                                <input type="date" class="order-expiration-date form-control" name="secondary_medications[][order_expiration_date]">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-3">
+                            <div class="form-group">
+                                <label class="control-label">Every:</label>
+                                <div class="input-group">
+                                    <input type="text" class="order-every-value form-control" name="secondary_medications[][order_every_value]" 
+                                           placeholder="Value">
+                                    <select class="order-every-unit form-control" name="secondary_medications[][order_every_unit]">
+                                        <option value="">Unit</option>
+                                        <option value="hours">Hours</option>
+                                        <option value="days">Days</option>
+                                        <option value="weeks">Weeks</option>
+                                        <option value="as needed">As Needed</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="form-group">
+                                <label class="control-label">Servicing Provider:</label>
+                                <input type="text" class="order-servicing-provider form-control" name="secondary_medications[][order_servicing_provider]" 
+                                       placeholder="Provider name">
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="form-group">
+                                <label class="control-label">NPI:</label>
+                                <input type="text" class="order-npi form-control" name="secondary_medications[][order_npi]" 
+                                       placeholder="NPI number">
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="form-group">
+                                <label class="control-label">End Date:</label>
+                                <input type="date" class="order-end-date form-control" name="secondary_medications[][order_end_date]">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-12">
+                            <div class="form-group">
+                                <label class="control-label">Order Notes:</label>
+                                <textarea class="order-note form-control" name="secondary_medications[][order_note]" rows="2" 
+                                          placeholder="Additional notes about the medication order"></textarea>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Administration Section -->
+                <div class="administration-section">
+                    <h4 class="subsection-title"><i class="fa fa-clock-o"></i> Administration</h4>
+                    <div class="row">
+                        <div class="col-md-4">
+                            <div class="form-group">
+                                <label class="control-label">Start Time:</label>
+                                <input type="datetime-local" class="administration-start form-control" name="secondary_medications[][administration_start]" 
+                                       onchange="calculateSecondaryDuration(this)" placeholder="Date and time">
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="form-group">
+                                <label class="control-label">End Time:</label>
+                                <input type="datetime-local" class="administration-end form-control" name="secondary_medications[][administration_end]" 
+                                       onchange="calculateSecondaryDuration(this)" placeholder="Date and time">
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="form-group">
+                                <label class="control-label">Duration:</label>
+                                <div class="input-group">
+                                    <input type="text" class="administration-duration form-control" name="secondary_medications[][administration_duration]" 
+                                           readonly placeholder="Calculated automatically">
+                                    <div class="input-group-append">
+                                        <span class="input-group-text">hours:minutes</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label class="control-label">Quantity Used:</label>
+                                <div class="input-group">
+                                    <input type="number" step="0.01" class="inventory-quantity-used form-control" 
+                                           name="secondary_medications[][inventory_quantity_used]" placeholder="Enter quantity used">
+                                    <div class="input-group-append">
+                                        <span class="input-group-text" style="display: inline-block;"></span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label class="control-label">Quantity Wasted:</label>
+                                <div class="input-group">
+                                    <input type="number" step="0.01" class="inventory-wastage-quantity form-control" 
+                                           name="secondary_medications[][inventory_wastage_quantity]" placeholder="Enter quantity wasted">
+                                    <div class="input-group-append">
+                                        <span class="input-group-text" style="display: inline-block;"></span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label class="control-label">Wastage Reason:</label>
+                                <select class="inventory-wastage-reason form-control" name="secondary_medications[][inventory_wastage_reason]">
+                                    <option value="">Select reason</option>
+                                    <?php foreach ($wastage_reasons as $reason): ?>
+                                        <option value="<?php echo htmlspecialchars($reason['reason_code']); ?>">
+                                            <?php echo htmlspecialchars($reason['reason_description']); ?>
+                                        </option>
+                                    <?php endforeach; ?>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label class="control-label">Wastage Notes:</label>
+                                <textarea class="inventory-wastage-notes form-control" name="secondary_medications[][inventory_wastage_notes]" rows="2" 
+                                          placeholder="Additional notes about wastage"></textarea>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label class="control-label">Administration Notes:</label>
+                                <textarea class="administration-note form-control" name="secondary_medications[][administration_note]" rows="3" 
+                                          placeholder="Notes about administration, patient response, complications..."></textarea>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </template>
+
     <script>
         // Version for cache busting
         const SCRIPT_VERSION = '<?php echo time(); ?>';
         console.log('Script version:', SCRIPT_VERSION);
+        
+        // Multi-Medication Functionality
+        let medicationCounter = 1;
+        let medications = [];
         
         // Search functionality
         let searchTimeout;
@@ -1007,7 +1511,7 @@ $csrf_token = CsrfUtils::collectCsrfToken();
 
         function performSearch(query) {
             const type = searchType.value;
-            const url = `/interface/modules/custom_modules/oe-module-inventory/get-drug-for-infusion.php?search=${encodeURIComponent(query)}&type=${type}`;
+            const url = '/interface/modules/custom_modules/oe-module-inventory/get-drug-for-infusion.php?search=' + encodeURIComponent(query) + '&type=' + type;
             
             fetch(url)
                 .then(response => response.json())
@@ -1026,14 +1530,14 @@ $csrf_token = CsrfUtils::collectCsrfToken();
 
         function performICD10Search(query) {
             console.log('Performing ICD-10 search for:', query);
-            const url = `/interface/modules/custom_modules/oe-module-inventory/search-icd10.php?search=${encodeURIComponent(query)}`;
+            const url = '/interface/modules/custom_modules/oe-module-inventory/search-icd10.php?search=' + encodeURIComponent(query);
             console.log('Search URL:', url);
             
             fetch(url)
                 .then(response => {
                     console.log('ICD-10 search response status:', response.status);
                     if (!response.ok) {
-                        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                        throw new Error('HTTP ' + response.status + ': ' + response.statusText);
                     }
                     return response.json();
                 })
@@ -1079,10 +1583,7 @@ $csrf_token = CsrfUtils::collectCsrfToken();
                 }
                 const item = document.createElement('div');
                 item.className = 'suggestion-item';
-                item.innerHTML = `
-                    <strong>${drug.name}</strong><br>
-                    <small>${drug.form} | Lot: ${drug.lot_number || 'N/A'} | Available: ${drug.quantity} ${drug.quantity_unit} | Exp: ${drug.expiration_date || 'N/A'}</small>
-                `;
+                item.innerHTML = '<strong>' + drug.name + '</strong><br><small>' + drug.form + ' | Lot: ' + (drug.lot_number || 'N/A') + ' | Available: ' + drug.quantity + ' ' + drug.quantity_unit + ' | Exp: ' + (drug.expiration_date || 'N/A') + '</small>';
                 item.addEventListener('click', () => selectDrug(item, drug));
                 searchSuggestions.appendChild(item);
             });
@@ -1109,10 +1610,7 @@ $csrf_token = CsrfUtils::collectCsrfToken();
             diagnoses.forEach(diagnosis => {
                 const item = document.createElement('div');
                 item.className = 'suggestion-item';
-                item.innerHTML = `
-                    <strong>${diagnosis.code || 'N/A'}</strong><br>
-                    <small>${diagnosis.description || 'No description'}</small>
-                `;
+                item.innerHTML = '<strong>' + (diagnosis.code || 'N/A') + '</strong><br><small>' + (diagnosis.description || 'No description') + '</small>';
                 item.addEventListener('click', () => selectICD10Diagnosis(item, diagnosis));
                 icd10Suggestions.appendChild(item);
             });
@@ -1243,16 +1741,7 @@ $csrf_token = CsrfUtils::collectCsrfToken();
                 const diagnosisDiv = document.createElement('div');
                 diagnosisDiv.className = 'row';
                 diagnosisDiv.style.marginBottom = '10px';
-                diagnosisDiv.innerHTML = `
-                    <div class="col-md-8">
-                        <strong>${diagnosis.code}</strong> - ${diagnosis.description}
-                    </div>
-                    <div class="col-md-4">
-                        <button type="button" class="btn btn-sm btn-danger" onclick="removeDiagnosis(${index})">
-                            <i class="fa fa-times"></i> Remove
-                        </button>
-                    </div>
-                `;
+                diagnosisDiv.innerHTML = '<div class="col-md-8"><strong>' + diagnosis.code + '</strong> - ' + diagnosis.description + '</div><div class="col-md-4"><button type="button" class="btn btn-sm btn-danger" onclick="removeDiagnosis(' + index + ')"><i class="fa fa-times"></i> Remove</button></div>';
                 diagnosesList.appendChild(diagnosisDiv);
             });
         }
@@ -1290,6 +1779,11 @@ $csrf_token = CsrfUtils::collectCsrfToken();
             }
             loadPreviousMedication();
             
+            // Load existing secondary medications for saved forms
+            if (formIdInput) {
+                loadExistingSecondaryMedications();
+            }
+            
             // Calculate duration if start and end times are already filled
             const startInput = document.getElementById('administration_start');
             const endInput = document.getElementById('administration_end');
@@ -1312,13 +1806,13 @@ $csrf_token = CsrfUtils::collectCsrfToken();
                 if (expirationDateInput && expirationDateInput.value) {
                     expirationDateInput.value = DateToYYYYMMDD_js(expirationDateInput.value);
 if (document.getElementById("iv_access_date") && document.getElementById("iv_access_date").value) {
-                    document.getElementById("iv_access_date").value = DateToYYYYMMDD_js(document.getElementById("iv_access_date").value);
+                    // Removed DateToYYYYMMDD_js for datetime-local input
                 }
                 if (document.getElementById("administration_start") && document.getElementById("administration_start").value) {
-                    document.getElementById("administration_start").value = DateToYYYYMMDD_js(document.getElementById("administration_start").value);
+                    // Removed DateToYYYYMMDD_js for datetime-local input
                 }
                 if (document.getElementById("administration_end") && document.getElementById("administration_end").value) {
-                    document.getElementById("administration_end").value = DateToYYYYMMDD_js(document.getElementById("administration_end").value);
+                    // Removed DateToYYYYMMDD_js for datetime-local input
                 }
                 }
                 
@@ -1405,14 +1899,329 @@ if (document.getElementById("iv_access_date") && document.getElementById("iv_acc
             });
         });
 
+        // Multi-Medication Management Functions
+        function addMedication() {
+            medicationCounter++;
+            
+            // Clone template
+            const template = document.getElementById('medication-template');
+            const newMedication = template.content.cloneNode(true);
+            
+            // Configure new medication
+            const medicationSection = newMedication.querySelector('.medication-section');
+            medicationSection.id = 'medication-' + medicationCounter;
+            medicationSection.dataset.medicationId = medicationCounter;
+            
+            // Set medication type
+            const typeBadge = medicationSection.querySelector('.medication-type-badge');
+            typeBadge.textContent = medicationCounter === 2 ? 'Secondary' : 'PRN';
+            typeBadge.className = 'medication-type-badge badge ' + (medicationCounter === 2 ? 'badge-info' : 'badge-warning');
+            
+            // Update field names with medication ID
+            updateFieldNames(medicationSection, medicationCounter);
+            
+            // Add to container
+            document.getElementById('secondary-medications-container').appendChild(newMedication);
+            
+            // Initialize functionality
+            initializeMedicationSection(medicationSection);
+            
+            // Store reference
+            medications.push({
+                id: medicationCounter,
+                type: medicationCounter === 2 ? 'secondary' : 'prn',
+                element: medicationSection
+            });
+            
+            console.log('Added medication:', medicationCounter, 'Type:', medicationCounter === 2 ? 'secondary' : 'prn');
+        }
+
+        function updateFieldNames(medicationSection, medicationId) {
+            const inputs = medicationSection.querySelectorAll('input, select, textarea');
+            inputs.forEach(input => {
+                if (input.name) {
+                    // Update array index for secondary medications
+                    const nameMatch = input.name.match(/secondary_medications\[\](\[.*\])?/);
+                    if (nameMatch) {
+                        input.name = input.name.replace('[]', '[' + (medicationId - 2) + '][]');
+                    }
+                }
+                if (input.id) {
+                    input.id = input.id + '_' + medicationId;
+                }
+            });
+        }
+
+        function initializeMedicationSection(medicationSection) {
+            // Initialize search functionality for this medication
+            const searchInput = medicationSection.querySelector('.medication-search');
+            const searchSuggestions = medicationSection.querySelector('.search-suggestions');
+            const searchType = medicationSection.querySelector('.search-type');
+            
+            if (searchInput) {
+                searchInput.addEventListener('input', function() {
+                    clearTimeout(searchTimeout);
+                    const query = this.value.trim();
+                    
+                    if (query.length < 2) {
+                        searchSuggestions.style.display = 'none';
+                        return;
+                    }
+                    
+                    searchTimeout = setTimeout(() => {
+                        performMedicationSearch(query, searchType.value, searchSuggestions, searchInput, medicationSection);
+                    }, 300);
+                });
+            }
+            
+            // Initialize duration calculation
+            const startInput = medicationSection.querySelector('.administration-start');
+            const endInput = medicationSection.querySelector('.administration-end');
+            const durationInput = medicationSection.querySelector('.administration-duration');
+            
+            if (startInput && endInput && durationInput) {
+                startInput.addEventListener('change', () => calculateSecondaryDuration(medicationSection));
+                endInput.addEventListener('change', () => calculateSecondaryDuration(medicationSection));
+            }
+        }
+
+        function editMedication(button) {
+            const medicationSection = button.closest('.medication-section');
+            const content = medicationSection.querySelector('.medication-content');
+            const isExpanded = content.style.display !== 'none';
+            
+            if (isExpanded) {
+                content.style.display = 'none';
+                button.innerHTML = '<i class="fa fa-edit"></i> Edit';
+            } else {
+                content.style.display = 'block';
+                button.innerHTML = '<i class="fa fa-compress"></i> Collapse';
+            }
+        }
+
+        function deleteMedication(button) {
+            if (confirm('Are you sure you want to delete this medication?')) {
+                const medicationSection = button.closest('.medication-section');
+                const medicationId = parseInt(medicationSection.dataset.medicationId);
+                
+                // Remove from DOM
+                medicationSection.remove();
+                
+                // Remove from medications array
+                medications = medications.filter(m => m.id !== medicationId);
+                
+                // Reorder remaining medications
+                reorderMedications();
+                
+                console.log('Deleted medication:', medicationId);
+            }
+        }
+
+        function reorderMedications() {
+            const secondaryContainer = document.getElementById('secondary-medications-container');
+            const medicationSections = secondaryContainer.querySelectorAll('.medication-section');
+            
+            medicationSections.forEach((section, index) => {
+                const newId = index + 2; // Start from 2 (secondary)
+                section.dataset.medicationId = newId;
+                section.id = 'medication-' + newId;
+                
+                // Update type badge
+                const typeBadge = section.querySelector('.medication-type-badge');
+                typeBadge.textContent = newId === 2 ? 'Secondary' : 'PRN';
+                typeBadge.className = 'medication-type-badge badge ' + (newId === 2 ? 'badge-info' : 'badge-warning');
+                
+                // Update field names
+                updateFieldNames(section, newId);
+            });
+            
+            // Update medications array
+            medications = medications.map((med, index) => ({
+                ...med,
+                id: index + 2,
+                type: index === 0 ? 'secondary' : 'prn'
+            }));
+        }
+
+        function calculateSecondaryDuration(medicationSection) {
+            const startInput = medicationSection.querySelector('.administration-start');
+            const endInput = medicationSection.querySelector('.administration-end');
+            const durationInput = medicationSection.querySelector('.administration-duration');
+
+            if (!startInput || !endInput || !durationInput) {
+                console.error('Inputs for secondary duration calculation not found.');
+                return;
+            }
+
+            const startDateTime = new Date(startInput.value);
+            const endDateTime = new Date(endInput.value);
+
+            if (isNaN(startDateTime.getTime()) || isNaN(endDateTime.getTime())) {
+                durationInput.value = '';
+                return;
+            }
+
+            const diffInMilliseconds = endDateTime.getTime() - startDateTime.getTime();
+            const diffInMinutes = Math.floor(diffInMilliseconds / (1000 * 60));
+            const hours = Math.floor(diffInMinutes / 60);
+            const minutes = diffInMinutes % 60;
+
+            durationInput.value = hours + ':' + minutes.toString().padStart(2, '0');
+        }
+
+        function performMedicationSearch(query, searchType, suggestionsContainer, searchInput, medicationSection) {
+            // Use the same search logic as the primary medication
+            fetch('search_inventory.php?query=' + encodeURIComponent(query) + '&type=' + encodeURIComponent(searchType))
+                .then(response => response.json())
+                .then(data => {
+                    suggestionsContainer.innerHTML = '';
+                    
+                    if (data.success && data.results && data.results.length > 0) {
+                        data.results.forEach((drug, index) => {
+                            const item = document.createElement('div');
+                            item.className = 'suggestion-item';
+                            item.textContent = (drug.name + ' - ' + (drug.strength || '') + ' (' + (drug.lot_number || '') + ')');
+                            item.dataset.drug = JSON.stringify(drug);
+                            
+                            item.addEventListener('click', () => {
+                                selectSecondaryDrug(drug, medicationSection);
+                                suggestionsContainer.style.display = 'none';
+                            });
+                            
+                            suggestionsContainer.appendChild(item);
+                        });
+                        
+                        suggestionsContainer.style.display = 'block';
+                    } else {
+                        suggestionsContainer.style.display = 'none';
+                    }
+                })
+                .catch(error => {
+                    console.error('Error searching inventory:', error);
+                    suggestionsContainer.style.display = 'none';
+                });
+        }
+
+        function selectSecondaryDrug(drug, medicationSection) {
+            // Populate the medication fields
+            medicationSection.querySelector('.order-medication').value = drug.name;
+            medicationSection.querySelector('.order-strength').value = drug.strength;
+            medicationSection.querySelector('.order-lot-number').value = drug.lot_number;
+            medicationSection.querySelector('.order-ndc').value = drug.ndc;
+            medicationSection.querySelector('.order-expiration-date').value = drug.expiration_date;
+            medicationSection.querySelector('.selected-drug-id').value = drug.id;
+            medicationSection.querySelector('.selected-drug-lot').value = drug.lot_number;
+            
+            // Show drug info
+            const drugInfo = medicationSection.querySelector('.drug-info');
+            medicationSection.querySelector('.drug-name-display').textContent = drug.name;
+            medicationSection.querySelector('.drug-strength-display').textContent = drug.strength;
+            medicationSection.querySelector('.drug-lot-display').textContent = drug.lot_number;
+            medicationSection.querySelector('.drug-ndc-display').textContent = drug.ndc;
+            medicationSection.querySelector('.drug-expiration-display').textContent = drug.expiration_date;
+            medicationSection.querySelector('.drug-quantity-display').textContent = drug.quantity;
+            medicationSection.querySelector('.drug-form-display').textContent = drug.form;
+            medicationSection.querySelector('.drug-status-display').textContent = drug.status;
+            
+            drugInfo.style.display = 'block';
+            
+            console.log('Selected secondary drug:', drug);
+        }
+
+        function loadExistingSecondaryMedications() {
+            console.log('=== DEBUG: loadExistingSecondaryMedications called ===');
+            
+            // Get data from a hidden input field to avoid PHP/JS mixing issues
+            const dataElement = document.getElementById('secondary-medications-data');
+            console.log('=== DEBUG: dataElement found:', !!dataElement);
+            
+            if (dataElement) {
+                console.log('=== DEBUG: dataElement.value:', dataElement.value);
+                console.log('=== DEBUG: dataElement.value type:', typeof dataElement.value);
+            }
+            
+            let secondaryMedications = [];
+            try {
+                secondaryMedications = dataElement ? JSON.parse(dataElement.value || '[]') : [];
+                console.log('=== DEBUG: JSON.parse successful, medications:', secondaryMedications);
+            } catch (e) {
+                console.error('=== DEBUG: JSON.parse failed:', e);
+                console.log('=== DEBUG: Raw value that failed:', dataElement ? dataElement.value : 'no element');
+                secondaryMedications = [];
+            }
+            
+            console.log('Loading existing secondary medications:', secondaryMedications);
+            
+            secondaryMedications.forEach((medication, index) => {
+                // Skip primary medication (order 1)
+                if (medication.medication_order <= 1) {
+                    return;
+                }
+                
+                // Add medication using the existing function
+                addMedication();
+                
+                // Get the newly added medication section
+                const medicationSection = document.querySelector('[data-medication-id="' + medication.medication_order + '"]');
+                if (!medicationSection) {
+                    console.error('Medication section not found for order:', medication.medication_order);
+                    return;
+                }
+                
+                // Populate the fields
+                populateSecondaryMedicationFields(medicationSection, medication);
+                
+                console.log('Loaded secondary medication:', medication.medication_order, medication.order_medication);
+            });
+        }
+
+        function populateSecondaryMedicationFields(medicationSection, medicationData) {
+            // Populate medication order fields
+            medicationSection.querySelector('.order-medication').value = medicationData.order_medication || '';
+            medicationSection.querySelector('.order-dose').value = medicationData.order_dose || '';
+            medicationSection.querySelector('.order-strength').value = medicationData.order_strength || '';
+            medicationSection.querySelector('.order-lot-number').value = medicationData.order_lot_number || '';
+            medicationSection.querySelector('.order-ndc').value = medicationData.order_ndc || '';
+            medicationSection.querySelector('.order-expiration-date').value = medicationData.order_expiration_date || '';
+            medicationSection.querySelector('.order-every-value').value = medicationData.order_every_value || '';
+            medicationSection.querySelector('.order-every-unit').value = medicationData.order_every_unit || '';
+            medicationSection.querySelector('.order-servicing-provider').value = medicationData.order_servicing_provider || '';
+            medicationSection.querySelector('.order-npi').value = medicationData.order_npi || '';
+            medicationSection.querySelector('.order-end-date').value = medicationData.order_end_date || '';
+            medicationSection.querySelector('.order-note').value = medicationData.order_note || '';
+            medicationSection.querySelector('.selected-drug-id').value = medicationData.inventory_drug_id || '';
+            medicationSection.querySelector('.selected-drug-lot').value = medicationData.inventory_lot_number || '';
+            
+            // Populate administration fields
+            medicationSection.querySelector('.administration-start').value = medicationData.administration_start || '';
+            medicationSection.querySelector('.administration-end').value = medicationData.administration_end || '';
+            medicationSection.querySelector('.administration-duration').value = medicationData.administration_duration || '';
+            medicationSection.querySelector('.inventory-quantity-used').value = medicationData.inventory_quantity_used || '';
+            medicationSection.querySelector('.inventory-wastage-quantity').value = medicationData.inventory_wastage_quantity || '';
+            medicationSection.querySelector('.inventory-wastage-reason').value = medicationData.inventory_wastage_reason || '';
+            medicationSection.querySelector('.inventory-wastage-notes').value = medicationData.inventory_wastage_notes || '';
+            medicationSection.querySelector('.administration-note').value = medicationData.administration_note || '';
+            
+            // Show drug info if inventory data exists
+            if (medicationData.inventory_drug_id) {
+                const drugInfo = medicationSection.querySelector('.drug-info');
+                medicationSection.querySelector('.drug-name-display').textContent = medicationData.order_medication || '';
+                medicationSection.querySelector('.drug-strength-display').textContent = medicationData.order_strength || '';
+                medicationSection.querySelector('.drug-lot-display').textContent = medicationData.order_lot_number || '';
+                medicationSection.querySelector('.drug-ndc-display').textContent = medicationData.order_ndc || '';
+                medicationSection.querySelector('.drug-expiration-display').textContent = medicationData.order_expiration_date || '';
+                drugInfo.style.display = 'block';
+            }
+        }
+
         function loadPreviousDiagnoses() {
-            const pid = <?php echo $pid; ?>;
-            const currentEncounter = <?php echo $encounter; ?>;
+            const pid = <?php echo json_encode($pid); ?>;
+            const currentEncounter = <?php echo json_encode($encounter); ?>;
             
             console.log('Loading previous diagnoses for PID:', pid, 'Current Encounter:', currentEncounter);
             
             // Fetch diagnoses from previous encounters using simple API
-            fetch(`get_previous_diagnoses_simple.php?pid=${pid}&current_encounter=${currentEncounter}`)
+            fetch('get_previous_diagnoses_simple.php?pid=' + pid + '&current_encounter=' + currentEncounter)
                 .then(response => {
                     console.log('Response status:', response.status);
                     return response.json();
@@ -1448,11 +2257,7 @@ if (document.getElementById("iv_access_date") && document.getElementById("iv_acc
             const notification = document.createElement('div');
             notification.className = 'alert alert-info';
             notification.style.marginBottom = '15px';
-            notification.innerHTML = `
-                <i class="fa fa-info-circle"></i> 
-                <strong>Previous Diagnoses Loaded:</strong> ${count} diagnosis(es) from previous encounters have been added to this form.
-                <button type="button" class="close" onclick="this.parentElement.remove()" style="float: right; background: none; border: none; font-size: 18px;">&times;</button>
-            `;
+            notification.innerHTML = '<i class="fa fa-info-circle"></i> <strong>Previous Diagnoses Loaded:</strong> ' + count + ' diagnosis(es) from previous encounters have been added to this form. <button type="button" class="close" onclick="this.parentElement.remove()" style="float: right; background: none; border: none; font-size: 18px;">&times;</button>';
             
             // Insert before the ICD-10 Diagnosis section
             const diagnosisSection = document.querySelector('.form-section');
@@ -1465,7 +2270,7 @@ if (document.getElementById("iv_access_date") && document.getElementById("iv_acc
             if (window.opener) {
                 window.close();
             } else {
-                window.location.href = '<?php echo $GLOBALS['webroot']; ?>/interface/patient_file/encounter/encounter_top.php?set_encounter=<?php echo $encounter; ?>';
+                window.location.href = '<?php echo $GLOBALS['webroot']; ?>/interface/patient_file/encounter/encounter_top.php?set_encounter=<?php echo json_encode($encounter); ?>';
             }
         }
 
@@ -1492,17 +2297,17 @@ if (document.getElementById("iv_access_date") && document.getElementById("iv_acc
             const hours = Math.floor(diffInMinutes / 60);
             const minutes = diffInMinutes % 60;
 
-            durationInput.value = `${hours}:${minutes.toString().padStart(2, '0')}`;
+            durationInput.value = hours + ':' + minutes.toString().padStart(2, '0');
         }
 
         function loadPreviousMedication() {
-            const pid = <?php echo $pid; ?>;
-            const currentEncounter = <?php echo $encounter; ?>;
+            const pid = <?php echo json_encode($pid); ?>;
+            const currentEncounter = <?php echo json_encode($encounter); ?>;
             
             console.log('Loading previous medication orders for PID:', pid, 'Current Encounter:', currentEncounter);
             
             // Fetch medication orders from previous encounters
-            fetch(`get_previous_medication.php?pid=${pid}&current_encounter=${currentEncounter}`)
+            fetch('get_previous_medication.php?pid=' + pid + '&current_encounter=' + currentEncounter)
                 .then(response => {
                     console.log('Medication response status:', response.status);
                     return response.json();
@@ -1573,11 +2378,7 @@ if (document.getElementById("iv_access_date") && document.getElementById("iv_acc
             // Create notification element
             const notification = document.createElement('div');
             notification.className = 'alert alert-info alert-dismissible fade show';
-            notification.innerHTML = `
-                <strong>Previous Medication Loaded!</strong> 
-                Medication order for "${medicationName}" has been loaded from the previous encounter.
-                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-            `;
+            notification.innerHTML = '<strong>Previous Medication Loaded!</strong> Medication order for "' + medicationName + '" has been loaded from the previous encounter. <button type="button" class="btn-close" data-bs-dismiss="alert"></button>';
             
             // Insert at the top of the form
             const form = document.querySelector('form');
@@ -1638,7 +2439,7 @@ if (document.getElementById("iv_access_date") && document.getElementById("iv_acc
         function loadExistingSignatures() {
             if (!currentFormId) return;
             
-            fetch(`get_signatures.php?form_id=${currentFormId}&site=default`, {
+            fetch('get_signatures.php?form_id=' + currentFormId + '&site=default', {
                 credentials: 'same-origin'
             })
                 .then(response => response.json())
@@ -1658,59 +2459,22 @@ if (document.getElementById("iv_access_date") && document.getElementById("iv_acc
             const container = document.getElementById('existing-signatures');
             
             if (signatures.length === 0) {
-                container.innerHTML = `
-                    <div class="row">
-                        <div class="col-md-12">
-                            <div class="alert alert-info">
-                                <i class="fa fa-info-circle"></i> No signatures yet. Add the first signature below.
-                            </div>
-                        </div>
-                    </div>
-                `;
+                container.innerHTML = '<div class="row"><div class="col-md-12"><div class="alert alert-info"><i class="fa fa-info-circle"></i> No signatures yet. Add the first signature below.</div></div></div>';
                 return;
             }
             
-            let tableHtml = `
-                <table class="signature-table">
-                    <thead>
-                        <tr>
-                            <th>User</th>
-                            <th>Type</th>
-                            <th>Date & Time</th>
-                            <th>Signature Text</th>
-                            <th>Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-            `;
+            let tableHtml = '<table class="signature-table"><thead><tr><th>User</th><th>Type</th><th>Date & Time</th><th>Signature Text</th><th>Actions</th></tr></thead><tbody>';
             
             signatures.forEach(signature => {
                 const dateTime = new Date(signature.signature_date).toLocaleString();
-                const typeBadge = `<span class="signature-type-badge signature-type-${signature.signature_type}">${signature.type_display_name}</span>`;
+                const typeBadge = '<span class="signature-type-badge signature-type-' + signature.signature_type + '">' + signature.type_display_name + '</span>';
                 
                 let actionsHtml = '';
                 if (signature.can_edit) {
-                    actionsHtml = `
-                        <div class="signature-actions">
-                            <button class="btn btn-sm btn-warning" onclick="editSignature(${signature.id})">
-                                <i class="fa fa-edit"></i> Edit
-                            </button>
-                            <button class="btn btn-sm btn-danger" onclick="deleteSignature(${signature.id})">
-                                <i class="fa fa-trash"></i> Delete
-                            </button>
-                        </div>
-                    `;
+                    actionsHtml = '<div class="signature-actions"><button class="btn btn-sm btn-warning" onclick="editSignature(' + signature.id + ')"><i class="fa fa-edit"></i> Edit</button><button class="btn btn-sm btn-danger" onclick="deleteSignature(' + signature.id + ')"><i class="fa fa-trash"></i> Delete</button></div>';
                 }
                 
-                tableHtml += `
-                    <tr>
-                        <td>${signature.user_name}</td>
-                        <td>${typeBadge}</td>
-                        <td>${dateTime}</td>
-                        <td>${signature.signature_text}</td>
-                        <td>${actionsHtml}</td>
-                    </tr>
-                `;
+                tableHtml += '<tr><td>' + signature.user_name + '</td><td>' + typeBadge + '</td><td>' + dateTime + '</td><td>' + signature.signature_text + '</td><td>' + actionsHtml + '</td></tr>';
             });
             
             tableHtml += '</tbody></table>';
@@ -1826,11 +2590,8 @@ if (document.getElementById("iv_access_date") && document.getElementById("iv_acc
         
         function showNotification(message, type = 'info') {
             const notification = document.createElement('div');
-            notification.className = `alert alert-${type} alert-dismissible fade show`;
-            notification.innerHTML = `
-                ${message}
-                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-            `;
+            notification.className = 'alert alert-' + type + ' alert-dismissible fade show';
+            notification.innerHTML = message + '<button type="button" class="btn-close" data-bs-dismiss="alert"></button>';
             
             // Insert at the top of the form
             const form = document.querySelector('form');

@@ -8,6 +8,8 @@ require_once(__DIR__ . "/../../../globals.php");
     <title>Inventory Management</title>
     <link rel="stylesheet" href="library/css/inventory-module.css">
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="../../../../library/formatting_DateToYYYYMMDD_js.js.php"></script>
+    <script src="../../../../library/js/xl/jquery-datetimepicker-2-5-4-translated.js"></script>
     <script src="library/js/barcode-auto-populate.js"></script>
     <script src="/library/formatting_DateToYYYYMMDD_js.js.php"></script>
 <script>
@@ -22,9 +24,45 @@ document.addEventListener("DOMContentLoaded", function() {
                     input.value = DateToYYYYMMDD_js(input.value);
                 }
             });
+    // Initialize date pickers
+    if (typeof datetimepickerTranslated !== "undefined") {
+        datetimepickerTranslated(".datepicker", {
+            timepicker: false,
+            showSeconds: false,
+            formatInput: false,
+            minDate: "-1970/01/01"
         });
+    }
+        });
+    // Initialize date pickers
+    if (typeof datetimepickerTranslated !== "undefined") {
+        datetimepickerTranslated(".datepicker", {
+            timepicker: false,
+            showSeconds: false,
+            formatInput: false,
+            minDate: "-1970/01/01"
+        });
+    }
     });
+    // Initialize date pickers
+    if (typeof datetimepickerTranslated !== "undefined") {
+        datetimepickerTranslated(".datepicker", {
+            timepicker: false,
+            showSeconds: false,
+            formatInput: false,
+            minDate: "-1970/01/01"
+        });
+    }
 });
+    // Initialize date pickers
+    if (typeof datetimepickerTranslated !== "undefined") {
+        datetimepickerTranslated(".datepicker", {
+            timepicker: false,
+            showSeconds: false,
+            formatInput: false,
+            minDate: "-1970/01/01"
+        });
+    }
 </script>
 </head>
 <body>
@@ -76,7 +114,7 @@ document.addEventListener("DOMContentLoaded", function() {
                 <!-- Lot Number and Expiration -->
                 <div class="lot-expiration-section">
                     <input type="text" name="lot_number" placeholder="Lot Number">
-                    <input type="text" name="expiration_date" placeholder="Expiration Date">
+                    <input type="text" name="expiration_date" placeholder="Expiration Date" class="datepicker" readonly>
                 </div>
                 
                 <label>
@@ -124,7 +162,7 @@ document.addEventListener("DOMContentLoaded", function() {
                     <!-- Lot Number and Expiration -->
                     <div class="lot-expiration-section">
                         <input type="text" name="lot_number" id="edit-lot-number" placeholder="Lot Number">
-                        <input type="text" name="expiration_date" id="edit-expiration-date" placeholder="Expiration Date">
+                        <input type="text" name="expiration_date" id="edit-expiration-date" placeholder="Expiration Date" class="datepicker" readonly>
                     </div>
                     
                     <!-- Form Selection -->
@@ -386,7 +424,25 @@ document.addEventListener("DOMContentLoaded", function() {
                         alert('Error adding drug. Please check the console for details.');
                     }
                 });
+    // Initialize date pickers
+    if (typeof datetimepickerTranslated !== "undefined") {
+        datetimepickerTranslated(".datepicker", {
+            timepicker: false,
+            showSeconds: false,
+            formatInput: false,
+            minDate: "-1970/01/01"
+        });
+    }
             });
+    // Initialize date pickers
+    if (typeof datetimepickerTranslated !== "undefined") {
+        datetimepickerTranslated(".datepicker", {
+            timepicker: false,
+            showSeconds: false,
+            formatInput: false,
+            minDate: "-1970/01/01"
+        });
+    }
 
             // Handle edit form submission
             $('#edit-drug-form').on('submit', function(e) {
@@ -414,7 +470,25 @@ document.addEventListener("DOMContentLoaded", function() {
                         alert('Error updating drug. Please check the console for details.');
                     }
                 });
+    // Initialize date pickers
+    if (typeof datetimepickerTranslated !== "undefined") {
+        datetimepickerTranslated(".datepicker", {
+            timepicker: false,
+            showSeconds: false,
+            formatInput: false,
+            minDate: "-1970/01/01"
+        });
+    }
             });
+    // Initialize date pickers
+    if (typeof datetimepickerTranslated !== "undefined") {
+        datetimepickerTranslated(".datepicker", {
+            timepicker: false,
+            showSeconds: false,
+            formatInput: false,
+            minDate: "-1970/01/01"
+        });
+    }
 
             // Handle wastage form submission
             $('#wastage-form').on('submit', function(e) {
@@ -467,7 +541,25 @@ document.addEventListener("DOMContentLoaded", function() {
                         alert('Error recording wastage. Please check the console for details.\n\nError: ' + xhr.responseText);
                     }
                 });
+    // Initialize date pickers
+    if (typeof datetimepickerTranslated !== "undefined") {
+        datetimepickerTranslated(".datepicker", {
+            timepicker: false,
+            showSeconds: false,
+            formatInput: false,
+            minDate: "-1970/01/01"
+        });
+    }
             });
+    // Initialize date pickers
+    if (typeof datetimepickerTranslated !== "undefined") {
+        datetimepickerTranslated(".datepicker", {
+            timepicker: false,
+            showSeconds: false,
+            formatInput: false,
+            minDate: "-1970/01/01"
+        });
+    }
 
             // Handle adjustment form submission
             $('#adjustment-form').on('submit', function(e) {
@@ -520,7 +612,25 @@ document.addEventListener("DOMContentLoaded", function() {
                         alert('Error recording adjustment. Please check the console for details.\n\nError: ' + xhr.responseText);
                     }
                 });
+    // Initialize date pickers
+    if (typeof datetimepickerTranslated !== "undefined") {
+        datetimepickerTranslated(".datepicker", {
+            timepicker: false,
+            showSeconds: false,
+            formatInput: false,
+            minDate: "-1970/01/01"
+        });
+    }
             });
+    // Initialize date pickers
+    if (typeof datetimepickerTranslated !== "undefined") {
+        datetimepickerTranslated(".datepicker", {
+            timepicker: false,
+            showSeconds: false,
+            formatInput: false,
+            minDate: "-1970/01/01"
+        });
+    }
 
             // Handle search
             $('#search-input').on('keypress', function(e) {
@@ -528,18 +638,54 @@ document.addEventListener("DOMContentLoaded", function() {
                     searchDrugs();
                 }
             });
+    // Initialize date pickers
+    if (typeof datetimepickerTranslated !== "undefined") {
+        datetimepickerTranslated(".datepicker", {
+            timepicker: false,
+            showSeconds: false,
+            formatInput: false,
+            minDate: "-1970/01/01"
+        });
+    }
 
             // Modal close functionality
             $('.close').click(function() {
                 $('.modal').hide();
             });
+    // Initialize date pickers
+    if (typeof datetimepickerTranslated !== "undefined") {
+        datetimepickerTranslated(".datepicker", {
+            timepicker: false,
+            showSeconds: false,
+            formatInput: false,
+            minDate: "-1970/01/01"
+        });
+    }
 
             $(window).click(function(e) {
                 if ($(e.target).hasClass('modal')) {
                     $('.modal').hide();
                 }
             });
+    // Initialize date pickers
+    if (typeof datetimepickerTranslated !== "undefined") {
+        datetimepickerTranslated(".datepicker", {
+            timepicker: false,
+            showSeconds: false,
+            formatInput: false,
+            minDate: "-1970/01/01"
         });
+    }
+        });
+    // Initialize date pickers
+    if (typeof datetimepickerTranslated !== "undefined") {
+        datetimepickerTranslated(".datepicker", {
+            timepicker: false,
+            showSeconds: false,
+            formatInput: false,
+            minDate: "-1970/01/01"
+        });
+    }
 
         function searchDrugs() {
             var query = $('#search-input').val();
@@ -555,6 +701,15 @@ document.addEventListener("DOMContentLoaded", function() {
                     $('#search-results').html('<p>Error searching drugs.</p>');
                 }
             });
+    // Initialize date pickers
+    if (typeof datetimepickerTranslated !== "undefined") {
+        datetimepickerTranslated(".datepicker", {
+            timepicker: false,
+            showSeconds: false,
+            formatInput: false,
+            minDate: "-1970/01/01"
+        });
+    }
         }
 
         function searchAllDrugs() {
@@ -581,6 +736,15 @@ document.addEventListener("DOMContentLoaded", function() {
                     $('#search-results').html('<p>Error loading all drugs. Status: ' + xhr.status + '</p>');
                 }
             });
+    // Initialize date pickers
+    if (typeof datetimepickerTranslated !== "undefined") {
+        datetimepickerTranslated(".datepicker", {
+            timepicker: false,
+            showSeconds: false,
+            formatInput: false,
+            minDate: "-1970/01/01"
+        });
+    }
         }
 
         function displaySearchResults(results) {
@@ -596,6 +760,15 @@ document.addEventListener("DOMContentLoaded", function() {
             results.forEach(function(drug) {
                 html += createDrugCard(drug);
             });
+    // Initialize date pickers
+    if (typeof datetimepickerTranslated !== "undefined") {
+        datetimepickerTranslated(".datepicker", {
+            timepicker: false,
+            showSeconds: false,
+            formatInput: false,
+            minDate: "-1970/01/01"
+        });
+    }
             
             html += '</div>';
             container.html(html);
@@ -624,6 +797,15 @@ document.addEventListener("DOMContentLoaded", function() {
             results.forEach(function(drug) {
                 html += createDrugCard(drug);
             });
+    // Initialize date pickers
+    if (typeof datetimepickerTranslated !== "undefined") {
+        datetimepickerTranslated(".datepicker", {
+            timepicker: false,
+            showSeconds: false,
+            formatInput: false,
+            minDate: "-1970/01/01"
+        });
+    }
             
             html += '</div>';
             container.html(html);
@@ -656,6 +838,15 @@ document.addEventListener("DOMContentLoaded", function() {
             var drugCard = $('.drug-item').filter(function() {
                 return $(this).find('button').attr('onclick').includes(drugId);
             });
+    // Initialize date pickers
+    if (typeof datetimepickerTranslated !== "undefined") {
+        datetimepickerTranslated(".datepicker", {
+            timepicker: false,
+            showSeconds: false,
+            formatInput: false,
+            minDate: "-1970/01/01"
+        });
+    }
             
             if (drugCard.length === 0) {
                 alert('Drug data not found. Please search again.');
@@ -691,6 +882,15 @@ document.addEventListener("DOMContentLoaded", function() {
             var drugCard = $('.drug-item').filter(function() {
                 return $(this).find('button').attr('onclick').includes(drugId);
             });
+    // Initialize date pickers
+    if (typeof datetimepickerTranslated !== "undefined") {
+        datetimepickerTranslated(".datepicker", {
+            timepicker: false,
+            showSeconds: false,
+            formatInput: false,
+            minDate: "-1970/01/01"
+        });
+    }
             
             if (drugCard.length === 0) {
                 alert('Drug data not found. Please search again.');
@@ -728,6 +928,15 @@ document.addEventListener("DOMContentLoaded", function() {
             var drugCard = $('.drug-item').filter(function() {
                 return $(this).find('button').attr('onclick').includes(drugId);
             });
+    // Initialize date pickers
+    if (typeof datetimepickerTranslated !== "undefined") {
+        datetimepickerTranslated(".datepicker", {
+            timepicker: false,
+            showSeconds: false,
+            formatInput: false,
+            minDate: "-1970/01/01"
+        });
+    }
             
             if (drugCard.length === 0) {
                 alert('Drug data not found. Please search again.');
@@ -778,6 +987,15 @@ document.addEventListener("DOMContentLoaded", function() {
             var drugCard = $('.drug-item').filter(function() {
                 return $(this).find('button').attr('onclick').includes(drugId);
             });
+    // Initialize date pickers
+    if (typeof datetimepickerTranslated !== "undefined") {
+        datetimepickerTranslated(".datepicker", {
+            timepicker: false,
+            showSeconds: false,
+            formatInput: false,
+            minDate: "-1970/01/01"
+        });
+    }
             
             if (drugCard.length === 0) {
                 alert('Drug data not found. Please search again.');
@@ -827,12 +1045,30 @@ document.addEventListener("DOMContentLoaded", function() {
                         response.reasons.forEach(function(reason) {
                             select.append('<option value="' + reason.reason_code + '">' + reason.reason_description + '</option>');
                         });
+    // Initialize date pickers
+    if (typeof datetimepickerTranslated !== "undefined") {
+        datetimepickerTranslated(".datepicker", {
+            timepicker: false,
+            showSeconds: false,
+            formatInput: false,
+            minDate: "-1970/01/01"
+        });
+    }
                     }
                 },
                 error: function() {
                     console.error('Failed to load removal reasons');
                 }
             });
+    // Initialize date pickers
+    if (typeof datetimepickerTranslated !== "undefined") {
+        datetimepickerTranslated(".datepicker", {
+            timepicker: false,
+            showSeconds: false,
+            formatInput: false,
+            minDate: "-1970/01/01"
+        });
+    }
         }
 
         // Handle remove form submission
@@ -866,7 +1102,25 @@ document.addEventListener("DOMContentLoaded", function() {
                     alert('Error removing drug. Please check the console for details.\n\nError: ' + xhr.responseText);
                 }
             });
+    // Initialize date pickers
+    if (typeof datetimepickerTranslated !== "undefined") {
+        datetimepickerTranslated(".datepicker", {
+            timepicker: false,
+            showSeconds: false,
+            formatInput: false,
+            minDate: "-1970/01/01"
         });
+    }
+        });
+    // Initialize date pickers
+    if (typeof datetimepickerTranslated !== "undefined") {
+        datetimepickerTranslated(".datepicker", {
+            timepicker: false,
+            showSeconds: false,
+            formatInput: false,
+            minDate: "-1970/01/01"
+        });
+    }
     </script>
 </body>
 </html> 

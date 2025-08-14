@@ -90,6 +90,56 @@ CREATE TABLE IF NOT EXISTS form_enhanced_infusion_injection (
     KEY inventory_lot_number (inventory_lot_number)
 );
 
+-- Create form_enhanced_infusion_medications table for multiple medications support
+CREATE TABLE IF NOT EXISTS form_enhanced_infusion_medications (
+    id bigint(20) NOT NULL AUTO_INCREMENT,
+    form_id bigint(20) NOT NULL,
+    medication_order int(11) DEFAULT 1,
+    medication_type enum('primary','secondary','prn') DEFAULT 'primary',
+    
+    -- Medication Order Fields
+    order_medication varchar(255) NULL,
+    order_dose varchar(255) NULL,
+    order_strength varchar(255) NULL,
+    order_lot_number varchar(255) NULL,
+    order_ndc varchar(255) NULL,
+    order_expiration_date date NULL,
+    order_every_value varchar(255) NULL,
+    order_every_unit varchar(255) NULL,
+    order_servicing_provider varchar(255) NULL,
+    order_npi varchar(255) NULL,
+    order_end_date date NULL,
+    order_note text NULL,
+    inventory_drug_id int(11) NULL,
+    inventory_lot_number varchar(50) NULL,
+    
+    -- Administration Fields
+    administration_start datetime NULL,
+    administration_end datetime NULL,
+    administration_rate varchar(255) NULL,
+    administration_rate_unit varchar(255) NULL,
+    administration_route varchar(255) NULL,
+    administration_site varchar(255) NULL,
+    administration_comments text NULL,
+    administration_duration varchar(10) NULL,
+    administration_note text NULL,
+    
+    -- Inventory Usage
+    inventory_quantity_used decimal(10,2) NULL,
+    inventory_wastage_quantity decimal(10,2) NULL,
+    inventory_wastage_reason varchar(100) NULL,
+    inventory_wastage_notes text NULL,
+    
+    created_date timestamp DEFAULT CURRENT_TIMESTAMP,
+    updated_date timestamp DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    
+    PRIMARY KEY (id),
+    KEY form_id (form_id),
+    KEY medication_order (medication_order),
+    KEY medication_type (medication_type),
+    FOREIGN KEY (form_id) REFERENCES form_enhanced_infusion_injection(id) ON DELETE CASCADE
+);
+
 -- Create form_infusion_injection table
 CREATE TABLE IF NOT EXISTS form_infusion_injection (
     id bigint(20) NOT NULL AUTO_INCREMENT,
