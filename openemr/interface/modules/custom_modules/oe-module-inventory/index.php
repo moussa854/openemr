@@ -1,6 +1,5 @@
 <?php
 require_once(__DIR__ . "/../../../globals.php");
-require_once "/var/www/emr.carepointinfusion.com/library/formatting_DateToYYYYMMDD_js.js.php";
 ?>
 
 <!DOCTYPE html>
@@ -10,13 +9,14 @@ require_once "/var/www/emr.carepointinfusion.com/library/formatting_DateToYYYYMM
     <link rel="stylesheet" href="library/css/inventory-module.css">
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="library/js/barcode-auto-populate.js"></script>
+    <script src="/library/formatting_DateToYYYYMMDD_js.js.php"></script>
 <script>
 // Date conversion functions
 document.addEventListener("DOMContentLoaded", function() {
     const forms = document.querySelectorAll("form");
     forms.forEach(function(form) {
         form.addEventListener("submit", function(e) {
-            const expirationInputs = form.querySelectorAll("input[name="expiration_date"]");
+            const expirationInputs = form.querySelectorAll('input[name="expiration_date"]');
             expirationInputs.forEach(function(input) {
                 if (input && input.value) {
                     input.value = DateToYYYYMMDD_js(input.value);

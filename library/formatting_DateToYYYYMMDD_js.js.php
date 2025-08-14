@@ -1,64 +1,123 @@
 <?php
-/*
- * javascripts function to allow date internationalization
- * and converts date back to YYYY-MM-DD and YYYY-MM-DD HH:MM:SS (SS is optional)
- * formats
- *
- * @package   OpenEMR
- * @link      https://www.open-emr.org
- * @author    Shachar Zilbershlag <shaharzi@matrix.co.il>
- * @author    Amiel Elboim <amielel@matrix.co.il>
- * @author    Brady Miller <brady.g.miller@gmail.com>
- * @copyright Copyright (c) 2016 Shachar Zilbershlag <shaharzi@matrix.co.il>
- * @copyright Copyright (c) 2016 Amiel Elboim <amielel@matrix.co.il>
- * @copyright Copyright (c) 2018 Brady Miller <brady.g.miller@gmail.com>
- * @license   https://github.com/openemr/openemr/blob/master/LICENSE GNU General Public License 3
- *
- * This file is intended to be included via a <script> tag.
- * Ensure OpenEMR globals and helpers are loaded to provide js_escape() and date_display_format.
- */
+// Set proper content type for JavaScript
+header('Content-Type: application/javascript');
 
-require_once __DIR__ . '/../interface/globals.php';
-require_once __DIR__ . '/htmlspecialchars.inc.php';
+// Use a default date display format if globals aren't available
+$date_display_format = 1; // mm/dd/yyyy format
 
 ?>
 
 function DateToYYYYMMDD_js(value){
-    var value = value.replace(/\//g,'-');
-    var parts = value.split('-');
-    var date_display_format = <?php echo js_escape((empty($GLOBALS['date_display_format']) ? 0 : $GLOBALS['date_display_format'])) ?>;
+    if (!value || value.trim() === '') {
+        return '';
+    }
+    
+    try {
+        var cleanValue = value.replace(/\//g,'-');
+        var parts = cleanValue.split('-');
+        var date_display_format = <?php echo $date_display_format; ?>;
 
-    if (date_display_format == 1)      // mm/dd/yyyy, note year is added below
-        value = parts[2] + '-' + parts[0]  + '-' + parts[1];
-    else if (date_display_format == 2) // dd/mm/yyyy, note year is added below
-        value = parts[2] + '-' + parts[1]  + '-' + parts[0];
+        if (parts.length !== 3) {
+            console.error('DateToYYYYMMDD_js: Invalid date format:', value);
+            return value; // Return original if can't parse
+        }
 
-    return value;
+        if (date_display_format == 1) {      // mm/dd/yyyy, note year is added below
+            var year = parts[2];
+            var month = parts[0].padStart(2, '0');
+            var day = parts[1].padStart(2, '0');
+            return year + '-' + month + '-' + day;
+        }
+        else if (date_display_format == 2) { // dd/mm/yyyy, note year is added below
+            var year = parts[2];
+            var month = parts[1].padStart(2, '0');
+            var day = parts[0].padStart(2, '0');
+            return year + '-' + month + '-' + day;
+        }
+
+        return value;
+    } catch (error) {
+        console.error('DateToYYYYMMDD_js error:', error, 'Input:', value);
+        return value; // Return original value if error
+    }
 }
 
 function TimeToHHMMSS_js(value){
-    if (value.trim() == '') {
+    if (!value || value.trim() === '') {
         return '';
     }
-
-    var is_pm = value.trim().toUpperCase().indexOf('PM');
-    if (is_pm > 0) {
-        let d = new Date("1970-01-01 " + value);
-        let value = d.setHours(d.getHours() + 12).toTimeString();
+    
+    try {
+        var timeValue = value.trim().toUpperCase();
+        var isPM = timeValue.indexOf('PM') > -1;
+        var isAM = timeValue.indexOf('AM') > -1;
+        
+        // Remove AM/PM indicators
+        var cleanTime = timeValue.replace(/(AM|PM)/g, '').trim();
+        
+        if (isPM || isAM) {
+            // Handle 12-hour format
+            var date = new Date("1970-01-01 " + cleanTime);
+            
+            if (isNaN(date.getTime())) {
+                console.error('TimeToHHMMSS_js: Invalid time format:', value);
+                return value;
+            }
+            
+            if (isPM && date.getHours() < 12) {
+                date.setHours(date.getHours() + 12);
+            } else if (isAM && date.getHours() === 12) {
+                date.setHours(0);
+            }
+            
+            // Format as HH:MM:SS
+            var hours = date.getHours().toString().padStart(2, '0');
+            var minutes = date.getMinutes().toString().padStart(2, '0');
+            var seconds = date.getSeconds().toString().padStart(2, '0');
+            
+            return hours + ':' + minutes + ':' + seconds;
+        } else {
+            // Already in 24-hour format, just ensure proper formatting
+            var timeParts = cleanTime.split(':');
+            if (timeParts.length >= 2) {
+                var hours = timeParts[0].padStart(2, '0');
+                var minutes = timeParts[1].padStart(2, '0');
+                var seconds = (timeParts[2] || '00').padStart(2, '0');
+                return hours + ':' + minutes + ':' + seconds;
+            }
+        }
+        
+        return value.trim();
+    } catch (error) {
+        console.error('TimeToHHMMSS_js error:', error, 'Input:', value);
+        return value.trim(); // Return original value if error
     }
-    return value.trim();
 }
 
 function DateToYYYYMMDDHHMMSS_js(value){
-    if (typeof value === 'undefined' || value.trim() == '') {
+    if (!value || typeof value === 'undefined' || value.trim() === '') {
         return undefined;
     }
-    var parts = value.split(' ');
-
-    var datePart = DateToYYYYMMDD_js(parts[0]);
-    var timePart = TimeToHHMMSS_js(parts[1]);
-
-    var value = datePart + ' ' + timePart;
-
-    return value.trim();
+    
+    try {
+        var parts = value.trim().split(' ');
+        
+        if (parts.length < 2) {
+            console.error('DateToYYYYMMDDHHMMSS_js: Invalid datetime format - missing time part:', value);
+            return value;
+        }
+        
+        var datePart = DateToYYYYMMDD_js(parts[0]);
+        var timePart = TimeToHHMMSS_js(parts[1]);
+        
+        if (!datePart || !timePart) {
+            console.error('DateToYYYYMMDDHHMMSS_js: Failed to parse date or time parts:', value);
+            return value;
+        }
+        
+        return datePart + ' ' + timePart;
+    } catch (error) {
+        console.error('DateToYYYYMMDDHHMMSS_js error:', error, 'Input:', value);
+        return value; // Return original value if error
+    }
 }
