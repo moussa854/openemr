@@ -8,7 +8,6 @@ require_once(__DIR__ . "/../../../globals.php");
     <title>Inventory Management</title>
     <link rel="stylesheet" href="library/css/inventory-module.css">
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    <script src="../../../../library/formatting_DateToYYYYMMDD_js.js.php"></script>
     <script src="../../../../library/js/xl/jquery-datetimepicker-2-5-4-translated.js"></script>
     <script src="library/js/barcode-auto-populate.js"></script>
     <script src="/library/formatting_DateToYYYYMMDD_js.js.php"></script>
@@ -24,26 +23,9 @@ document.addEventListener("DOMContentLoaded", function() {
                     input.value = DateToYYYYMMDD_js(input.value);
                 }
             });
-    // Initialize date pickers
-    if (typeof datetimepickerTranslated !== "undefined") {
-        datetimepickerTranslated(".datepicker", {
-            timepicker: false,
-            showSeconds: false,
-            formatInput: false,
-            minDate: "-1970/01/01"
         });
-    }
-        });
-    // Initialize date pickers
-    if (typeof datetimepickerTranslated !== "undefined") {
-        datetimepickerTranslated(".datepicker", {
-            timepicker: false,
-            showSeconds: false,
-            formatInput: false,
-            minDate: "-1970/01/01"
-        });
-    }
     });
+    
     // Initialize date pickers
     if (typeof datetimepickerTranslated !== "undefined") {
         datetimepickerTranslated(".datepicker", {
@@ -54,15 +36,6 @@ document.addEventListener("DOMContentLoaded", function() {
         });
     }
 });
-    // Initialize date pickers
-    if (typeof datetimepickerTranslated !== "undefined") {
-        datetimepickerTranslated(".datepicker", {
-            timepicker: false,
-            showSeconds: false,
-            formatInput: false,
-            minDate: "-1970/01/01"
-        });
-    }
 </script>
 </head>
 <body>
