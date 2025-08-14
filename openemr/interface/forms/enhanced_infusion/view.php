@@ -10,7 +10,7 @@
  */
 
 // Initialize OpenEMR
-require_once(dirname(__FILE__) . "/../../../globals.php");
+require_once(dirname(__FILE__) . "/../../../../globals.php");
 
 // Get parameters - try GET parameters first, then session/globals
 $form_id = $_GET['id'] ?? '';
