@@ -103,7 +103,7 @@ function buildAllergyHtml($pid) {
     return $html;
 }
 
-function enhanced_infusion_report($pid, $encounter, $cols, $id) {
+function enhanced_infusion_report($pid, $encounter, $cols, $id, $print = true) {
     // DEBUG: Log the function call
     error_log("=== DEBUG REPORT: Enhanced styled injection report called - PID: $pid, Encounter: $encounter, ID: $id");
     
@@ -671,6 +671,28 @@ function enhanced_infusion_report($pid, $encounter, $cols, $id) {
                 document.body.removeChild(link);
             }
             </script>
+        </body>
+        </html>
+        <?php
+    } else {
+        ?>
+        <!DOCTYPE html>
+        <html>
+        <head>
+            <title>Enhanced Infusion & Injection Form</title>
+            <style>
+                body { font-family: Arial, sans-serif; margin: 20px; background: #f5f5f5; }
+                .container { max-width: 800px; margin: 0 auto; background: white; padding: 30px; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+                .no-data { color: #6c757d; font-style: italic; text-align: center; padding: 50px; }
+            </style>
+        </head>
+        <body>
+            <div class="container">
+                <div class="no-data">
+                    <h2>No Form Data Found</h2>
+                    <p>No Enhanced Infusion and Injection Form data was found for this encounter.</p>
+                </div>
+            </div>
         </body>
         </html>
         <?php
