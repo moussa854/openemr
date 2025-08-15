@@ -1,0 +1,27 @@
+CREATE TABLE IF NOT EXISTS `form_enhanced_infusion_medications` (
+  `id` INT(11) UNSIGNED NOT NULL AUTO_INCREMENT,
+  `form_id` INT(11) UNSIGNED NOT NULL,
+  `medication_order` INT(11) UNSIGNED NOT NULL DEFAULT 1,
+  `order_medication` VARCHAR(255) DEFAULT NULL,
+  `order_dose` VARCHAR(255) DEFAULT NULL,
+  `order_strength` VARCHAR(255) DEFAULT NULL,
+  `administration_route` VARCHAR(255) DEFAULT NULL,
+  `order_lot_number` VARCHAR(255) DEFAULT NULL,
+  `order_expiration_date` DATE DEFAULT NULL,
+  `order_ndc` VARCHAR(50) DEFAULT NULL,
+  `order_every_value` VARCHAR(50) DEFAULT NULL,
+  `order_every_unit` VARCHAR(20) DEFAULT NULL,
+  `order_end_date` DATE DEFAULT NULL,
+  `order_servicing_provider` VARCHAR(255) DEFAULT NULL,
+  `order_npi` VARCHAR(20) DEFAULT NULL,
+  `order_note` TEXT,
+  `administration_start` DATETIME DEFAULT NULL,
+  `administration_end` DATETIME DEFAULT NULL,
+  `administration_duration` VARCHAR(20) DEFAULT NULL,
+  `administration_note` TEXT,
+  `date` DATETIME DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `idx_form_id` (`form_id`),
+  CONSTRAINT `fk_medications_form` FOREIGN KEY (`form_id`) REFERENCES `form_enhanced_infusion_injection`(`id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+

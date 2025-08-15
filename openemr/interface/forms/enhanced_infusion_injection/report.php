@@ -111,9 +111,18 @@ function enhanced_infusion_injection_report($pid, $encounter, $cols, $id, $print
     $encounter_date = sqlQuery("SELECT date FROM form_encounter WHERE pid = ? AND encounter = ?", [$pid, $encounter]);
     $dos_date = $encounter_date['date'] ?? date('Y-m-d');
     
-    // Get form data from the database
+    // Map the generic forms table id ($id) to the actual record id in
+    // form_enhanced_infusion_injection.  In the `forms` table, the
+    // column `form_id` stores the primary-key value of the specific
+    // form’s data table.  Without this lookup the report tries to load
+    // the wrong id and shows no data.
+
+    $mapRow = sqlQuery("SELECT form_id FROM forms WHERE id = ?", [$id]);
+    $realFormId = $mapRow['form_id'] ?? $id; // Fallback to original id just in case
+
+    // Now fetch the enhanced infusion record using the mapped id
     $sql = "SELECT * FROM form_enhanced_infusion_injection WHERE id = ? AND pid = ?";
-    $form_data = sqlQuery($sql, [$id, $pid]);
+    $form_data = sqlQuery($sql, [$realFormId, $pid]);
     
     if ($print) {
         ?>
