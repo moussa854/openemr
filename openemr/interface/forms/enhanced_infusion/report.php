@@ -17,11 +17,25 @@ function enhanced_infusion_report($pid, $encounter, $cols, $id) {
     
     $count = 0;
     
-    // Get the actual form_id from the forms table using the forms.id
-    $mapRow = sqlQuery("SELECT form_id FROM forms WHERE id = ?", [$id]);
-    $realId = $mapRow ? $mapRow['form_id'] : $id;
-    
-    error_log("=== DEBUG REPORT: forms.id=$id, mapped to form_id=$realId, pid=$pid, encounter=$encounter");
+    // Handle ID mapping - OpenEMR might pass either forms.id or form_id
+    // First try as forms.id
+    $mapRow = sqlQuery("SELECT form_id FROM forms WHERE id = ? AND formdir = 'enhanced_infusion'", [$id]);
+    if ($mapRow) {
+        $realId = $mapRow['form_id'];
+        error_log("=== DEBUG REPORT: Received forms.id=$id, mapped to form_id=$realId");
+    } else {
+        // If not found, try as form_id directly
+        $formExists = sqlQuery("SELECT id FROM form_enhanced_infusion_injection WHERE id = ?", [$id]);
+        if ($formExists) {
+            $realId = $id;
+            error_log("=== DEBUG REPORT: Received form_id=$id directly");
+        } else {
+            // Last resort: find the form by pid/encounter
+            $lastForm = sqlQuery("SELECT fe.id FROM form_enhanced_infusion_injection fe JOIN forms f ON f.form_id = fe.id WHERE f.pid = ? AND f.encounter = ? AND f.formdir = 'enhanced_infusion' ORDER BY fe.id DESC LIMIT 1", [$pid, $encounter]);
+            $realId = $lastForm ? $lastForm['id'] : $id;
+            error_log("=== DEBUG REPORT: Fallback lookup for pid=$pid, encounter=$encounter, found form_id=$realId");
+        }
+    }
     
     $data = formFetch("form_enhanced_infusion_injection", $realId);
     
