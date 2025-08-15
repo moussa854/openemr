@@ -77,6 +77,10 @@ if ($form_id) {
     
     if ($row = sqlFetchArray($form_result)) {
         $saved_data = $row;
+        // DEBUG: Log the loaded date values
+        error_log("=== DEBUG DATE LOAD: order_expiration_date = " . ($saved_data["order_expiration_date"] ?? 'NULL'));
+        error_log("=== DEBUG DATE LOAD: order_end_date = " . ($saved_data["order_end_date"] ?? 'NULL'));
+        
         // Map database columns to form fields
         $saved_data["order_route"] = $saved_data["administration_route"] ?? "";
         // Get encounter and pid from saved data if not provided in URL
@@ -853,7 +857,11 @@ $csrf_token = CsrfUtils::collectCsrfToken();
                             <div class="col-md-4">
                                 <div class="form-group">
                                     <label for="order_expiration_date" class="control-label">Expiration Date:</label>
-                                    <input type="date" name="order_expiration_date" id="order_expiration_date" class="form-control" value="<?php echo htmlspecialchars($saved_data["order_expiration_date"] ?? ""); ?>">
+                                    <input type="date" name="order_expiration_date" id="order_expiration_date" class="form-control" value="<?php 
+                                        $expiration_value = (!empty($saved_data["order_expiration_date"]) && $saved_data["order_expiration_date"] !== '0000-00-00') ? htmlspecialchars($saved_data["order_expiration_date"]) : "";
+                                        error_log("=== DEBUG DATE RENDER: order_expiration_date display value = '" . $expiration_value . "'");
+                                        echo $expiration_value;
+                                    ?>">
                                 </div>
                             </div>
                             <div class="col-md-4">
@@ -888,7 +896,11 @@ $csrf_token = CsrfUtils::collectCsrfToken();
                             <div class="col-md-4">
                                 <div class="form-group">
                                     <label for="order_end_date" class="control-label">End Date:</label>
-                                    <input type="date" name="order_end_date" id="order_end_date" class="form-control" value="<?php echo htmlspecialchars($saved_data["order_end_date"] ?? ""); ?>">
+                                    <input type="date" name="order_end_date" id="order_end_date" class="form-control" value="<?php 
+                                        $end_date_value = (!empty($saved_data["order_end_date"]) && $saved_data["order_end_date"] !== '0000-00-00') ? htmlspecialchars($saved_data["order_end_date"]) : "";
+                                        error_log("=== DEBUG DATE RENDER: order_end_date display value = '" . $end_date_value . "'");
+                                        echo $end_date_value;
+                                    ?>">
                                 </div>
                             </div>
                         </div>
@@ -2092,6 +2104,12 @@ $csrf_token = CsrfUtils::collectCsrfToken();
         
         // Initialize form when page loads
         document.addEventListener('DOMContentLoaded', function() {
+            // DEBUG: Check if date fields have values when DOM loads
+            const expirationField = document.getElementById('order_expiration_date');
+            const endDateField = document.getElementById('order_end_date');
+            console.log('=== DEBUG DOM LOAD: expiration field value:', expirationField ? expirationField.value : 'NOT FOUND');
+            console.log('=== DEBUG DOM LOAD: end date field value:', endDateField ? endDateField.value : 'NOT FOUND');
+            
             // Initialize diagnoses from saved data
             const savedDiagnoses = document.getElementById('diagnoses_codes').value;
             if (savedDiagnoses) {
@@ -2111,12 +2129,12 @@ $csrf_token = CsrfUtils::collectCsrfToken();
             }
             
             // Load previous diagnoses and medication only for new forms
-            // Only load previous diagnoses for new forms
+            // Only load previous diagnoses and medication for new forms
             const formIdInput = document.querySelector("input[name=\"id\"]");
             if (!formIdInput) {
                 loadPreviousDiagnoses();
+                loadPreviousMedication();
             }
-            loadPreviousMedication();
             
             // Load existing secondary medications for saved forms
             if (formIdInput) {
