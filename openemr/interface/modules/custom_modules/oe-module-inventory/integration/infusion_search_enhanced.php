@@ -2149,7 +2149,6 @@ $csrf_token = CsrfUtils::collectCsrfToken();
                 if (document.getElementById("administration_end") && document.getElementById("administration_end").value) {
                     // Removed DateToYYYYMMDD_js for datetime-local input
                 }
-                }
                 
                 // Show loading state
                 const submitBtn = document.querySelector('button[type="submit"]');
