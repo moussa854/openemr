@@ -194,8 +194,12 @@ function buildAllergyHtml($pid) {
     }
 
     $html = '<ul class="list-unstyled mb-0">';
-    foreach ($items as $item) {
-        $html .= '<li>&#8226; ' . $item . '</li>';
+    foreach ($items as $index => $item) {
+        if ($index === 0) {
+            $html .= '<li>' . $item . '</li>';
+        } else {
+            $html .= '<li>&#8226; ' . $item . '</li>';
+        }
     }
     $html .= '</ul>';
     return $html;
