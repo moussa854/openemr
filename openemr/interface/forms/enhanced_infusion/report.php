@@ -17,21 +17,13 @@ function enhanced_infusion_report($pid, $encounter, $cols, $id) {
     
     $count = 0;
     
-    // DEBUG: Check if form exists in forms table
-    $formsCheck = sqlQuery("SELECT * FROM forms WHERE id = ? AND form_name = 'enhanced_infusion_injection'", [$id]);
-    error_log("=== DEBUG REPORT: Forms table check - " . ($formsCheck ? 'FOUND' : 'NOT_FOUND'));
-    if ($formsCheck) {
-        error_log("=== DEBUG REPORT: Forms table data - PID: " . $formsCheck['pid'] . ", Encounter: " . $formsCheck['encounter']);
-    }
+    // Get the actual form_id from the forms table using the forms.id
+    $mapRow = sqlQuery("SELECT form_id FROM forms WHERE id = ?", [$id]);
+    $realId = $mapRow ? $mapRow['form_id'] : $id;
     
-    // DEBUG: Check if form exists in form_enhanced_infusion_injection table
-    $formCheck = sqlQuery("SELECT * FROM form_enhanced_infusion_injection WHERE id = ?", [$id]);
-    error_log("=== DEBUG REPORT: Form table check - " . ($formCheck ? 'FOUND' : 'NOT_FOUND'));
-    if ($formCheck) {
-        error_log("=== DEBUG REPORT: Form table data - PID: " . $formCheck['pid'] . ", Encounter: " . $formCheck['encounter']);
-    }
+    error_log("=== DEBUG REPORT: forms.id=$id, mapped to form_id=$realId, pid=$pid, encounter=$encounter");
     
-    $data = formFetch("form_enhanced_infusion_injection", $id);
+    $data = formFetch("form_enhanced_infusion_injection", $realId);
     
     // DEBUG: Log the data retrieved
     error_log("=== DEBUG REPORT: formFetch result: " . ($data ? 'YES' : 'NO'));
@@ -50,7 +42,7 @@ function enhanced_infusion_report($pid, $encounter, $cols, $id) {
         // Get secondary medications
         $secondary_medications = [];
         $sql = "SELECT * FROM form_enhanced_infusion_medications WHERE form_id = ? ORDER BY medication_order";
-        $result = sqlStatement($sql, [$id]);
+        $result = sqlStatement($sql, [$realId]);
         while ($row = sqlFetchArray($result)) {
             $secondary_medications[] = $row;
         }
