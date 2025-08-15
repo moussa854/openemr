@@ -65,18 +65,18 @@ try {
         'order_strength' => $formData['order_strength'] ?? '',
         'order_lot_number' => $formData['order_lot_number'] ?? '',
         'order_ndc' => $formData['order_ndc'] ?? '',
-        'order_expiration_date' => $formData['order_expiration_date'] ?? null,
+        'order_expiration_date' => !empty($formData['order_expiration_date']) ? $formData['order_expiration_date'] : null,
         'order_every_value' => $formData['order_every_value'] ?? '',
         'order_every_unit' => $formData['order_every_unit'] ?? '',
         'order_servicing_provider' => $formData['order_servicing_provider'] ?? '',
         'order_npi' => $formData['order_npi'] ?? '',
-        'order_end_date' => $formData['order_end_date'] ?? null,
+        'order_end_date' => !empty($formData['order_end_date']) ? $formData['order_end_date'] : null,
         'order_note' => $formData['order_note'] ?? '',
         'administration_start' => $formData['administration_start'] ?? null,
         'administration_end' => $formData['administration_end'] ?? null,
         'administration_rate' => $formData['administration_rate'] ?? '',
         'administration_rate_unit' => $formData['administration_rate_unit'] ?? '',
-        'administration_route' => $formData['administration_route'] ?? '',
+        'administration_route' => $formData['order_route'] ?? '',
         'administration_site' => $formData['administration_site'] ?? '',
         'administration_comments' => $formData['administration_comments'] ?? '',
         'administration_duration' => $formData['administration_duration'] ?? '',
@@ -109,6 +109,10 @@ try {
     error_log("=== DEBUG SAVE: Form ID check - received id: " . ($formData['id'] ?? 'NULL'));
     error_log("=== DEBUG SAVE: Form ID check - formId variable: " . ($formId ?? 'NULL'));
     error_log("=== DEBUG SAVE: Form ID check - is update: " . ($formId ? 'YES' : 'NO'));
+    
+    // DEBUG: Route and date field logging
+    error_log("=== DEBUG SAVE: Route field - order_route: " . ($formData['order_route'] ?? 'NULL'));
+    error_log("=== DEBUG SAVE: Date fields - expiration: " . ($formData['order_expiration_date'] ?? 'NULL') . ", end: " . ($formData['order_end_date'] ?? 'NULL'));
     
     if ($formId) {
         // Update existing form
