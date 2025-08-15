@@ -49,7 +49,7 @@ if ($form_id) {
     if (!empty($pid)) {
         error_log("=== DEBUG FORM LOAD: PID is not empty, trying with PID");
         $form_sql = "SELECT * FROM form_enhanced_infusion_injection WHERE id = ? AND pid = ?";
-        $form_result = sqlStatement($form_sql, [$form_id, $pid]);
+    $form_result = sqlStatement($form_sql, [$form_id, $pid]);
     } else {
         error_log("=== DEBUG FORM LOAD: PID is empty, trying to get from forms table");
         // If no PID, try to get it from the forms table first
@@ -492,8 +492,14 @@ $csrf_token = CsrfUtils::collectCsrfToken();
                     <input type="hidden" name="csrf_token_form" value="<?php echo $csrf_token; ?>">
                     <input type="hidden" name="pid" value="<?php echo htmlspecialchars($pid); ?>">
                     <input type="hidden" name="encounter" value="<?php echo htmlspecialchars($encounter); ?>">
-                    <?php if ($form_id): ?>
+                    <?php 
+                    // DEBUG: Log hidden input field
+                    error_log("=== DEBUG FORM LOAD: Hidden input field - form_id: " . ($form_id ?? 'NULL'));
+                    error_log("=== DEBUG FORM LOAD: Hidden input field - will include: " . ($form_id ? 'YES' : 'NO'));
+                    if ($form_id): ?>
                     <input type="hidden" name="id" value="<?php echo htmlspecialchars($form_id); ?>">
+                    <?php else: ?>
+                    <!-- DEBUG: No form_id, hidden input not included -->
                     <?php endif; ?>
                     
                     <!-- Assessment Section -->

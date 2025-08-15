@@ -105,6 +105,11 @@ try {
     // Check if this is an update or new form
     $formId = $formData['id'] ?? null;
     
+    // DEBUG: Enhanced form ID logging
+    error_log("=== DEBUG SAVE: Form ID check - received id: " . ($formData['id'] ?? 'NULL'));
+    error_log("=== DEBUG SAVE: Form ID check - formId variable: " . ($formId ?? 'NULL'));
+    error_log("=== DEBUG SAVE: Form ID check - is update: " . ($formId ? 'YES' : 'NO'));
+    
     if ($formId) {
         // Update existing form
         $updateSql = "UPDATE form_enhanced_infusion_injection SET ";
@@ -142,6 +147,20 @@ try {
         sqlStatement($insertSql, array_values($mainFormData));
         $formId = sqlGetLastInsertId();
         error_log("=== DEBUG SAVE: New form created - FormID: " . $formId . ", Encounter: " . $formData['encounter'] . ", PID: " . $formData['pid']);
+        
+        // DEBUG: Verify the form was actually created with this ID
+        $verify_query = sqlQuery("SELECT id, iv_access_type FROM form_enhanced_infusion_injection WHERE id = ?", [$formId]);
+        if ($verify_query) {
+            error_log("=== DEBUG SAVE: Form verification SUCCESS - ID: " . $formId . ", IV Type: " . ($verify_query['iv_access_type'] ?? 'NULL'));
+        } else {
+            error_log("=== DEBUG SAVE: Form verification FAILED - ID: " . $formId . " not found");
+            // Try to find the actual ID
+            $actual_query = sqlQuery("SELECT id FROM form_enhanced_infusion_injection WHERE pid = ? AND encounter = ? ORDER BY id DESC LIMIT 1", [$formData['pid'], $formData['encounter']]);
+            if ($actual_query) {
+                error_log("=== DEBUG SAVE: Actual form ID found: " . $actual_query['id']);
+                $formId = $actual_query['id']; // Use the correct ID
+            }
+        }
         // Register form in forms table for encounter report
         $addFormResult = addForm($formData['encounter'], "Enhanced Infusion and Injection Form", $formId, "enhanced_infusion", $formData['pid'], 1);
         error_log("=== DEBUG SAVE: addForm result: " . ($addFormResult ? 'SUCCESS' : 'FAILED'));
