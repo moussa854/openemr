@@ -103,7 +103,7 @@ function buildAllergyHtml($pid) {
     return $html;
 }
 
-function enhanced_infusion_injection_report($pid, $encounter, $cols, $id, $print = true) {
+function enhanced_infusion_report($pid, $encounter, $cols, $id) {
     // DEBUG: Log the function call
     error_log("=== DEBUG REPORT: Enhanced styled injection report called - PID: $pid, Encounter: $encounter, ID: $id");
     
