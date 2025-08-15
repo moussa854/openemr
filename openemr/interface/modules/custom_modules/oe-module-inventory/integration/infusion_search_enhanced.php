@@ -2135,12 +2135,12 @@ $csrf_token = CsrfUtils::collectCsrfToken();
                 const endDateInput = document.getElementById("order_end_date");
                 const expirationDateInput = document.getElementById("order_expiration_date");
                 
-                if (endDateInput && endDateInput.value) {
-                    endDateInput.value = DateToYYYYMMDD_js(endDateInput.value);
-                }
-                if (expirationDateInput && expirationDateInput.value) {
-                    expirationDateInput.value = DateToYYYYMMDD_js(expirationDateInput.value);
-if (document.getElementById("iv_access_date") && document.getElementById("iv_access_date").value) {
+                // HTML5 date inputs already provide YYYY-MM-DD format, no conversion needed
+                console.log("=== DEBUG DATE: End Date value:", endDateInput ? endDateInput.value : 'NULL');
+                console.log("=== DEBUG DATE: Expiration Date value:", expirationDateInput ? expirationDateInput.value : 'NULL');
+                // Removed DateToYYYYMMDD_js conversion for HTML5 date inputs
+                
+                if (document.getElementById("iv_access_date") && document.getElementById("iv_access_date").value) {
                     // Removed DateToYYYYMMDD_js for datetime-local input
                 }
                 if (document.getElementById("administration_start") && document.getElementById("administration_start").value) {
