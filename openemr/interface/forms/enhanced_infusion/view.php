@@ -13,21 +13,37 @@
 require_once(dirname(__FILE__) . "/../../globals.php");
 
 // Get parameters - try GET parameters first, then session/globals
-$forms_id = $_GET['id'] ?? '';  // This is the forms.id, not the form_enhanced_infusion_injection.id
+$id_param = $_GET['id'] ?? '';  // This could be either forms.id OR form_enhanced_infusion_injection.id
 $pid = $_GET['pid'] ?? $GLOBALS['pid'] ?? '';
 $encounter = $_GET['encounter'] ?? $GLOBALS['encounter'] ?? '';
 
-// Get the actual form_id from the forms table using the forms.id
+// Determine if the ID is a forms.id or form_enhanced_infusion_injection.id
 $form_id = '';
-if (!empty($forms_id)) {
-    $forms_query = sqlQuery("SELECT form_id, pid, encounter FROM forms WHERE id = ?", [$forms_id]);
+if (!empty($id_param)) {
+    // First try: assume it's a forms.id
+    $forms_query = sqlQuery("SELECT form_id, pid, encounter FROM forms WHERE id = ? AND formdir = 'enhanced_infusion'", [$id_param]);
     if ($forms_query) {
-        $form_id = $forms_query['form_id'];  // This is the actual form data ID
+        // It's a forms.id - get the actual form_id
+        $form_id = $forms_query['form_id'];
         if (empty($pid)) {
             $pid = $forms_query['pid'];
         }
         if (empty($encounter)) {
             $encounter = $forms_query['encounter'];
+        }
+        error_log("=== DEBUG VIEW: Received forms.id = $id_param, mapped to form_id = $form_id");
+    } else {
+        // Second try: assume it's already a form_enhanced_infusion_injection.id
+        $form_query = sqlQuery("SELECT pid, encounter FROM form_enhanced_infusion_injection WHERE id = ?", [$id_param]);
+        if ($form_query) {
+            $form_id = $id_param;  // It's already the form data ID
+            if (empty($pid)) {
+                $pid = $form_query['pid'];
+            }
+            if (empty($encounter)) {
+                $encounter = $form_query['encounter'];
+            }
+            error_log("=== DEBUG VIEW: Received form_enhanced_infusion_injection.id = $id_param directly");
         }
     }
 }
@@ -42,7 +58,7 @@ if ((empty($pid) || empty($encounter)) && !empty($form_id)) {
 }
 
 // Debug logging
-error_log("=== DEBUG VIEW: forms_id = $forms_id, form_id = $form_id, pid = $pid, encounter = $encounter");
+error_log("=== DEBUG VIEW: id_param = $id_param, form_id = $form_id, pid = $pid, encounter = $encounter");
 
 // Redirect to the custom module view with proper parameters
 $redirect_url = $GLOBALS['web_root'] . "/interface/modules/custom_modules/oe-module-inventory/integration/infusion_search_enhanced.php?pid=" . urlencode($pid) . "&encounter=" . urlencode($encounter) . "&id=" . urlencode($form_id);
