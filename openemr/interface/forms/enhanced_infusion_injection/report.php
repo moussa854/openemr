@@ -104,6 +104,9 @@ function buildAllergyHtml($pid) {
 }
 
 function enhanced_infusion_injection_report($pid, $encounter, $cols, $id, $print = true) {
+    // DEBUG: Log the function call
+    error_log("=== DEBUG REPORT: Enhanced styled injection report called - PID: $pid, Encounter: $encounter, ID: $id");
+    
     // Get patient data
     $patient = getPatientData($pid);
     
@@ -114,22 +117,35 @@ function enhanced_infusion_injection_report($pid, $encounter, $cols, $id, $print
     // Map the generic forms table id ($id) to the actual record id in
     // form_enhanced_infusion_injection.  In the `forms` table, the
     // column `form_id` stores the primary-key value of the specific
-    // form’s data table.  Without this lookup the report tries to load
+    // form's data table.  Without this lookup the report tries to load
     // the wrong id and shows no data.
 
     $mapRow = sqlQuery("SELECT form_id FROM forms WHERE id = ?", [$id]);
     $realFormId = $mapRow['form_id'] ?? $id; // Fallback to original id just in case
+    
+    error_log("=== DEBUG REPORT: Received forms.id=$id, mapped to form_id=$realFormId");
 
     // Now fetch the enhanced infusion record using the mapped id
     $sql = "SELECT * FROM form_enhanced_infusion_injection WHERE id = ? AND pid = ?";
     $form_data = sqlQuery($sql, [$realFormId, $pid]);
+    
+    // DEBUG: Log the data retrieved
+    error_log("=== DEBUG REPORT: formFetch result: " . ($form_data ? 'YES' : 'NO'));
+    if ($form_data) {
+        error_log("=== DEBUG REPORT: Form data - Assessment: " . ($form_data['assessment'] ?? 'NOT_SET'));
+        error_log("=== DEBUG REPORT: Form data - Order Medication: " . ($form_data['order_medication'] ?? 'NOT_SET'));
+        error_log("=== DEBUG REPORT: Form data - IV Access Type: " . ($form_data['iv_access_type'] ?? 'NOT_SET'));
+        error_log("=== DEBUG REPORT: Form data - Route: " . ($form_data['administration_route'] ?? 'NOT_SET'));
+    } else {
+        error_log("=== DEBUG REPORT: No data returned from query");
+    }
     
     if ($print) {
         ?>
         <!DOCTYPE html>
         <html>
         <head>
-            <title>Infusion & Injection Form</title>
+            <title>Enhanced Infusion & Injection Form</title>
             <style>
                 body { font-family: Arial, sans-serif; margin: 20px; background: #f5f5f5; }
                 .container { max-width: 800px; margin: 0 auto; background: white; padding: 30px; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
@@ -212,8 +228,9 @@ function enhanced_infusion_injection_report($pid, $encounter, $cols, $id, $print
         <body>
             <div class="container">
                 <button class="print-button" onclick="downloadPDF();">📄 Download PDF</button>
+                <button class="print-button" onclick="window.print();" style="background: #007bff;">🖨️ Print</button>
                 <div class="header">
-                    <h1>Infusion & Injection Form</h1>
+                    <h1>Enhanced Infusion & Injection Form</h1>
                     <div class="patient-info">
                         <div class="info-pair">
                             <div class="info-item">
@@ -308,16 +325,46 @@ function enhanced_infusion_injection_report($pid, $encounter, $cols, $id, $print
                             <span class="field-value"><?php echo htmlspecialchars($form_data['order_dose']); ?></span>
                         </div>
                         <?php endif; ?>
+                        <?php if (hasValue($form_data['order_strength'])): ?>
+                        <div class="field">
+                            <span class="field-label">Strength:</span>
+                            <span class="field-value"><?php echo htmlspecialchars($form_data['order_strength']); ?></span>
+                        </div>
+                        <?php endif; ?>
                         <?php if (hasValue($form_data['order_every_value']) || hasValue($form_data['order_every_unit'])): ?>
                         <div class="field">
                             <span class="field-label">Frequency:</span>
                             <span class="field-value"><?php echo htmlspecialchars($form_data["order_every_value"] ?? "") . " " . htmlspecialchars(($form_data["order_every_value"] == 1 ? rtrim($form_data["order_every_unit"] ?? "", "s") : $form_data["order_every_unit"] ?? "")); ?></span>
                         </div>
                         <?php endif; ?>
+                        <?php if (hasValue($form_data['administration_route'])): ?>
+                        <div class="field">
+                            <span class="field-label">Route:</span>
+                            <span class="field-value"><?php echo htmlspecialchars($form_data['administration_route']); ?></span>
+                        </div>
+                        <?php endif; ?>
                         <?php if (hasValue($form_data['order_end_date'])): ?>
                         <div class="field">
                             <span class="field-label">End Date:</span>
                             <span class="field-value"><?php echo htmlspecialchars(oeFormatShortDate($form_data['order_end_date'] ?? '')); ?></span>
+                        </div>
+                        <?php endif; ?>
+                        <?php if (hasValue($form_data['order_expiration_date'])): ?>
+                        <div class="field">
+                            <span class="field-label">Expiration Date:</span>
+                            <span class="field-value"><?php echo htmlspecialchars(oeFormatShortDate($form_data['order_expiration_date'] ?? '')); ?></span>
+                        </div>
+                        <?php endif; ?>
+                        <?php if (hasValue($form_data['order_lot_number'])): ?>
+                        <div class="field">
+                            <span class="field-label">Lot Number:</span>
+                            <span class="field-value"><?php echo htmlspecialchars($form_data['order_lot_number']); ?></span>
+                        </div>
+                        <?php endif; ?>
+                        <?php if (hasValue($form_data['order_ndc'])): ?>
+                        <div class="field">
+                            <span class="field-label">NDC:</span>
+                            <span class="field-value"><?php echo htmlspecialchars($form_data['order_ndc']); ?></span>
                         </div>
                         <?php endif; ?>
                         <?php if (hasValue($form_data['order_servicing_provider'])): ?>
@@ -348,6 +395,7 @@ function enhanced_infusion_injection_report($pid, $encounter, $cols, $id, $print
                         </div>
                     </div>
                     
+                    <?php if (hasValue($form_data['bp_systolic']) || hasValue($form_data['bp_diastolic']) || hasValue($form_data['pulse']) || hasValue($form_data['temperature_f']) || hasValue($form_data['oxygen_saturation']) || hasValue($form_data['respiratory_rate']) || hasValue($form_data['weight']) || hasValue($form_data['height'])): ?>
                     <div class="section">
                         <div class="section-title">Vital Signs</div>
                         <?php if (hasValue($form_data['bp_systolic']) || hasValue($form_data['bp_diastolic'])): ?>
@@ -393,7 +441,9 @@ function enhanced_infusion_injection_report($pid, $encounter, $cols, $id, $print
                         </div>
                         <?php endif; ?>
                     </div>
+                    <?php endif; ?>
                     
+                    <?php if (hasValue($form_data['iv_access_type']) || hasValue($form_data['iv_access_location']) || hasValue($form_data['iv_access_needle_gauge']) || hasValue($form_data['iv_access_blood_return']) || hasValue($form_data['iv_access_attempts']) || hasValue($form_data['iv_access_date']) || hasValue($form_data['iv_access_comments'])): ?>
                     <div class="section">
                         <div class="section-title">IV Access</div>
                         <?php if (hasValue($form_data['iv_access_type'])): ?>
@@ -439,51 +489,11 @@ function enhanced_infusion_injection_report($pid, $encounter, $cols, $id, $print
                         </div>
                         <?php endif; ?>
                     </div>
+                    <?php endif; ?>
                     
+                    <?php if (hasValue($form_data['administration_start']) || hasValue($form_data['administration_end']) || hasValue($form_data['inventory_quantity_used']) || hasValue($form_data['inventory_wastage_quantity']) || hasValue($form_data['administration_site']) || hasValue($form_data['administration_comments']) || hasValue($form_data['administration_note'])): ?>
                     <div class="section">
                         <div class="section-title">Administration</div>
-                        <?php if (hasValue($form_data['order_medication'])): ?>
-                        <div class="field">
-                            <span class="field-label">Medication:</span>
-                            <span class="field-value"><?php echo htmlspecialchars($form_data['order_medication']); ?></span>
-                        </div>
-                        <?php endif; ?>
-                        <?php if (hasValue($form_data['order_dose'])): ?>
-                        <div class="field">
-                            <span class="field-label">Dose:</span>
-                            <span class="field-value"><?php echo htmlspecialchars($form_data['order_dose']); ?></span>
-                        </div>
-                        <?php endif; ?>
-                        <?php if (hasValue($form_data['order_strength'])): ?>
-                        <div class="field">
-                            <span class="field-label">Strength:</span>
-                            <span class="field-value"><?php echo htmlspecialchars($form_data['order_strength'] . ' ' . extractUnitFromDose($form_data['order_dose'] ?? '')); ?></span>
-                        </div>
-                        <?php endif; ?>
-                        <?php if (hasValue($form_data['administration_route'])): ?>
-                        <div class="field">
-                            <span class="field-label">Route:</span>
-                            <span class="field-value"><?php echo htmlspecialchars($form_data['administration_route']); ?></span>
-                        </div>
-                        <?php endif; ?>
-                        <?php if (hasValue($form_data['order_lot_number'])): ?>
-                        <div class="field">
-                            <span class="field-label">Lot Number:</span>
-                            <span class="field-value"><?php echo htmlspecialchars($form_data['order_lot_number']); ?></span>
-                        </div>
-                        <?php endif; ?>
-                        <?php if (hasValue($form_data['order_expiration_date'])): ?>
-                        <div class="field">
-                            <span class="field-label">Expiration Date:</span>
-                            <span class="field-value"><?php echo htmlspecialchars(oeFormatShortDate($form_data['order_expiration_date'] ?? '')); ?></span>
-                        </div>
-                        <?php endif; ?>
-                        <?php if (hasValue($form_data['order_ndc'])): ?>
-                        <div class="field">
-                            <span class="field-label">NDC:</span>
-                            <span class="field-value"><?php echo htmlspecialchars($form_data['order_ndc']); ?></span>
-                        </div>
-                        <?php endif; ?>
                         <?php if (hasValue($form_data['administration_start'])): ?>
                         <div class="field">
                             <span class="field-label">Start Time:</span>
@@ -496,6 +506,7 @@ function enhanced_infusion_injection_report($pid, $encounter, $cols, $id, $print
                             <span class="field-value"><?php echo htmlspecialchars(formatDateTimeAmPm($form_data['administration_end'])); ?></span>
                         </div>
                         <?php endif; ?>
+                        <?php if (hasValue($form_data['administration_start']) && hasValue($form_data['administration_end'])): ?>
                         <div class="field">
                             <span class="field-label">Duration:</span>
                             <span class="field-value"><?php 
@@ -503,6 +514,7 @@ function enhanced_infusion_injection_report($pid, $encounter, $cols, $id, $print
                                 echo htmlspecialchars($calculated_duration ?: 'Not calculated'); 
                             ?></span>
                         </div>
+                        <?php endif; ?>
                         <?php if (hasValue($form_data['inventory_quantity_used'])): ?>
                         <div class="field">
                             <span class="field-label">Quantity Used:</span>
@@ -539,7 +551,47 @@ function enhanced_infusion_injection_report($pid, $encounter, $cols, $id, $print
                             <span class="field-value"><?php echo htmlspecialchars($form_data['administration_comments']); ?></span>
                         </div>
                         <?php endif; ?>
+                        <?php if (hasValue($form_data['administration_note'])): ?>
+                        <div class="field">
+                            <span class="field-label">Administration Notes:</span>
+                            <span class="field-value"><?php echo htmlspecialchars($form_data['administration_note']); ?></span>
+                        </div>
+                        <?php endif; ?>
                     </div>
+                    <?php endif; ?>
+                    
+                    <?php
+                    // Get secondary medications
+                    $secondary_medications = [];
+                    $sql = "SELECT * FROM form_enhanced_infusion_medications WHERE form_id = ? ORDER BY medication_order";
+                    $result = sqlStatement($sql, [$realFormId]);
+                    while ($row = sqlFetchArray($result)) {
+                        $secondary_medications[] = $row;
+                    }
+                    
+                    if (!empty($secondary_medications)): ?>
+                    <div class="section">
+                        <div class="section-title">Secondary/PRN Medications</div>
+                        <?php foreach ($secondary_medications as $med): ?>
+                        <div class="field">
+                            <span class="field-label">Medication:</span>
+                            <span class="field-value"><?php echo htmlspecialchars($med['order_medication']); ?></span>
+                        </div>
+                        <div class="field">
+                            <span class="field-label">Dose:</span>
+                            <span class="field-value"><?php echo htmlspecialchars($med['order_dose']); ?></span>
+                        </div>
+                        <div class="field">
+                            <span class="field-label">Start:</span>
+                            <span class="field-value"><?php echo htmlspecialchars(formatDateTimeAmPm($med['administration_start'])); ?></span>
+                        </div>
+                        <div class="field">
+                            <span class="field-label">End:</span>
+                            <span class="field-value"><?php echo htmlspecialchars(formatDateTimeAmPm($med['administration_end'])); ?></span>
+                        </div>
+                        <?php endforeach; ?>
+                    </div>
+                    <?php endif; ?>
                     
                     <!-- Electronic Signatures Section -->
                     <?php
@@ -558,7 +610,7 @@ function enhanced_infusion_injection_report($pid, $encounter, $cols, $id, $print
                                        WHERE s.form_id = ? AND s.is_active = 1
                                        ORDER BY s.signature_order ASC, s.created_at ASC";
                     
-                    $signatures_result = sqlStatement($signatures_sql, [$id]);
+                    $signatures_result = sqlStatement($signatures_sql, [$realFormId]);
                     $signatures = [];
                     while ($row = sqlFetchArray($signatures_result)) {
                         $signatures[] = $row;

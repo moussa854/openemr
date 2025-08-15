@@ -2140,7 +2140,7 @@ $csrf_token = CsrfUtils::collectCsrfToken();
                 console.log("=== DEBUG DATE: Expiration Date value:", expirationDateInput ? expirationDateInput.value : 'NULL');
                 // Removed DateToYYYYMMDD_js conversion for HTML5 date inputs
                 
-                if (document.getElementById("iv_access_date") && document.getElementById("iv_access_date").value) {
+if (document.getElementById("iv_access_date") && document.getElementById("iv_access_date").value) {
                     // Removed DateToYYYYMMDD_js for datetime-local input
                 }
                 if (document.getElementById("administration_start") && document.getElementById("administration_start").value) {
