@@ -129,7 +129,7 @@ try {
         
         // Update form registration in forms table for encounter report
         error_log("=== DEBUG SAVE: Updating form registration - Encounter: " . $formData['encounter'] . ", PID: " . $formData['pid'] . ", FormID: " . $formId);
-        $updateFormSql = "UPDATE forms SET encounter = ?, pid = ?, form_name = ?, formdir = ? WHERE id = ?";
+        $updateFormSql = "UPDATE forms SET encounter = ?, pid = ?, form_name = ?, formdir = ? WHERE form_id = ? AND formdir = 'enhanced_infusion'";
         $updateFormResult = sqlStatement($updateFormSql, [$formData['encounter'], $formData['pid'], "Enhanced Infusion and Injection Form", "enhanced_infusion", $formId]);
         error_log("=== DEBUG SAVE: Update forms table result: " . ($updateFormResult ? 'SUCCESS' : 'FAILED'));
         
