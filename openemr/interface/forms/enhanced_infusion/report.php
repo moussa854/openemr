@@ -75,6 +75,32 @@ function enhanced_infusion_report($pid, $encounter, $cols, $id) {
         print "<td>" . text($data['inventory_quantity_used']) . "</td>";
         print "</tr>";
         
+        // IV Access Information
+        if (!empty($data['iv_access_type']) || !empty($data['iv_access_location']) || !empty($data['iv_access_comments'])) {
+            print "<tr><td colspan='4'><span class=bold>" . xlt("IV Access Information") . ":</span></td></tr>";
+            if (!empty($data['iv_access_type'])) {
+                print "<tr><td><span class=bold>" . xlt("Access Type") . ":</span></td>";
+                print "<td>" . text($data['iv_access_type']) . "</td>";
+                if (!empty($data['iv_access_location'])) {
+                    print "<td><span class=bold>" . xlt("Location") . ":</span></td>";
+                    print "<td>" . text($data['iv_access_location']) . "</td>";
+                } else {
+                    print "<td></td><td></td>";
+                }
+                print "</tr>";
+            }
+            if (!empty($data['iv_access_comments'])) {
+                print "<tr><td><span class=bold>" . xlt("IV Comments") . ":</span></td>";
+                print "<td colspan='3'>" . text($data['iv_access_comments']) . "</td></tr>";
+            }
+        }
+        
+        // Diagnosis Information
+        if (!empty($data['diagnoses'])) {
+            print "<tr><td><span class=bold>" . xlt("Diagnoses") . ":</span></td>";
+            print "<td colspan='3'>" . text($data['diagnoses']) . "</td></tr>";
+        }
+        
         // Secondary medications
         if (!empty($secondary_medications)) {
             print "<tr><td colspan='4'><span class=bold>" . xlt("Secondary/PRN Medications") . ":</span></td></tr>";

@@ -84,7 +84,7 @@ try {
         'wastage_reason' => $formData['wastage_reason'] ?? '',
         'wastage_notes' => $formData['wastage_notes'] ?? '',
         'administration_note' => $formData['administration_note'] ?? '',
-        'diagnoses' => $formData['diagnoses'] ?? '',
+        'diagnoses' => $formData['diagnoses_codes'] ?? '',
         'bp_systolic' => $formData['bp_systolic'] ?? '',
         'bp_diastolic' => $formData['bp_diastolic'] ?? '',
         'pulse' => $formData['pulse'] ?? '',
