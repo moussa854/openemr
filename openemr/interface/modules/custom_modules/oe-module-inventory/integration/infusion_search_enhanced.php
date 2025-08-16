@@ -216,7 +216,7 @@ $csrf_token = CsrfUtils::collectCsrfToken();
 <html>
 <head>
     <script src="../../../../../library/formatting_DateToYYYYMMDD_js.js.php"></script>
-    <title>Enhanced Infusion and Injection Form</title>
+            <title>Infusion and Injection Form</title>
     <link rel="stylesheet" href="<?php echo $GLOBALS['webroot']; ?>/public/themes/style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
     <style>
@@ -492,7 +492,7 @@ $csrf_token = CsrfUtils::collectCsrfToken();
     <div class="container-fluid">
         <div class="row">
             <div class="col-md-12">
-                <h2><i class="fa fa-tint"></i> Enhanced Infusion and Injection Treatment Form</h2>
+                <h2><i class="fa fa-tint"></i> Infusion and Injection Treatment Form</h2>
                 
                 <?php echo $saved_message; ?>
                 

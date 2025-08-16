@@ -139,7 +139,7 @@ try {
         // Update form registration in forms table for encounter report
         error_log("=== DEBUG SAVE: Updating form registration - Encounter: " . $formData['encounter'] . ", PID: " . $formData['pid'] . ", FormID: " . $formId);
         $updateFormSql = "UPDATE forms SET encounter = ?, pid = ?, form_name = ?, formdir = ? WHERE form_id = ? AND formdir = 'enhanced_infusion'";
-        $updateFormResult = sqlStatement($updateFormSql, [$formData['encounter'], $formData['pid'], "Enhanced Infusion and Injection Form", "enhanced_infusion", $formId]);
+        $updateFormResult = sqlStatement($updateFormSql, [$formData['encounter'], $formData['pid'], "Infusion and Injection Form", "enhanced_infusion", $formId]);
         error_log("=== DEBUG SAVE: Update forms table result: " . ($updateFormResult ? 'SUCCESS' : 'FAILED'));
         
     } else {
@@ -166,7 +166,7 @@ try {
             }
         }
         // Register form in forms table for encounter report
-        $addFormResult = addForm($formData['encounter'], "Enhanced Infusion and Injection Form", $formId, "enhanced_infusion", $formData['pid'], 1);
+        $addFormResult = addForm($formData['encounter'], "Infusion and Injection Form", $formId, "enhanced_infusion", $formData['pid'], 1);
         error_log("=== DEBUG SAVE: addForm result: " . ($addFormResult ? 'SUCCESS' : 'FAILED'));
     }
     

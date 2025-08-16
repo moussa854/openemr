@@ -140,7 +140,7 @@ function enhanced_infusion_report($pid, $encounter, $cols, $id, $print = true) {
         <!DOCTYPE html>
         <html>
         <head>
-            <title>Enhanced Infusion & Injection Form</title>
+            <title>Infusion & Injection Form</title>
             <style>
                 body { font-family: Arial, sans-serif; margin: 20px; background: #f5f5f5; }
                 .container { max-width: 800px; margin: 0 auto; background: white; padding: 30px; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
@@ -224,7 +224,7 @@ function enhanced_infusion_report($pid, $encounter, $cols, $id, $print = true) {
             <div class="container">
                 <button class="print-button" onclick="downloadPDF();">📄 Download PDF</button>
                 <div class="header">
-                    <h1>Enhanced Infusion & Injection Form</h1>
+                    <h1>Infusion & Injection Form</h1>
                     <div class="patient-info">
                         <div class="info-pair">
                             <div class="info-item">
@@ -641,7 +641,7 @@ function enhanced_infusion_report($pid, $encounter, $cols, $id, $print = true) {
                 <?php else: ?>
                     <div class="section">
                         <div class="section-title">No Form Data Found</div>
-                        <p class="no-data">No Enhanced Infusion and Injection Form data was found for this encounter.</p>
+                        <p class="no-data">No Infusion and Injection Form data was found for this encounter.</p>
                     </div>
                 <?php endif; ?>
                 
@@ -678,7 +678,7 @@ function enhanced_infusion_report($pid, $encounter, $cols, $id, $print = true) {
         <!DOCTYPE html>
         <html>
         <head>
-            <title>Enhanced Infusion & Injection Form</title>
+            <title>Infusion & Injection Form</title>
             <style>
                 body { font-family: Arial, sans-serif; margin: 20px; background: #f5f5f5; }
                 .container { max-width: 800px; margin: 0 auto; background: white; padding: 30px; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
@@ -689,7 +689,7 @@ function enhanced_infusion_report($pid, $encounter, $cols, $id, $print = true) {
             <div class="container">
                 <div class="no-data">
                     <h2>No Form Data Found</h2>
-                    <p>No Enhanced Infusion and Injection Form data was found for this encounter.</p>
+                    <p>No Infusion and Injection Form data was found for this encounter.</p>
                 </div>
             </div>
         </body>
