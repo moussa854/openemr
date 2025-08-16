@@ -683,7 +683,14 @@ $csrf_token = CsrfUtils::collectCsrfToken();
                             <div class="col-md-4">
                                 <div class="form-group">
                                     <label for="iv_access_date" class="control-label">Access Date:</label>
-                                    <input type="datetime-local" name="iv_access_date" id="iv_access_date" class="form-control" value="<?php echo htmlspecialchars(date('Y-m-d\TH:i', strtotime($saved_data["iv_access_date"] ?? 'now'))); ?>" placeholder="Date and time">
+                                    <input type="datetime-local" name="iv_access_date" id="iv_access_date" class="form-control" value="<?php 
+                                        $access_date = $saved_data["iv_access_date"] ?? 'now';
+                                        if ($access_date && $access_date !== '0000-00-00 00:00:00') {
+                                            echo htmlspecialchars(date('Y-m-d\TH:i', strtotime($access_date)));
+                                        } else {
+                                            echo htmlspecialchars(date('Y-m-d\TH:i'));
+                                        }
+                                    ?>" placeholder="Date and time">
                                 </div>
                             </div>
                         </div>
