@@ -202,7 +202,7 @@ function buildAllergyHtml($pid) {
         if ($index === 0) {
             $html .= '<li>' . $item . '</li>';
         } else {
-            $html .= '<li>&#8226; ' . $item . '</li>';
+        $html .= '<li>&#8226; ' . $item . '</li>';
         }
     }
     $html .= '</ul>';
@@ -941,7 +941,7 @@ $csrf_token = CsrfUtils::collectCsrfToken();
                                     <input type="datetime-local" name="administration_start" id="administration_start" class="form-control" value="<?php 
                                         $start_time = $saved_data["administration_start"] ?? null;
                                         if ($start_time && $start_time !== '0000-00-00 00:00:00') {
-                                            echo htmlspecialchars(date('Y-m-d') . 'T' . date('H:i', strtotime($start_time)));
+                                            echo htmlspecialchars(date('Y-m-d\TH:i', strtotime($start_time)));
                                         } else {
                                             echo htmlspecialchars(date('Y-m-d') . 'T' . date('H:i'));
                                         }
@@ -954,7 +954,7 @@ $csrf_token = CsrfUtils::collectCsrfToken();
                                     <input type="datetime-local" name="administration_end" id="administration_end" class="form-control" value="<?php 
                                         $end_time = $saved_data["administration_end"] ?? null;
                                         if ($end_time && $end_time !== '0000-00-00 00:00:00') {
-                                            echo htmlspecialchars(date('Y-m-d') . 'T' . date('H:i', strtotime($end_time)));
+                                            echo htmlspecialchars(date('Y-m-d\TH:i', strtotime($end_time)));
                                         } else {
                                             echo htmlspecialchars(date('Y-m-d') . 'T' . date('H:i'));
                                         }
@@ -2133,7 +2133,7 @@ $csrf_token = CsrfUtils::collectCsrfToken();
             const formIdInput = document.querySelector("input[name=\"id\"]");
             if (!formIdInput) {
                 loadPreviousDiagnoses();
-                loadPreviousMedication();
+            loadPreviousMedication();
             }
             
             // Load existing secondary medications for saved forms
