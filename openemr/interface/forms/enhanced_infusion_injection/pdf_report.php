@@ -1,9 +1,9 @@
 <?php
 
 /**
- * Enhanced Infusion and Injection Form PDF Report Generator
+ * Infusion and Injection Form PDF Report Generator
  * 
- * This file generates a PDF download of the Enhanced Infusion and Injection Form.
+ * This file generates a PDF download of the Infusion and Injection Form.
  * It uses mPDF library for PDF generation.
  */
 

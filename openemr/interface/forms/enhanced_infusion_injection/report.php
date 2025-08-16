@@ -2,9 +2,9 @@
 require_once($GLOBALS["fileroot"] . "/library/formatting.inc.php");
 require_once($GLOBALS["fileroot"] . "/src/Services/Utils/DateFormatterUtils.php");
 /**
- * Enhanced Infusion and Injection Form Report
+ * Infusion and Injection Form Report
  * 
- * This file generates a printable report for the Enhanced Infusion and Injection Form.
+ * This file generates a printable report for the Infusion and Injection Form.
  * It displays all form data in a structured, readable format.
  */
 
@@ -647,7 +647,7 @@ function enhanced_infusion_report($pid, $encounter, $cols, $id) {
                 <?php else: ?>
                     <div class="section">
                         <div class="section-title">No Form Data Found</div>
-                        <p class="no-data">No Enhanced Infusion and Injection Form data was found for this encounter.</p>
+                        <p class="no-data">No Infusion and Injection Form data was found for this encounter.</p>
                     </div>
                 <?php endif; ?>
                 
