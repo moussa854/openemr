@@ -223,7 +223,6 @@ function enhanced_infusion_report($pid, $encounter, $cols, $id, $print = true) {
         <body>
             <div class="container">
                 <button class="print-button" onclick="downloadPDF();">📄 Download PDF</button>
-                <button class="print-button" onclick="window.print();" style="background: #007bff;">🖨️ Print</button>
                 <div class="header">
                     <h1>Enhanced Infusion & Injection Form</h1>
                     <div class="patient-info">
