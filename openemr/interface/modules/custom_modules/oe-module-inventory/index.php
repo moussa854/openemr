@@ -119,10 +119,10 @@ document.addEventListener("DOMContentLoaded", function() {
                 <input type="text" name="route" placeholder="Route (oral, topical, etc.)">
                 <input type="text" name="form" placeholder="Form (tablet, injection, etc.)">
                 
-                <!-- Vial Type Section -->
-                <div class="vial-type-section">
+                <!-- Vial Type Section - Only visible for vials -->
+                <div class="vial-type-section" id="vial-type-section" style="display: none;">
                     <label>Vial Type:</label>
-                    <select name="vial_type" required>
+                    <select name="vial_type" id="vial-type-select">
                         <option value="">Select Vial Type</option>
                         <option value="single_dose">Single Dose Vial (SDV)</option>
                         <option value="multi_dose">Multi-Dose Vial (MDV)</option>
@@ -179,10 +179,10 @@ document.addEventListener("DOMContentLoaded", function() {
                     <input type="text" name="dose" id="edit-dose" placeholder="Dose (e.g., 5 grams)">
                     <input type="text" name="route" id="edit-route" placeholder="Route (oral, topical, etc.)">
                     
-                    <!-- Vial Type Section -->
-                    <div class="vial-type-section">
+                    <!-- Vial Type Section - Only visible for vials -->
+                    <div class="vial-type-section" id="edit-vial-type-section" style="display: none;">
                         <label>Vial Type:</label>
-                        <select name="vial_type" id="edit-vial-type" required>
+                        <select name="vial_type" id="edit-vial-type">
                             <option value="">Select Vial Type</option>
                             <option value="single_dose">Single Dose Vial (SDV)</option>
                             <option value="multi_dose">Multi-Dose Vial (MDV)</option>
@@ -443,6 +443,45 @@ document.addEventListener("DOMContentLoaded", function() {
         var currentDrugData = {};
         
         $(document).ready(function() {
+            // Show/hide vial type section based on quantity unit selection
+            function toggleVialTypeSection() {
+                var quantityUnit = $('select[name="quantity_unit"]').val();
+                var vialTypeSection = $('#vial-type-section');
+                var vialTypeSelect = $('#vial-type-select');
+                
+                if (quantityUnit === 'vial') {
+                    vialTypeSection.show();
+                    vialTypeSelect.attr('required', true);
+                } else {
+                    vialTypeSection.hide();
+                    vialTypeSelect.attr('required', false);
+                    vialTypeSelect.val('unknown'); // Set to unknown for non-vials
+                }
+            }
+            
+            // Show/hide edit vial type section based on quantity unit selection
+            function toggleEditVialTypeSection() {
+                var quantityUnit = $('#edit-quantity-unit').val();
+                var vialTypeSection = $('#edit-vial-type-section');
+                var vialTypeSelect = $('#edit-vial-type');
+                
+                if (quantityUnit === 'vial') {
+                    vialTypeSection.show();
+                    vialTypeSelect.attr('required', true);
+                } else {
+                    vialTypeSection.hide();
+                    vialTypeSelect.attr('required', false);
+                    vialTypeSelect.val('unknown'); // Set to unknown for non-vials
+                }
+            }
+            
+            // Bind events for quantity unit changes
+            $('select[name="quantity_unit"]').on('change', toggleVialTypeSection);
+            $('#edit-quantity-unit').on('change', toggleEditVialTypeSection);
+            
+            // Initial check on page load
+            toggleVialTypeSection();
+            
             // Handle form submission
             $('#add-drug-form').on('submit', function(e) {
                 e.preventDefault();
@@ -857,18 +896,22 @@ document.addEventListener("DOMContentLoaded", function() {
         }
 
         function createDrugCard(drug) {
-            // Format vial type with icons and styling
-            var vialTypeText = '';
-            var vialTypeClass = '';
-            if (drug.vial_type === 'single_dose') {
-                vialTypeText = '⚡ Single Dose Vial (SDV)';
-                vialTypeClass = 'vial-type-sdv';
-            } else if (drug.vial_type === 'multi_dose') {
-                vialTypeText = '🔄 Multi-Dose Vial (MDV)';
-                vialTypeClass = 'vial-type-mdv';
-            } else {
-                vialTypeText = '❓ Unknown Vial Type';
-                vialTypeClass = 'vial-type-unknown';
+            // Only show vial type for actual vials
+            var vialTypeHtml = '';
+            if (drug.quantity_unit === 'vial') {
+                var vialTypeText = '';
+                var vialTypeClass = '';
+                if (drug.vial_type === 'single_dose') {
+                    vialTypeText = '⚡ Single Dose Vial (SDV)';
+                    vialTypeClass = 'vial-type-sdv';
+                } else if (drug.vial_type === 'multi_dose') {
+                    vialTypeText = '🔄 Multi-Dose Vial (MDV)';
+                    vialTypeClass = 'vial-type-mdv';
+                } else {
+                    vialTypeText = '❓ Unknown Vial Type';
+                    vialTypeClass = 'vial-type-unknown';
+                }
+                vialTypeHtml = '<p class="' + vialTypeClass + '"><strong>' + vialTypeText + '</strong></p>';
             }
             
             return '<div class="drug-item ' + (drug.is_controlled_substance ? 'controlled' : '') + '" data-drug=\'' + JSON.stringify(drug) + '\'>' +
@@ -882,7 +925,7 @@ document.addEventListener("DOMContentLoaded", function() {
                 '<p><strong>Quantity: ' + (drug.quantity || 0) + ' ' + (drug.quantity_unit || 'vial') + '</strong></p>' +
                 '<p>Lot Number: ' + (drug.lot_number || 'N/A') + '</p>' +
                 '<p>Expiration: ' + (drug.expiration_date || 'N/A') + '</p>' +
-                '<p class="' + vialTypeClass + '"><strong>' + vialTypeText + '</strong></p>' +
+                vialTypeHtml +
                 '<p>Controlled: ' + (drug.is_controlled_substance ? 'Yes' : 'No') + '</p>' +
                 '<div class="action-buttons">' +
                 '<button onclick="editDrug(' + drug.drug_id + ')" class="btn-edit">Edit</button>' +
@@ -933,6 +976,9 @@ document.addEventListener("DOMContentLoaded", function() {
             $('#edit-lot-number').val(drugData.lot_number || '');
             $('#edit-expiration-date').val(drugData.expiration_date || '');
             $('#edit-controlled').prop('checked', drugData.is_controlled_substance == 1);
+            
+            // Toggle vial type section based on current quantity unit
+            toggleEditVialTypeSection();
             
             // Show the modal
             $('#edit-modal').show();
