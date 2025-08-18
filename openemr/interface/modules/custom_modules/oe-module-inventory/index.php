@@ -165,7 +165,7 @@ document.addEventListener("DOMContentLoaded", function() {
                 <!-- Lot Number and Expiration -->
                 <div class="lot-expiration-section">
                     <input type="text" name="lot_number" placeholder="Lot Number">
-                    <input type="text" name="expiration_date" placeholder="Expiration Date" class="datepicker" readonly>
+                    <input type="date" name="expiration_date" placeholder="Expiration Date">
                 </div>
                 
                 <label>
@@ -243,7 +243,7 @@ document.addEventListener("DOMContentLoaded", function() {
                     <!-- Lot Number and Expiration -->
                     <div class="lot-expiration-section">
                         <input type="text" name="lot_number" id="edit-lot-number" placeholder="Lot Number">
-                        <input type="text" name="expiration_date" id="edit-expiration-date" placeholder="Expiration Date" class="datepicker" readonly>
+                        <input type="date" name="expiration_date" id="edit-expiration-date" placeholder="Expiration Date">
                     </div>
                     
                     <!-- Form Selection -->
