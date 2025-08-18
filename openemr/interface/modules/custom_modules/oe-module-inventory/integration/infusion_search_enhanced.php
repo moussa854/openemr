@@ -1165,6 +1165,8 @@ $csrf_token = CsrfUtils::collectCsrfToken();
                     </div>
 
                     <script>
+        // Global error handler for debugging        window.addEventListener("error", function(e) {            console.error("GLOBAL ERROR CAUGHT:", {                message: e.message,                filename: e.filename,                lineno: e.lineno,                colno: e.colno,                error: e.error,                stack: e.error ? e.error.stack : "No stack"            });        });
+        });                console.log("DEBUG: Script loading started");        console.log("DEBUG: Current timestamp:", new Date().toISOString());
                     let secondaryIndex = 0;
                     const maxSecondary = 3; // allows total 4 meds including primary
                     function addSecondaryMedication() {
@@ -1736,6 +1738,8 @@ $csrf_token = CsrfUtils::collectCsrfToken();
     </template>
 
     <script>
+        // Global error handler for debugging        window.addEventListener("error", function(e) {            console.error("GLOBAL ERROR CAUGHT:", {                message: e.message,                filename: e.filename,                lineno: e.lineno,                colno: e.colno,                error: e.error,                stack: e.error ? e.error.stack : "No stack"            });        });
+        });                console.log("DEBUG: Script loading started");        console.log("DEBUG: Current timestamp:", new Date().toISOString());
         // Version for cache busting
         const SCRIPT_VERSION = '<?php echo time(); ?>';
         console.log('Script version:', SCRIPT_VERSION);
@@ -2467,11 +2471,14 @@ if (document.getElementById("iv_access_date") && document.getElementById("iv_acc
         }
 
         function selectSecondaryDrug(drug, medicationSection) {
+        console.log("DEBUG: selectSecondaryDrug function called with:", drug, medicationSection);
             // Populate the medication fields
             medicationSection.querySelector('.order-medication').value = drug.name;
             medicationSection.querySelector('.order-strength').value = drug.strength;
             medicationSection.querySelector('.order-lot-number').value = drug.lot_number;
+        console.log("DEBUG: About to execute line that causes syntax error");
             medicationSection.querySelector('.order-ndc').value = drug.ndc;
+        console.log("DEBUG: Line 2474 executed successfully");
             medicationSection.querySelector('.order-expiration-date').value = drug.expiration_date;
             medicationSection.querySelector('.selected-drug-id').value = drug.id;
             medicationSection.querySelector('.selected-drug-lot').value = drug.lot_number;
@@ -3370,6 +3377,7 @@ if (document.getElementById("iv_access_date") && document.getElementById("iv_acc
             }
         }
         function populateMedicationFields(medication) {            // Populate medication order fields            if (medication.medication) {                document.getElementById("order_medication").value = medication.medication;            }            if (medication.dose) {                document.getElementById("order_dose").value = medication.dose;            }            if (medication.lot_number) {                document.getElementById("order_lot_number").value = medication.lot_number;            }            if (medication.ndc) {                document.getElementById("order_ndc").value = medication.ndc;            }            // Skip expiration date population to avoid format errors            if (medication.frequency_value) {                document.getElementById("order_every_value").value = medication.frequency_value;            }            if (medication.frequency_unit) {                document.getElementById("order_every_unit").value = medication.frequency_unit;            }            if (medication.provider) {                document.getElementById("order_servicing_provider").value = medication.provider;            }            if (medication.npi) {                document.getElementById("order_npi").value = medication.npi;            }            // Skip end date population to avoid format errors            if (medication.note) {                document.getElementById("order_note").value = medication.note;            }                        console.log("Medication fields populated with data from encounter:", medication.encounter);        }
+        console.log("DEBUG: Script loaded successfully, all functions defined");
     </script>
 </body>
 </html> 
