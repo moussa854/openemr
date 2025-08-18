@@ -475,6 +475,7 @@ document.addEventListener("DOMContentLoaded", function() {
     </div>
 
     <script>
+        /* Cache-busting timestamp: <?php echo time(); ?> */
         // Store the current drug data for editing
         var currentDrugData = {};
         
@@ -496,17 +497,21 @@ document.addEventListener("DOMContentLoaded", function() {
         
         // Show/hide edit vial type section based on quantity unit selection
         function toggleEditVialTypeSection() {
+            console.log('DEBUG: toggleEditVialTypeSection called');
             var quantityUnit = $('#edit-quantity-unit').val();
+            console.log('DEBUG: Edit quantity unit:', quantityUnit);
             var vialTypeSection = $('#edit-vial-type-section');
             var vialTypeSelect = $('#edit-vial-type');
             
             if (quantityUnit === 'vial') {
                 vialTypeSection.show();
                 vialTypeSelect.attr('required', true);
+                console.log('DEBUG: Showing vial type section for edit');
             } else {
                 vialTypeSection.hide();
                 vialTypeSelect.attr('required', false);
                 vialTypeSelect.val('unknown'); // Set to unknown for non-vials
+                console.log('DEBUG: Hiding vial type section for edit');
             }
         }
         
@@ -1013,10 +1018,12 @@ document.addEventListener("DOMContentLoaded", function() {
             $('#edit-lot-number').val(drugData.lot_number || '');
             // Convert date format from MM-YYYY-DD to YYYY-MM-DD for HTML5 date input
             var expirationDate = drugData.expiration_date || '';
+            console.log('DEBUG: Original expiration date:', expirationDate);
             if (expirationDate && expirationDate.match(/^\d{2}-\d{4}-\d{2}$/)) {
                 // Convert MM-YYYY-DD to YYYY-MM-DD
                 var dateParts = expirationDate.split('-');
                 expirationDate = dateParts[1] + '-' + dateParts[0] + '-' + dateParts[2];
+                console.log('DEBUG: Converted expiration date:', expirationDate);
             }
             $('#edit-expiration-date').val(expirationDate);
             $('#edit-controlled').prop('checked', drugData.is_controlled_substance == 1);
