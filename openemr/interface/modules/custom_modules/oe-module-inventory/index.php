@@ -7,6 +7,52 @@ require_once(__DIR__ . "/../../../globals.php");
 <head>
     <title>Inventory Management</title>
     <link rel="stylesheet" href="library/css/inventory-module.css">
+    <style>
+        /* Vial Type Styling */
+        .vial-type-sdv {
+            color: #dc3545;
+            font-weight: bold;
+            background-color: #f8d7da;
+            padding: 2px 8px;
+            border-radius: 4px;
+            border: 1px solid #dc3545;
+        }
+        
+        .vial-type-mdv {
+            color: #28a745;
+            font-weight: bold;
+            background-color: #d4edda;
+            padding: 2px 8px;
+            border-radius: 4px;
+            border: 1px solid #28a745;
+        }
+        
+        .vial-type-unknown {
+            color: #6c757d;
+            font-weight: bold;
+            background-color: #e2e3e5;
+            padding: 2px 8px;
+            border-radius: 4px;
+            border: 1px solid #6c757d;
+        }
+        
+        .vial-type-section {
+            margin: 10px 0;
+        }
+        
+        .vial-type-section label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        
+        .vial-type-section small {
+            color: #6c757d;
+            font-style: italic;
+            display: block;
+            margin-top: 5px;
+        }
+    </style>
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <!-- Use OpenEMR's datetimepicker setup -->
     <script src="../../../../library/js/xl/jquery-datetimepicker-2-5-4.js.php"></script>
@@ -811,6 +857,20 @@ document.addEventListener("DOMContentLoaded", function() {
         }
 
         function createDrugCard(drug) {
+            // Format vial type with icons and styling
+            var vialTypeText = '';
+            var vialTypeClass = '';
+            if (drug.vial_type === 'single_dose') {
+                vialTypeText = '⚡ Single Dose Vial (SDV)';
+                vialTypeClass = 'vial-type-sdv';
+            } else if (drug.vial_type === 'multi_dose') {
+                vialTypeText = '🔄 Multi-Dose Vial (MDV)';
+                vialTypeClass = 'vial-type-mdv';
+            } else {
+                vialTypeText = '❓ Unknown Vial Type';
+                vialTypeClass = 'vial-type-unknown';
+            }
+            
             return '<div class="drug-item ' + (drug.is_controlled_substance ? 'controlled' : '') + '" data-drug=\'' + JSON.stringify(drug) + '\'>' +
                 '<h4>' + drug.name + '</h4>' +
                 '<p>Barcode: ' + (drug.barcode || 'N/A') + '</p>' +
@@ -822,6 +882,7 @@ document.addEventListener("DOMContentLoaded", function() {
                 '<p><strong>Quantity: ' + (drug.quantity || 0) + ' ' + (drug.quantity_unit || 'vial') + '</strong></p>' +
                 '<p>Lot Number: ' + (drug.lot_number || 'N/A') + '</p>' +
                 '<p>Expiration: ' + (drug.expiration_date || 'N/A') + '</p>' +
+                '<p class="' + vialTypeClass + '"><strong>' + vialTypeText + '</strong></p>' +
                 '<p>Controlled: ' + (drug.is_controlled_substance ? 'Yes' : 'No') + '</p>' +
                 '<div class="action-buttons">' +
                 '<button onclick="editDrug(' + drug.drug_id + ')" class="btn-edit">Edit</button>' +
@@ -867,6 +928,7 @@ document.addEventListener("DOMContentLoaded", function() {
             $('#edit-dose').val(drugData.dose || '');
             $('#edit-route').val(drugData.route || '');
             $('#edit-quantity').val(drugData.quantity || 0);
+            $('#edit-vial-type').val(drugData.vial_type || 'unknown');
             $('#edit-quantity-unit').val(drugData.quantity_unit || 'vial');
             $('#edit-lot-number').val(drugData.lot_number || '');
             $('#edit-expiration-date').val(drugData.expiration_date || '');

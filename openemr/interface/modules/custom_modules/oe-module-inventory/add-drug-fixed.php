@@ -34,6 +34,7 @@ $lot_number = trim($_POST['lot_number'] ?? '');
 $expiration_date = trim($_POST['expiration_date'] ?? '');
 $form = trim($_POST['form'] ?? '');
 $is_controlled = isset($_POST['is_controlled_substance']) ? 1 : 0;
+$vial_type = trim($_POST['vial_type'] ?? 'unknown');
 
 // Convert date format from MM/DD/YYYY to YYYY-MM-DD for MySQL
 function convertDateToMysql($date) {
@@ -81,8 +82,8 @@ try {
     $insert_sql = "INSERT INTO drugs (
         name, barcode, ndc_10, ndc_11, size, unit, dose, route, 
         quantity, quantity_unit, lot_number, expiration_date, form, 
-        is_controlled_substance, status, date_created, last_updated
-    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'active', NOW(), NOW())";
+        is_controlled_substance, vial_type, vial_type_source, status, date_created, last_updated
+    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'manual', 'active', NOW(), NOW())";
 
     $stmt = $pdo->prepare($insert_sql);
     $result = $stmt->execute([
@@ -99,7 +100,8 @@ try {
         $lot_number ?: null,
         $mysql_expiration_date,
         $form,
-        $is_controlled
+        $is_controlled,
+        $vial_type
     ]);
 
     // Debug: Log insert result

@@ -14,7 +14,7 @@ try {
     $dsn = "mysql:host=$host;dbname=$dbname";
     $pdo = new PDO($dsn, $username, $password, [PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION]);
     
-    // Query for active drugs
+    // Query for active drugs including vial type
     $stmt = $pdo->query("
         SELECT 
             drug_id,
@@ -32,6 +32,8 @@ try {
             lot_number,
             expiration_date,
             is_controlled_substance,
+            vial_type,
+            vial_type_source,
             status,
             active
         FROM drugs 
