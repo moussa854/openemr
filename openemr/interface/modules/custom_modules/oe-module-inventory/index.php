@@ -1016,21 +1016,28 @@ document.addEventListener("DOMContentLoaded", function() {
             $('#edit-vial-type').val(drugData.vial_type || 'unknown');
             $('#edit-quantity-unit').val(drugData.quantity_unit || 'vial');
             $('#edit-lot-number').val(drugData.lot_number || '');
-            // Convert various date formats to YYYY-MM-DD for HTML5 date input
+            // Handle date format for HTML5 date input
             var expirationDate = drugData.expiration_date || '';
             console.log('DEBUG: Original expiration date:', expirationDate);
-            if (expirationDate && expirationDate.match(/^\d{2}-\d{4}-\d{2}$/)) {
+            
+            // Check if date is already in correct YYYY-MM-DD format
+            if (expirationDate && expirationDate.match(/^\d{4}-\d{2}-\d{2}$/)) {
+                console.log('DEBUG: Date already in correct YYYY-MM-DD format:', expirationDate);
+                // Keep as-is, this is the correct format for HTML5 date input
+            }
+            // Handle incorrect DD-YYYY-MM format
+            else if (expirationDate && expirationDate.match(/^\d{2}-\d{4}-\d{2}$/)) {
                 var dateParts = expirationDate.split('-');
                 var firstPart = parseInt(dateParts[0]);
                 var thirdPart = parseInt(dateParts[2]);
                 
                 // Smart detection: if first part > 12, it's likely DD-YYYY-MM format
                 if (firstPart > 12) {
-                    // DD-YYYY-MM -> YYYY-MM-DD (18-2025-08 -> 2025-08-18)
+                    // DD-YYYY-MM -> YYYY-MM-DD (31-2025-10 -> 2025-10-31)
                     expirationDate = dateParts[1] + '-' + dateParts[2] + '-' + dateParts[0];
                     console.log('DEBUG: Converted DD-YYYY-MM to:', expirationDate);
                 } else if (thirdPart > 12) {
-                    // MM-YYYY-DD -> YYYY-MM-DD (08-2025-18 -> 2025-08-18)
+                    // MM-YYYY-DD -> YYYY-MM-DD (10-2025-31 -> 2025-10-31)
                     expirationDate = dateParts[1] + '-' + dateParts[0] + '-' + dateParts[2];
                     console.log('DEBUG: Converted MM-YYYY-DD to:', expirationDate);
                 } else {
@@ -1038,6 +1045,8 @@ document.addEventListener("DOMContentLoaded", function() {
                     expirationDate = dateParts[1] + '-' + dateParts[2] + '-' + dateParts[0];
                     console.log('DEBUG: Ambiguous format, assumed DD-YYYY-MM to:', expirationDate);
                 }
+            } else if (expirationDate) {
+                console.log('DEBUG: Unknown date format, keeping as-is:', expirationDate);
             }
             $('#edit-expiration-date').val(expirationDate);
             $('#edit-controlled').prop('checked', drugData.is_controlled_substance == 1);
