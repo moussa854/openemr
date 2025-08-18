@@ -54,9 +54,9 @@ require_once(__DIR__ . "/../../../globals.php");
         }
     </style>
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    <!-- Use OpenEMR's datetimepicker setup -->
-    <script src="../../../../library/js/xl/jquery-datetimepicker-2-5-4.js.php"></script>
-    <script src="../../../../library/js/xl/jquery-datetimepicker-2-5-4-translated.js"></script>
+    <!-- Temporarily disabled datetimepicker due to xlj() function error -->
+    <!-- <script src="../../../../library/js/xl/jquery-datetimepicker-2-5-4.js.php"></script> -->
+    <!-- <script src="../../../../library/js/xl/jquery-datetimepicker-2-5-4-translated.js"></script> -->
     <script src="library/js/barcode-auto-populate.js"></script>
     <script src="/library/formatting_DateToYYYYMMDD_js.js.php"></script>
 <script>
