@@ -14,6 +14,7 @@ $ignoreAuth = false;
 require_once(dirname(__FILE__) . "/../../../../../interface/globals.php");
 require_once(dirname(__FILE__) . "/../../../../../library/forms.inc.php");
 require_once(dirname(__FILE__) . "/../../../../../library/patient.inc.php");
+require_once(dirname(__FILE__) . "/inventory_functions.php");
 
 use OpenEMR\Common\Csrf\CsrfUtils;
 
@@ -226,15 +227,90 @@ try {
         }
     }
     
+    // Process inventory deduction for primary medication
+    $inventoryResult = null;
+    if (!empty($mainFormData['inventory_drug_id']) && !empty($mainFormData['inventory_lot_number'])) {
+        $primaryMedicationData = [
+            'inventory_drug_id' => $mainFormData['inventory_drug_id'],
+            'inventory_lot_number' => $mainFormData['inventory_lot_number'],
+            'inventory_quantity_used' => $mainFormData['inventory_quantity_used'],
+            'inventory_wastage_quantity' => $mainFormData['inventory_wastage_quantity'],
+            'order_strength' => $mainFormData['order_strength'],
+            'pid' => $mainFormData['pid'],
+            'encounter' => $mainFormData['encounter']
+        ];
+        
+        $inventoryResult = deductInventoryFromInfusionForm($formId, $primaryMedicationData);
+        
+        if (!$inventoryResult['success']) {
+            // Rollback transaction if inventory deduction fails
+            sqlStatement("ROLLBACK");
+            ob_clean(); echo json_encode([
+                'success' => false,
+                'message' => 'Form saved but inventory deduction failed: ' . $inventoryResult['message']
+            ]);
+            exit;
+        }
+    }
+    
+    // Process inventory deduction for secondary medications
+    $secondaryInventoryResults = [];
+    if (isset($formData['secondary_medications']) && is_array($formData['secondary_medications'])) {
+        foreach ($formData['secondary_medications'] as $index => $medicationData) {
+            if (empty($medicationData['order_medication'])) {
+                continue; // Skip empty medications
+            }
+            
+            if (!empty($medicationData['inventory_drug_id']) && !empty($medicationData['inventory_lot_number'])) {
+                $secondaryMedicationData = [
+                    'inventory_drug_id' => $medicationData['inventory_drug_id'],
+                    'inventory_lot_number' => $medicationData['inventory_lot_number'],
+                    'inventory_quantity_used' => $medicationData['inventory_quantity_used'],
+                    'inventory_wastage_quantity' => $medicationData['inventory_wastage_quantity'],
+                    'order_strength' => $medicationData['order_strength'],
+                    'pid' => $mainFormData['pid'],
+                    'encounter' => $mainFormData['encounter']
+                ];
+                
+                $secondaryResult = deductInventoryFromInfusionForm($formId, $secondaryMedicationData);
+                $secondaryInventoryResults[$index] = $secondaryResult;
+                
+                if (!$secondaryResult['success']) {
+                    // Rollback transaction if inventory deduction fails
+                    sqlStatement("ROLLBACK");
+                    ob_clean(); echo json_encode([
+                        'success' => false,
+                        'message' => 'Form saved but secondary medication inventory deduction failed: ' . $secondaryResult['message']
+                    ]);
+                    exit;
+                }
+            }
+        }
+    }
+    
     // Commit transaction
     sqlStatement("COMMIT");
     
-    // Return success response
-    ob_clean(); echo json_encode([
+    // Prepare response with inventory information
+    $response = [
         'success' => true,
         'message' => 'Form saved successfully!',
         'form_id' => $formId
-    ]);
+    ];
+    
+    // Add inventory information to response
+    if ($inventoryResult) {
+        $response['inventory'] = [
+            'primary' => $inventoryResult
+        ];
+    }
+    
+    if (!empty($secondaryInventoryResults)) {
+        $response['inventory']['secondary'] = $secondaryInventoryResults;
+    }
+    
+    // Return success response
+    ob_clean(); echo json_encode($response);
     
 } catch (Exception $e) {
     // Rollback transaction

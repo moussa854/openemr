@@ -73,6 +73,18 @@ document.addEventListener("DOMContentLoaded", function() {
                 <input type="text" name="route" placeholder="Route (oral, topical, etc.)">
                 <input type="text" name="form" placeholder="Form (tablet, injection, etc.)">
                 
+                <!-- Vial Type Section -->
+                <div class="vial-type-section">
+                    <label>Vial Type:</label>
+                    <select name="vial_type" required>
+                        <option value="">Select Vial Type</option>
+                        <option value="single_dose">Single Dose Vial (SDV)</option>
+                        <option value="multi_dose">Multi-Dose Vial (MDV)</option>
+                        <option value="unknown">Unknown</option>
+                    </select>
+                    <small>SDV: Used once, discard remainder. MDV: Can be reused if properly stored.</small>
+                </div>
+                
                 <!-- Quantity Section -->
                 <div class="quantity-section">
                     <input type="number" name="quantity" placeholder="Quantity" min="0">
@@ -120,6 +132,18 @@ document.addEventListener("DOMContentLoaded", function() {
                     <input type="text" name="unit" id="edit-unit" placeholder="Unit (mg, ml, etc.)">
                     <input type="text" name="dose" id="edit-dose" placeholder="Dose (e.g., 5 grams)">
                     <input type="text" name="route" id="edit-route" placeholder="Route (oral, topical, etc.)">
+                    
+                    <!-- Vial Type Section -->
+                    <div class="vial-type-section">
+                        <label>Vial Type:</label>
+                        <select name="vial_type" id="edit-vial-type" required>
+                            <option value="">Select Vial Type</option>
+                            <option value="single_dose">Single Dose Vial (SDV)</option>
+                            <option value="multi_dose">Multi-Dose Vial (MDV)</option>
+                            <option value="unknown">Unknown</option>
+                        </select>
+                        <small>SDV: Used once, discard remainder. MDV: Can be reused if properly stored.</small>
+                    </div>
                     
                     <!-- Quantity Section -->
                     <div class="quantity-section">
