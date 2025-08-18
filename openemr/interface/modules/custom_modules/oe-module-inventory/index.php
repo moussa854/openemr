@@ -478,38 +478,39 @@ document.addEventListener("DOMContentLoaded", function() {
         // Store the current drug data for editing
         var currentDrugData = {};
         
-        $(document).ready(function() {
-            // Show/hide vial type section based on quantity unit selection
-            function toggleVialTypeSection() {
-                var quantityUnit = $('select[name="quantity_unit"]').val();
-                var vialTypeSection = $('#vial-type-section');
-                var vialTypeSelect = $('#vial-type-select');
-                
-                if (quantityUnit === 'vial') {
-                    vialTypeSection.show();
-                    vialTypeSelect.attr('required', true);
-                } else {
-                    vialTypeSection.hide();
-                    vialTypeSelect.attr('required', false);
-                    vialTypeSelect.val('unknown'); // Set to unknown for non-vials
-                }
-            }
+        // Show/hide vial type section based on quantity unit selection
+        function toggleVialTypeSection() {
+            var quantityUnit = $('select[name="quantity_unit"]').val();
+            var vialTypeSection = $('#vial-type-section');
+            var vialTypeSelect = $('#vial-type-select');
             
-            // Show/hide edit vial type section based on quantity unit selection
-            function toggleEditVialTypeSection() {
-                var quantityUnit = $('#edit-quantity-unit').val();
-                var vialTypeSection = $('#edit-vial-type-section');
-                var vialTypeSelect = $('#edit-vial-type');
-                
-                if (quantityUnit === 'vial') {
-                    vialTypeSection.show();
-                    vialTypeSelect.attr('required', true);
-                } else {
-                    vialTypeSection.hide();
-                    vialTypeSelect.attr('required', false);
-                    vialTypeSelect.val('unknown'); // Set to unknown for non-vials
-                }
+            if (quantityUnit === 'vial') {
+                vialTypeSection.show();
+                vialTypeSelect.attr('required', true);
+            } else {
+                vialTypeSection.hide();
+                vialTypeSelect.attr('required', false);
+                vialTypeSelect.val('unknown'); // Set to unknown for non-vials
             }
+        }
+        
+        // Show/hide edit vial type section based on quantity unit selection
+        function toggleEditVialTypeSection() {
+            var quantityUnit = $('#edit-quantity-unit').val();
+            var vialTypeSection = $('#edit-vial-type-section');
+            var vialTypeSelect = $('#edit-vial-type');
+            
+            if (quantityUnit === 'vial') {
+                vialTypeSection.show();
+                vialTypeSelect.attr('required', true);
+            } else {
+                vialTypeSection.hide();
+                vialTypeSelect.attr('required', false);
+                vialTypeSelect.val('unknown'); // Set to unknown for non-vials
+            }
+        }
+        
+        $(document).ready(function() {
             
             // Bind events for quantity unit changes
             $('select[name="quantity_unit"]').on('change', toggleVialTypeSection);
@@ -1010,7 +1011,14 @@ document.addEventListener("DOMContentLoaded", function() {
             $('#edit-vial-type').val(drugData.vial_type || 'unknown');
             $('#edit-quantity-unit').val(drugData.quantity_unit || 'vial');
             $('#edit-lot-number').val(drugData.lot_number || '');
-            $('#edit-expiration-date').val(drugData.expiration_date || '');
+            // Convert date format from MM-YYYY-DD to YYYY-MM-DD for HTML5 date input
+            var expirationDate = drugData.expiration_date || '';
+            if (expirationDate && expirationDate.match(/^\d{2}-\d{4}-\d{2}$/)) {
+                // Convert MM-YYYY-DD to YYYY-MM-DD
+                var dateParts = expirationDate.split('-');
+                expirationDate = dateParts[1] + '-' + dateParts[0] + '-' + dateParts[2];
+            }
+            $('#edit-expiration-date').val(expirationDate);
             $('#edit-controlled').prop('checked', drugData.is_controlled_substance == 1);
             
             // Toggle vial type section based on current quantity unit
