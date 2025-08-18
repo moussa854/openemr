@@ -11,7 +11,7 @@
 
 // Initialize OpenEMR
 $ignoreAuth = false;
-require_once dirname(__FILE__) . "/../../../../../interface/globals.php";
+require_once dirname(__FILE__) . "/../../../../interface/globals.php";
 
 // Set JSON response header
 header('Content-Type: application/json');
