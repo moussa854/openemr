@@ -114,7 +114,25 @@ document.addEventListener("DOMContentLoaded", function() {
                 <input type="text" name="ndc_10" placeholder="NDC-10 (0000-0000-00)">
                 <input type="text" name="ndc_11" placeholder="NDC-11 (00000-0000-00)">
                 <input type="text" name="size" placeholder="Strength/Size">
-                <input type="text" name="unit" placeholder="Unit (mg, ml, etc.)">
+                <select name="unit" required>
+                    <option value="">Select Unit</option>
+                    <option value="mg">mg (milligrams)</option>
+                    <option value="mcg">mcg (micrograms)</option>
+                    <option value="g">g (grams)</option>
+                    <option value="ml">mL (milliliters)</option>
+                    <option value="L">L (liters)</option>
+                    <option value="units">units</option>
+                    <option value="mEq">mEq (milliequivalents)</option>
+                    <option value="IU">IU (International Units)</option>
+                    <option value="puffs">puffs</option>
+                    <option value="tablets">tablets</option>
+                    <option value="capsules">capsules</option>
+                    <option value="suppositories">suppositories</option>
+                    <option value="patches">patches</option>
+                    <option value="vials">vials</option>
+                    <option value="ampules">ampules</option>
+                    <option value="other">Other</option>
+                </select>
                 <input type="text" name="dose" placeholder="Dose (e.g., 5 mg)">
                 <input type="text" name="route" placeholder="Route (oral, topical, etc.)">
                 <input type="text" name="form" placeholder="Form (tablet, injection, etc.)">
@@ -175,7 +193,25 @@ document.addEventListener("DOMContentLoaded", function() {
                     <input type="text" name="ndc_10" id="edit-ndc-10" placeholder="NDC-10 (0000-0000-00)">
                     <input type="text" name="ndc_11" id="edit-ndc-11" placeholder="NDC-11 (00000-0000-00)">
                     <input type="text" name="size" id="edit-size" placeholder="Strength/Size">
-                    <input type="text" name="unit" id="edit-unit" placeholder="Unit (mg, ml, etc.)">
+                    <select name="unit" id="edit-unit" required>
+                        <option value="">Select Unit</option>
+                        <option value="mg">mg (milligrams)</option>
+                        <option value="mcg">mcg (micrograms)</option>
+                        <option value="g">g (grams)</option>
+                        <option value="ml">mL (milliliters)</option>
+                        <option value="L">L (liters)</option>
+                        <option value="units">units</option>
+                        <option value="mEq">mEq (milliequivalents)</option>
+                        <option value="IU">IU (International Units)</option>
+                        <option value="puffs">puffs</option>
+                        <option value="tablets">tablets</option>
+                        <option value="capsules">capsules</option>
+                        <option value="suppositories">suppositories</option>
+                        <option value="patches">patches</option>
+                        <option value="vials">vials</option>
+                        <option value="ampules">ampules</option>
+                        <option value="other">Other</option>
+                    </select>
                     <input type="text" name="dose" id="edit-dose" placeholder="Dose (e.g., 5 grams)">
                     <input type="text" name="route" id="edit-route" placeholder="Route (oral, topical, etc.)">
                     
