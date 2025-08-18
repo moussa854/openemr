@@ -3376,7 +3376,41 @@ if (document.getElementById("iv_access_date") && document.getElementById("iv_acc
                 }, 5000);
             }
         }
-        function populateMedicationFields(medication) {            // Populate medication order fields            if (medication.medication) {                document.getElementById("order_medication").value = medication.medication;            }            if (medication.dose) {                document.getElementById("order_dose").value = medication.dose;            }            if (medication.lot_number) {                document.getElementById("order_lot_number").value = medication.lot_number;            }            if (medication.ndc) {                document.getElementById("order_ndc").value = medication.ndc;            }            // Skip expiration date population to avoid format errors            if (medication.frequency_value) {                document.getElementById("order_every_value").value = medication.frequency_value;            }            if (medication.frequency_unit) {                document.getElementById("order_every_unit").value = medication.frequency_unit;            }            if (medication.provider) {                document.getElementById("order_servicing_provider").value = medication.provider;            }            if (medication.npi) {                document.getElementById("order_npi").value = medication.npi;            }            // Skip end date population to avoid format errors            if (medication.note) {                document.getElementById("order_note").value = medication.note;            }                        console.log("Medication fields populated with data from encounter:", medication.encounter);        }
+        
+        function populateMedicationFields(medication) {
+            // Populate medication order fields
+            if (medication.medication) {
+                document.getElementById("order_medication").value = medication.medication;
+            }
+            if (medication.dose) {
+                document.getElementById("order_dose").value = medication.dose;
+            }
+            if (medication.lot_number) {
+                document.getElementById("order_lot_number").value = medication.lot_number;
+            }
+            if (medication.ndc) {
+                document.getElementById("order_ndc").value = medication.ndc;
+            }
+            // Skip expiration date population to avoid format errors
+            if (medication.frequency_value) {
+                document.getElementById("order_every_value").value = medication.frequency_value;
+            }
+            if (medication.frequency_unit) {
+                document.getElementById("order_every_unit").value = medication.frequency_unit;
+            }
+            if (medication.provider) {
+                document.getElementById("order_servicing_provider").value = medication.provider;
+            }
+            if (medication.npi) {
+                document.getElementById("order_npi").value = medication.npi;
+            }
+            // Skip end date population to avoid format errors
+            if (medication.note) {
+                document.getElementById("order_note").value = medication.note;
+            }
+            
+            console.log("Medication fields populated with data from encounter:", medication.encounter);
+        }
         console.log("DEBUG: Script loaded successfully, all functions defined");
     </script>
 </body>
