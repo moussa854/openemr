@@ -1016,14 +1016,28 @@ document.addEventListener("DOMContentLoaded", function() {
             $('#edit-vial-type').val(drugData.vial_type || 'unknown');
             $('#edit-quantity-unit').val(drugData.quantity_unit || 'vial');
             $('#edit-lot-number').val(drugData.lot_number || '');
-            // Convert date format from MM-YYYY-DD to YYYY-MM-DD for HTML5 date input
+            // Convert various date formats to YYYY-MM-DD for HTML5 date input
             var expirationDate = drugData.expiration_date || '';
             console.log('DEBUG: Original expiration date:', expirationDate);
             if (expirationDate && expirationDate.match(/^\d{2}-\d{4}-\d{2}$/)) {
-                // Convert MM-YYYY-DD to YYYY-MM-DD
                 var dateParts = expirationDate.split('-');
-                expirationDate = dateParts[1] + '-' + dateParts[0] + '-' + dateParts[2];
-                console.log('DEBUG: Converted expiration date:', expirationDate);
+                var firstPart = parseInt(dateParts[0]);
+                var thirdPart = parseInt(dateParts[2]);
+                
+                // Smart detection: if first part > 12, it's likely DD-YYYY-MM format
+                if (firstPart > 12) {
+                    // DD-YYYY-MM -> YYYY-MM-DD (18-2025-08 -> 2025-08-18)
+                    expirationDate = dateParts[1] + '-' + dateParts[2] + '-' + dateParts[0];
+                    console.log('DEBUG: Converted DD-YYYY-MM to:', expirationDate);
+                } else if (thirdPart > 12) {
+                    // MM-YYYY-DD -> YYYY-MM-DD (08-2025-18 -> 2025-08-18)
+                    expirationDate = dateParts[1] + '-' + dateParts[0] + '-' + dateParts[2];
+                    console.log('DEBUG: Converted MM-YYYY-DD to:', expirationDate);
+                } else {
+                    // Ambiguous case, assume DD-YYYY-MM for safety
+                    expirationDate = dateParts[1] + '-' + dateParts[2] + '-' + dateParts[0];
+                    console.log('DEBUG: Ambiguous format, assumed DD-YYYY-MM to:', expirationDate);
+                }
             }
             $('#edit-expiration-date').val(expirationDate);
             $('#edit-controlled').prop('checked', drugData.is_controlled_substance == 1);
