@@ -896,6 +896,7 @@ $csrf_token = CsrfUtils::collectCsrfToken();
                                         <option value="days" <?php echo ($saved_data['order_every_unit'] ?? '') == 'days' ? 'selected' : ''; ?>>Days</option>
                                         <option value="weeks" <?php echo ($saved_data['order_every_unit'] ?? '') == 'weeks' ? 'selected' : ''; ?>>Weeks</option>
                                         <option value="once" <?php echo ($saved_data['order_every_unit'] ?? '') == 'once' ? 'selected' : ''; ?>>Once</option>
+                                        <option value="months" <?php echo ($saved_data["order_every_unit"] ?? "") == "months" ? "selected" : ""; ?>>Months</option>
                                         <option value="prn" <?php echo ($saved_data['order_every_unit'] ?? '') == 'prn' ? 'selected' : ''; ?>>PRN</option>
                                     </select>
                                 </div>
@@ -3077,6 +3078,7 @@ if (document.getElementById("iv_access_date") && document.getElementById("iv_acc
                                     <option value="days">Days</option>
                                     <option value="weeks">Weeks</option>
                                     <option value="once">Once</option>
+                                    <option value="months">Months</option>
                                     <option value="prn">PRN</option>
                                 </select>
                             </div>
@@ -3261,6 +3263,7 @@ if (document.getElementById("iv_access_date") && document.getElementById("iv_acc
                                     <option value="hours" ${medicationData.order_every_unit === 'hours' ? 'selected' : ''}>Hours</option>
                                     <option value="days" ${medicationData.order_every_unit === 'days' ? 'selected' : ''}>Days</option>
                                     <option value="weeks" ${medicationData.order_every_unit === 'weeks' ? 'selected' : ''}>Weeks</option>
+                                    <option value="months" ${medicationData.order_every_unit === "months" ? "selected" : ""}>Months</option>
                                     <option value="once" ${medicationData.order_every_unit === 'once' ? 'selected' : ''}>Once</option>
                                     <option value="prn" ${medicationData.order_every_unit === 'prn' ? 'selected' : ''}>PRN</option>
                                 </select>
